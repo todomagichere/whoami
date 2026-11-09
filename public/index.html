@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#efeee8">
+  <meta name="description" content="El taller de Roberto Pérez Villegas. Desarrollo, herramientas abiertas y experimentos que empiezan con una pregunta.">
+  <title>Roberto Pérez — Código y curiosidad</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#contenido">Saltar al contenido</a>
+  <header class="header">
+    <a class="wordmark" href="#" aria-label="Roberto Pérez, inicio">rp<span>®</span></a>
+    <span class="header-note">ROBERTO PÉREZ VILLEGAS<br>DESARROLLADOR / @TODOMAGICHERE</span>
+    <nav aria-label="Navegación principal"><a href="#proyectos">Proyectos <sup>05</sup></a><a href="#taller">El taller</a><a href="#contacto">Hablemos ↗</a></nav>
+  </header>
+  <main id="contenido">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="eyebrow"><span class="dot"></span> UN ESPACIO PARA CONSTRUIR Y PROBAR <span class="edition">VOL. 01 / EN CONSTRUCCIÓN</span></div>
+      <h1 id="hero-title">Código.<br>Curiosidad.<br><span>Y un poco de</span><br><em>magia.</em><span class="asterisk" aria-hidden="true">✳</span></h1>
+      <div class="hero-aside">
+        <div class="sketch" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><span class="core">{<i>✳</i>}</span><span class="coordinate">FIG. 01 — UNA IDEA EN ÓRBITA</span></div>
+        <p>Soy Roberto. Este es mi rincón para compartir lo que construyo: herramientas, pequeños juegos y preguntas convertidas en código.</p>
+        <a class="text-link" href="#proyectos">Abre el cajón de proyectos <span>↓</span></a>
+      </div>
+      <div class="hero-footer"><span>PHP · JAVASCRIPT · IBEXA · GNOME</span><span>DESLIZA. EXPLORA. TOCA COSAS. ↓</span></div>
+    </section>
+    <section id="proyectos" class="projects" aria-labelledby="projects-title">
+      <div class="section-heading"><span class="section-number">01 / LO QUE CONSTRUYO</span><h2 id="projects-title">Ideas con<br><em>las manos dentro.</em></h2><p>Una selección de mis repositorios públicos.<br>Cada uno empieza con algo que explorar.</p></div>
+      <div class="filters" role="group" aria-label="Filtrar proyectos"><button aria-pressed="true" data-filter="all">Todo <sup>05</sup></button><button aria-pressed="false" data-filter="tools">Herramientas</button><button aria-pressed="false" data-filter="play">Experimentos</button><span id="count" aria-live="polite">5 proyectos</span></div>
+      <div class="project-list">
+        <article class="project" data-category="play"><span class="project-number">01</span><div class="project-name"><span class="tag">JUEGO DIARIO / JAVASCRIPT</span><h3>Etimología<span>↗</span></h3><p>Un juego para tirar del hilo de las palabras y descubrir de dónde vienen.</p></div><div class="project-art words" aria-hidden="true"><span>étumos</span><b>+</b><span>logía</span></div><a class="project-link" href="https://github.com/todomagichere/etimologia" target="_blank" rel="noopener noreferrer" aria-label="Ver Etimología en GitHub (nueva pestaña)"></a></article>
+        <article class="project" data-category="tools"><span class="project-number">02</span><div class="project-name"><span class="tag">DEVELOPER EXPERIENCE / IBEXA</span><h3>Un clic menos.<span>↗</span></h3><p>Información del tipo de contenido, directamente en la vista de ubicación de Ibexa.</p><span class="repo-name">ibexa-contenttype-info-tab</span></div><div class="project-art tabs" aria-hidden="true"><span>Contenido</span><span class="selected">Tipo de contenido ↗</span><i></i><i></i></div><a class="project-link" href="https://github.com/todomagichere/ibexa-contenttype-info-tab" target="_blank" rel="noopener noreferrer" aria-label="Ver Ibexa Content Type Info Tab en GitHub (nueva pestaña)"></a></article>
+        <article class="project" data-category="tools"><span class="project-number">03</span><div class="project-name"><span class="tag">ESCRITORIO / GNOME SHELL</span><h3>Arrastrar. Soltar. Listo.<span>↗</span></h3><p>Capturas de área en un solo gesto. Una pequeña mejora para el escritorio de cada día.</p><span class="repo-name">gnome-instant-area-screenshot</span></div><div class="project-art capture" aria-hidden="true"><div>↖<span>CAPTURADO.</span><i>+</i></div></div><a class="project-link" href="https://github.com/todomagichere/gnome-instant-area-screenshot" target="_blank" rel="noopener noreferrer" aria-label="Ver Instant Area Screenshot en GitHub (nueva pestaña)"></a></article>
+        <article class="project" data-category="play"><span class="project-number">04</span><div class="project-name"><span class="tag">ALGORITMOS / PHP</span><h3>Un problema, tres caminos.<span>↗</span></h3><p>Explorar Fibonacci con complejidad exponencial, lineal y logarítmica.</p><span class="repo-name">fibonacci</span></div><div class="project-art sequence" aria-hidden="true">1 1 2<br><b>3 5 8</b></div><a class="project-link" href="https://github.com/todomagichere/fibonacci" target="_blank" rel="noopener noreferrer" aria-label="Ver Fibonacci en GitHub (nueva pestaña)"></a></article>
+        <article class="project" data-category="tools"><span class="project-number">05</span><div class="project-name"><span class="tag">WEB / PREPARACIÓN COTIDIANA</span><h3>Listo 72H<span>↗</span></h3><p>Un portal en español sobre preparación del hogar y mochilas de salida de 72 horas.</p><span class="repo-name">prepara-tu-mochila</span></div><div class="project-art ready" aria-hidden="true"><b>72</b><span>HORAS / LO ESENCIAL</span></div><a class="project-link" href="https://github.com/todomagichere/prepara-tu-mochila" target="_blank" rel="noopener noreferrer" aria-label="Ver Listo 72H en GitHub (nueva pestaña)"></a></article>
+      </div>
+      <a class="all-repos text-link" href="https://github.com/todomagichere?tab=repositories" target="_blank" rel="noopener noreferrer">El resto está en GitHub <span>↗</span></a>
+    </section>
+    <section id="taller" class="workshop" aria-labelledby="workshop-title">
+      <div class="workshop-copy"><span class="section-number">02 / EL TALLER</span><h2 id="workshop-title">La curiosidad<br>se <em>ejecuta.</em></h2><p>Un mismo resultado puede esconder caminos muy diferentes. Mueve el control y mira cómo crece la secuencia de Fibonacci.</p><p class="small-note">Una pequeña visualización inspirada en mi repositorio <a href="https://github.com/todomagichere/fibonacci" target="_blank" rel="noopener noreferrer">fibonacci ↗</a>.</p></div>
+      <div class="experiment"><div class="experiment-heading"><span>EXPERIMENTO 001</span><span aria-hidden="true">↗</span></div><div class="result"><span>f(<output id="n-label">8</output>) =</span><output id="result">21</output></div><label for="sequence-input">¿Hasta dónde llegamos? <span>n = <output id="n-value">8</output></span></label><input id="sequence-input" type="range" min="2" max="20" value="8"><div class="range-bounds"><span>2</span><span>20</span></div><div id="bars" class="bars" aria-hidden="true"></div><p id="sequence" class="sequence-text" aria-live="polite"></p><span class="experiment-note">CADA NÚMERO ES LA SUMA DE LOS DOS ANTERIORES.</span></div>
+    </section>
+    <section id="contacto" class="contact" aria-labelledby="contact-title"><span class="section-number">03 / SIGUIENTE CONVERSACIÓN</span><h2 id="contact-title">¿Y si hacemos<br><em>algo interesante?</em><span aria-hidden="true">↗</span></h2><div class="contact-bottom"><p>Todo empieza por una conversación.</p><a href="https://www.linkedin.com/in/robertoperezvillegas/" target="_blank" rel="noopener noreferrer">Hablemos en LinkedIn ↗</a><a href="https://github.com/todomagichere" target="_blank" rel="noopener noreferrer">Nos vemos en GitHub ↗</a></div></section>
+  </main>
+  <footer><span>© <span id="year">2026</span> ROBERTO PÉREZ VILLEGAS</span><span>SIEMPRE EN CONSTRUCCIÓN. COMO YO.</span><a href="#">Volver arriba ↑</a></footer>
+</body>
+</html>
