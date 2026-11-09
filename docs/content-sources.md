@@ -1,8 +1,8 @@
-# Contenido de la primera versión
+# Fuentes del portfolio
 
-Perfil confirmado por la conexión GitHub y el remoto de este repositorio: `todomagichere` (Roberto Pérez). Nombre completo y URL de LinkedIn facilitados por el usuario.
+Nombre completo y perfil LinkedIn facilitados por el usuario. Usuario GitHub confirmado por el remoto del repositorio y la conexión GitHub: `todomagichere`.
 
-Selección editorial de repositorios públicos, consultados el 9 de noviembre de 2026:
+## Proyectos
 
 - https://github.com/todomagichere/etimologia/blob/main/README.md
 - https://github.com/todomagichere/ibexa-contenttype-info-tab/blob/main/README.md
@@ -10,6 +10,20 @@ Selección editorial de repositorios públicos, consultados el 9 de noviembre de
 - https://github.com/todomagichere/fibonacci
 - https://github.com/todomagichere/prepara-tu-mochila/blob/main/README.md
 
-Los gráficos son ilustraciones conceptuales hechas con CSS, no capturas de los proyectos. El experimento Fibonacci es una visualización nueva para el portfolio, no una ejecución del paquete PHP.
+## Capturas reales
 
-Pendiente de aportación del usuario: titular, trayectoria, tecnologías principales y presentación personal definitiva. LinkedIn no permitió acceder al contenido. No se han incorporado cargos, fechas, empleadores, certificaciones ni métricas sin confirmar. Los textos en primera persona son propuestas editoriales para revisar.
+Consultadas y capturadas el 9 de noviembre de 2026:
+
+- `public/assets/etimologia.png`: https://etimologia.es — captura de la web pública.
+- `public/assets/mochila.png`: https://preparatumochila.com — captura de la web pública, tras rechazar las cookies opcionales.
+- `public/assets/ibexa.png`: imagen publicada en el README del repositorio: https://github.com/todomagichere/ibexa-contenttype-info-tab-bundle/assets/23119890/91dc450c-149b-4cae-a560-a4b1bdabb8c8
+
+GNOME y Fibonacci se representan con símbolos de código, no con capturas ficticias. La terminal y el escritorio son una simulación hecha para este portfolio. La información del comando neofetch describe el portfolio y sus proyectos, no un sistema Linux real.
+
+## Dirección visual
+
+El usuario pidió un PC con Linux, comandos didácticos y pantallazos de proyectos. Indicó https://janjs.dev/ como referencia; se consultaron sus paneles, capturas de proyectos y sección Workspace. La implementación del monitor, escritorio y ventanas es propia, en HTML/CSS/JavaScript, sin copiar recursos o código de esa web.
+
+## Pendiente
+
+LinkedIn no permitió acceder al contenido. Faltan titular, trayectoria y experiencia profesional aportados por el usuario. No se han inventado empleadores, cargos, certificaciones ni fechas. El texto de presentación en primera persona es un borrador editorial basado en los repositorios públicos.
