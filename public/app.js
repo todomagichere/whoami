@@ -43,8 +43,8 @@ function welcome(){
   line('Escribe un comando o pulsa una sugerencia.\nEmpieza por help si es tu primera terminal.','muted');
   const p=line('');['whoami','ls proyectos','help'].forEach(c=>p.append(commandButton(c)));
 }
-function syncDock(){document.querySelectorAll('.dock [data-open]').forEach(b=>b.classList.toggle('running',!document.getElementById(b.dataset.open).hidden))}
-function raise(win){windows.filter(w=>w!==win).sort((a,b)=>Number(a.style.zIndex||getComputedStyle(a).zIndex)-Number(b.style.zIndex||getComputedStyle(b).zIndex)).forEach((w,i)=>w.style.zIndex=String(i+2));win.style.zIndex='5';}
+function syncDock(){document.querySelectorAll('.dock [data-open]').forEach(b=>b.classList.toggle('running',!document.getElementById(b.dataset.open).hidden));renderProcesses()}
+function raise(win){windows.filter(w=>w!==win).sort((a,b)=>Number(a.style.zIndex||getComputedStyle(a).zIndex)-Number(b.style.zIndex||getComputedStyle(b).zIndex)).forEach((w,i)=>w.style.zIndex=String(i+2));win.style.zIndex=String(windows.length+2);}
 function terminalIsForeground(){
  return entered && !$('#terminal').hidden && !document.querySelector('dialog[open]') &&
   windows.filter(win=>!win.hidden).every(win=>Number(getComputedStyle(win).zIndex)<=Number(getComputedStyle($('#terminal')).zIndex));
@@ -52,10 +52,11 @@ function terminalIsForeground(){
 function focusTerminal(){
  if(terminalIsForeground() && !window.getSelection()?.toString()) input.focus({preventScroll:true});
 }
-function showWindow(id,focus=true){const win=document.getElementById(id);win.hidden=false;raise(win);syncDock();if(focus){if(id==='terminal')input.focus({preventScroll:true});else win.querySelector('button')?.focus({preventScroll:true})}}
+function showWindow(id,focus=true){const win=document.getElementById(id);if(!win||!win.classList.contains('window'))return;$('#launcher').close();win.hidden=false;raise(win);syncDock();if(focus){if(id==='terminal')input.focus({preventScroll:true});else if(id==='editor')$('#editor-text').focus({preventScroll:true});else win.querySelector('button')?.focus({preventScroll:true})}}
 function enter(focus=true){entered=true;$('#login').hidden=true;$('#desktop').inert=false;syncDock();if(focus)showWindow('terminal');}
 function lock(){entered=false;$('#login').hidden=false;$('#desktop').inert=true;$('#enter').focus();}
 function projectGrid(){
+ $('#file-address').textContent='⌂ /home/roberto/proyectos';
  const area=$('#project-content');area.replaceChildren();const grid=document.createElement('div');grid.className='project-grid';
  projects.forEach(p=>{const button=document.createElement('button');button.className='project-tile';button.dataset.project=p.id;button.setAttribute('aria-label',`Abrir ${p.title}`);
  if(p.image){const img=document.createElement('img');img.src=p.image;img.alt=`Captura real de ${p.title}`;img.loading='lazy';button.append(img)}else{const art=document.createElement('div');art.className='code-preview';art.textContent=p.symbol;button.append(art)}
@@ -84,7 +85,7 @@ function run(raw){
  switch(name){
  case 'help':
    line('TU MAPA DEL ESCRITORIO','success');
-   line('whoami              Quién soy\nneofetch            Mi ficha de desarrollador\nls [carpeta]        Listar archivos\npwd                 Mostrar dónde estás\ncd proyectos        Entrar en una carpeta\ncd ..               Volver a la carpeta anterior\ncat sobre-mi.md     Leer un archivo\nopen etimologia     Abrir un proyecto\nprojects            Abrir el explorador\ncontact             Encontrarme en la red\nfibonacci 12        Calcular y aprender\nclear               Limpiar la terminal\nhistory             Ver tus comandos\nexit                Volver a la pantalla de entrada');
+   line('whoami              Quién soy\nneofetch            Mi ficha de desarrollador\nls [carpeta]        Listar archivos\npwd                 Mostrar dónde estás\ncd proyectos        Entrar en una carpeta\ncd ..               Volver a la carpeta anterior\ncat sobre-mi.md     Leer un archivo\nopen etimologia     Abrir un proyecto\nopen sobre-mi.md    Leer en el editor\nopen ajustes        Personalizar escritorio\nopen monitor        Ventanas abiertas\nprojects            Abrir el explorador\ncontact             Encontrarme en la red\nfibonacci 12        Calcular y aprender\nclear               Limpiar la terminal\nhistory             Ver tus comandos\nexit                Volver a la pantalla de entrada');
    explain('Tab autocompleta. ↑ y ↓ recorren el historial. Ctrl+L limpia. Los comandos son una simulación local para explorar el portfolio.');break;
  case 'whoami':line(about,'success');explain('En Linux, whoami devuelve el usuario actual. Aquí te presenta al dueño del escritorio.');break;
  case 'neofetch':line('      .--.       roberto@portfolio\n     |o_o |      ──────────────────────────\n     |:_/ |      Nombre   Roberto Pérez\n    //   \\ \\     GitHub   @todomagichere\n   (|     | )    Código   PHP · JavaScript\n  /\u0027\\_   _/\u0027\\   Taller   Ibexa · GNOME · Web\n  \\___)=(___/    Proyectos   5 seleccionados','accent');explain('neofetch suele mostrar información del sistema. Esta versión muestra mi perfil y los proyectos seleccionados.');break;
@@ -93,7 +94,7 @@ function run(raw){
  case 'cd':{const path=resolvePath(arg||'~');if(directories.has(path)){cwd=path;updatePrompt();explain(`Ahora estás en ${shortPath()}. Prueba ls.`)}else line(`cd: no existe la carpeta «${arg}». Prueba cd ~/proyectos`,'error');break}
  case 'cat':{if(!arg){line('Uso: cat <archivo>. Por ejemplo: cat ~/sobre-mi.md','muted');break}const path=resolvePath(arg);if(Object.hasOwn(files,path)){line(files[path]);explain('cat muestra el contenido de un archivo de texto.')}else line(`cat: no existe «${arg}». Usa ls para ver los archivos de esta carpeta.`,'error');break}
  case 'projects':projectGrid();showWindow('files');line('Abriendo ~/proyectos…','success');break;
- case 'open':{const id=(arg||'proyectos').replace(/\/$/,'').split('/').pop();if(['proyectos','.'].includes(id)){projectGrid();showWindow('files');line('Abriendo el explorador…','success')}else if(projectDetail(id)){line(`Abriendo ${id}: captura, descripción y código.`,'success')}else line(`No encuentro «${arg}». Puedes abrir: ${projects.map(p=>p.id).join(', ')}.`,'error');break}
+ case 'open':{if(arg.endsWith('.md')){const path=resolvePath(arg);if(Object.hasOwn(files,path)){openDocument(path);line('Abriendo el editor de texto…','success')}else line('No existe ese documento. Prueba open ~/sobre-mi.md','error');break}const app={ajustes:'settings',imagenes:'gallery',notas:'editor',monitor:'processes',contactos:'contact-app',editor:'editor'}[arg];if(app){showWindow(app);break}const id=(arg||'proyectos').replace(/\/$/,'').split('/').pop();if(['proyectos','.'].includes(id)){projectGrid();showWindow('files');line('Abriendo el explorador…','success')}else if(projectDetail(id)){line(`Abriendo ${id}: captura, descripción y código.`,'success')}else line(`No encuentro «${arg}». Puedes abrir: ${projects.map(p=>p.id).join(', ')}.`,'error');break}
  case 'contact':{
    line('Hablemos de código, proyectos o esa idea que tienes en mente.');const p=line('');[['GitHub','https://github.com/todomagichere'],['LinkedIn','https://www.linkedin.com/in/robertoperezvillegas/']].forEach(([text,url])=>{const a=document.createElement('a');a.textContent=text+' ↗   ';a.href=url;a.target='_blank';a.rel='noopener noreferrer';p.append(a)});break}
  case 'fibonacci':{const n=Number(arg||'12');if(!Number.isInteger(n)||n<0||n>50){line('Prueba un número entero entre 0 y 50. Ejemplo: fibonacci 12','error');break}const values=[0,1];for(let i=2;i<=n;i++)values.push(values[i-1]+values[i-2]);line(`F(${n}) = ${values[n]}\n\n${values.slice(0,n+1).join(' → ')}`,'success');explain('Cada término suma los dos anteriores. Esta implementación recorre la secuencia una vez: tiempo O(n). Mi paquete PHP explora tres métodos. Abre open fibonacci.');break}
@@ -116,7 +117,7 @@ input.addEventListener('keydown',e=>{
  if(e.ctrlKey&&e.key.toLowerCase()==='c'){e.preventDefault();line(`visitante@roberto:${shortPath()}$ ${input.value}^C`,'muted');input.value='';scrollTerminal()}
  if(e.key==='Tab'&&!e.shiftKey){
    const parts=input.value.split(/\s+/);const fragment=parts.at(-1);let candidates;
-   if(parts.length===1)candidates=commands;else if(parts[0]==='open')candidates=['proyectos',...projects.map(p=>p.id)];else{
+   if(parts.length===1)candidates=commands;else if(parts[0]==='open')candidates=['proyectos','sobre-mi.md','ajustes','imagenes','editor','monitor','contactos',...projects.map(p=>p.id)];else{
      const slash=fragment.lastIndexOf('/');const prefix=slash>=0?fragment.slice(0,slash+1):'';const base=resolvePath(prefix||'.');
      candidates=[...directories,...Object.keys(files)].filter(p=>p.startsWith(base+'/')&&!p.slice(base.length+1).includes('/')).map(p=>prefix+p.slice(base.length+1)+(directories.has(p)?'/':''));
    }
@@ -126,7 +127,7 @@ input.addEventListener('keydown',e=>{
 $('#enter').addEventListener('click',()=>enter());$('#lock').addEventListener('click',lock);
 $('#room-toggle').addEventListener('click',()=>{document.body.classList.toggle('expanded');$('#room-toggle').textContent=document.body.classList.contains('expanded')?'Reducir pantalla ↙':'Ampliar pantalla ↗';resetWindowPositions()});
 // Escape always provides a way back from the enlarged computer view.
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#screenshot-dialog').open){document.body.classList.remove('expanded');$('#room-toggle').textContent='Ampliar pantalla ↗';resetWindowPositions()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('dialog[open]')){document.body.classList.remove('expanded');$('#room-toggle').textContent='Ampliar pantalla ↗';resetWindowPositions()}});
 // Typing belongs to the frontmost terminal, even after clicking the desktop.
 // Keep text selection, other editors, button activation and browser shortcuts intact.
 document.addEventListener('keydown',e=>{
@@ -142,6 +143,8 @@ document.addEventListener('keydown',e=>{
 $('#exit-expanded').addEventListener('click',()=>{document.body.classList.remove('expanded');$('#room-toggle').textContent='Ampliar pantalla ↗';resetWindowPositions()});
 $('#show-all').addEventListener('click',projectGrid);
 document.addEventListener('click',e=>{
+ const doc=e.target.closest('[data-document]');if(doc)openDocument(home+'/'+doc.dataset.document);
+ const folder=e.target.closest('[data-folder]');if(folder)showFolder(folder.dataset.folder);
  const open=e.target.closest('[data-open]');if(open){if(!entered)enter(false);showWindow(open.dataset.open)}
  const command=e.target.closest('[data-command],[data-entry-command]');if(command){if(!entered)enter(false);showWindow('terminal');run(command.dataset.command||command.dataset.entryCommand)}
  const project=e.target.closest('[data-project]');if(project)projectDetail(project.dataset.project);
@@ -155,9 +158,61 @@ windows.forEach(win=>{
  const bar=win.querySelector('.titlebar');let drag;
  bar.addEventListener('dblclick',e=>{if(!e.target.closest('button'))win.classList.toggle('maximized')});
  bar.addEventListener('pointerdown',e=>{if(e.target.closest('button')||win.classList.contains('maximized')||matchMedia('(max-width:600px)').matches)return;const rect=win.getBoundingClientRect();const screen=$('#desktop').getBoundingClientRect();drag={x:e.clientX,y:e.clientY,left:rect.left-screen.left,top:rect.top-screen.top};bar.setPointerCapture(e.pointerId)});
- bar.addEventListener('pointermove',e=>{if(!drag)return;const x=Math.max(0,Math.min($('#desktop').clientWidth-win.offsetWidth,drag.left+e.clientX-drag.x));const y=Math.max(30,Math.min($('#desktop').clientHeight-win.offsetHeight-70,drag.top+e.clientY-drag.y));win.style.left=x+'px';win.style.top=y+'px';win.style.right='auto'});
+ bar.addEventListener('pointermove',e=>{if(!drag)return;const x=Math.max(0,Math.min($('#desktop').clientWidth-win.offsetWidth,drag.left+e.clientX-drag.x));const y=Math.max(44,Math.min($('#desktop').clientHeight-win.offsetHeight-70,drag.top+e.clientY-drag.y));win.style.left=x+'px';win.style.top=y+'px';win.style.right='auto'});
  bar.addEventListener('pointerup',()=>drag=null);bar.addEventListener('pointercancel',()=>drag=null);
 });
 window.addEventListener('resize',resetWindowPositions);
 function clock(){const now=new Date();$('#clock').textContent=now.toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' · '+now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});$('#login-time').textContent=now.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})+' · '+now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}
-clock();setInterval(clock,30000);projectGrid();welcome();syncDock();
+
+const applications = [
+ {id:'terminal',name:'Terminal',icon:'>_',description:'Comandos y descubrimientos'},
+ {id:'files',name:'Archivos',icon:'▱',description:'Proyectos y documentos'},
+ {id:'editor',name:'Editor de texto',icon:'▤',description:'Sobre mí, tecnologías y notas'},
+ {id:'gallery',name:'Imágenes',icon:'▧',description:'Capturas reales de proyectos'},
+ {id:'settings',name:'Ajustes',icon:'⚙',description:'Tu escritorio, a tu gusto'},
+ {id:'processes',name:'Monitor de aplicaciones',icon:'▥',description:'Gestiona las ventanas abiertas'},
+ {id:'contact-app',name:'Contactos',icon:'↗',description:'GitHub y LinkedIn'},
+ {id:'guide',name:'Ayuda',icon:'?',description:'Aprende a usar la terminal'}
+];
+files[home+'/sobre-mi.md']='# Roberto Pérez Villegas\n\nDesarrollador · @todomagichere\n\n## Lo que me mueve\n\n'+about.split('\n\n').slice(1).join('\n\n')+'\n\n## Por dónde empezar\n\n- Etimología: un juego sobre el origen de las palabras.\n- Ibexa: información del contenido, a un clic.\n- GNOME: capturas de pantalla en un solo gesto.\n\nAbre la carpeta Proyectos para ver las capturas y el código.\n';
+files[home+'/tecnologias.md']='# Tecnologías entre mis proyectos\n\n## PHP e Ibexa\n\nExtensiones para el back office y experimentos con algoritmos.\nProyectos: ibexa-contenttype-info-tab y fibonacci.\n\n## JavaScript y navegador\n\nJuegos diarios, herramientas e interfaces interactivas.\nProyecto: etimologia.\n\n## GNOME Shell\n\nCambios pequeños en el comportamiento del escritorio.\nProyecto: gnome-instant-area-screenshot.\n\n## HTML, CSS y Docker\n\nPortales estáticos y entornos de desarrollo reproducibles.\nProyecto: prepara-tu-mochila.\n';
+files[home+'/notas.md']='# Cuaderno del visitante\n\nEste documento es tuyo mientras exploras el escritorio.\nEscribe aquí, pulsa Guardar y léelo con cat ~/notas.md.\n\nLos cambios duran hasta que recargues la página.\n\n## Comandos para probar\n\nls proyectos\ncd proyectos/etimologia\ncat README.md\nopen etimologia\n\n## Tus ideas\n\n';
+let currentDocument=home+'/sobre-mi.md';
+const drafts=new Map();
+function rememberDraft(){if(currentDocument&&$('#editor-text').value!==files[currentDocument])drafts.set(currentDocument,$('#editor-text').value);else drafts.delete(currentDocument)}
+function loadDocument(path){
+ currentDocument=path;$('#editor-text').value=drafts.get(path)??files[path];
+ const name=path.slice(home.length+1);$('#editor-tab-name').textContent=name;$('#editor-title').textContent=name+' — gedit';
+ const select=$('#editor-file');if(![...select.options].some(o=>o.value===name)){const option=document.createElement('option');option.value=name;option.textContent=name;select.append(option)}select.value=name;
+ $('#editor-save-status').textContent='Borrador de esta sesión';$('#editor-text').setSelectionRange(0,0);$('#editor-text').scrollTop=0;$('#editor-text').scrollLeft=0;updateEditor();
+}
+function openDocument(path){if(!Object.hasOwn(files,path))return;rememberDraft();loadDocument(path);showWindow('editor')}
+function updateEditor(){
+ const text=$('#editor-text');const before=text.value.slice(0,text.selectionStart);const lines=before.split('\n');$('#editor-position').textContent=`Ln ${lines.length}, Col ${lines.at(-1).length+1}`;
+ $('#editor-lines').textContent=Array.from({length:text.value.split('\n').length},(_,i)=>i+1).join('\n');$('#editor-lines').scrollTop=text.scrollTop;
+ $('#editor-dirty').textContent=text.value===files[currentDocument]?'':'● Sin guardar';
+}
+$('#editor-text').addEventListener('input',()=>{rememberDraft();updateEditor()});['click','keyup','select'].forEach(event=>$('#editor-text').addEventListener(event,updateEditor));
+$('#editor-text').addEventListener('scroll',()=>$('#editor-lines').scrollTop=$('#editor-text').scrollTop);
+function saveDocument(){files[currentDocument]=$('#editor-text').value;drafts.delete(currentDocument);$('#editor-save-status').textContent='Guardado en esta sesión';updateEditor()}
+$('#editor-save').addEventListener('click',saveDocument);
+$('#editor-wrap').addEventListener('change',()=>{const wrap=$('#editor-wrap').checked;$('#editor').classList.toggle('wrapped',wrap);$('#editor-text').wrap=wrap?'soft':'off'});
+$('#editor-undo').addEventListener('click',()=>{drafts.delete(currentDocument);loadDocument(currentDocument);$('#editor-text').focus()});
+$('#editor-file').addEventListener('change',()=>openDocument(home+'/'+$('#editor-file').value));
+$('#editor-text').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();saveDocument()}});
+function renderApps(){const query=$('#app-search').value.toLocaleLowerCase('es');const grid=$('#app-grid');grid.replaceChildren();applications.filter(app=>(app.name+' '+app.description).toLocaleLowerCase('es').includes(query)).forEach(app=>{const button=document.createElement('button');button.dataset.open=app.id;const icon=document.createElement('span');icon.className='app-icon';icon.textContent=app.icon;const title=document.createElement('strong');title.textContent=app.name;const description=document.createElement('small');description.textContent=app.description;button.append(icon,title,description);grid.append(button)});$('#app-empty').hidden=grid.childElementCount>0}
+function showApplications(){if(!entered)enter(false);$('#app-search').value='';renderApps();$('#launcher').showModal();$('#app-search').focus()}
+$('#applications').addEventListener('click',showApplications);$('#dock-applications').addEventListener('click',showApplications);$('#app-search').addEventListener('input',renderApps);
+function renderGallery(){const grid=$('#gallery-grid');projects.filter(p=>p.image).forEach(p=>{const button=document.createElement('button');button.dataset.screenshot=p.id;const img=document.createElement('img');img.src=p.image;img.alt='Captura de '+p.title;const title=document.createElement('strong');title.textContent=p.title;button.append(img,title);grid.append(button)})}
+function renderProcesses(){if(typeof applications==='undefined')return;const list=$('#process-list');list.replaceChildren();applications.filter(app=>!document.getElementById(app.id).hidden).forEach(app=>{const row=document.createElement('div');const title=document.createElement('span');title.textContent=app.icon+'  '+app.name;const open=document.createElement('button');open.textContent='Mostrar';open.dataset.open=app.id;const close=document.createElement('button');close.textContent='Cerrar';close.setAttribute('aria-label','Cerrar '+app.name);close.addEventListener('click',()=>{document.getElementById(app.id).hidden=true;syncDock();focusTerminal()});row.append(title,open,close);list.append(row)})}
+function showFolder(folder){
+ if(folder==='projects'){projectGrid();showWindow('files');return}
+ const area=$('#project-content');area.replaceChildren();$('#file-address').textContent=folder==='home'?'⌂ /home/roberto':'⌂ /home/roberto/Documentos';
+ const grid=document.createElement('div');grid.className='folder-grid';
+ const entries=folder==='home'?[['Proyectos','projects'],['Documentos','documents'],['Imágenes','gallery']]:[['sobre-mi.md'],['tecnologias.md'],['notas.md'],['README.md']];
+ entries.forEach(([name,target])=>{const button=document.createElement('button');const icon=document.createElement('span');icon.className=target?'folder-icon':'file-icon';icon.textContent=target?'':'#';const title=document.createElement('span');title.textContent=name;button.append(icon,title);if(target==='gallery')button.dataset.open='gallery';else if(target)button.dataset.folder=target;else button.dataset.document=name;grid.append(button)});area.append(grid);showWindow('files');
+}
+document.querySelectorAll('button[data-theme]').forEach(button=>button.addEventListener('click',()=>{document.body.dataset.theme=button.dataset.theme;document.querySelectorAll('button[data-theme]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)))}));
+document.querySelectorAll('[data-size]').forEach(button=>button.addEventListener('click',()=>{document.body.classList.toggle('large-text',button.dataset.size==='large');document.querySelectorAll('[data-size]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)))}));
+$('#reduce-motion').checked=matchMedia('(prefers-reduced-motion:reduce)').matches;$('#reduce-motion').addEventListener('change',()=>document.body.classList.toggle('reduce-motion',$('#reduce-motion').checked));
+clock();setInterval(clock,30000);projectGrid();welcome();loadDocument(home+'/sobre-mi.md');renderGallery();renderApps();syncDock();enter();
