@@ -45,6 +45,13 @@ function welcome(){
 }
 function syncDock(){document.querySelectorAll('.dock [data-open]').forEach(b=>b.classList.toggle('running',!document.getElementById(b.dataset.open).hidden))}
 function raise(win){windows.filter(w=>w!==win).sort((a,b)=>Number(a.style.zIndex||getComputedStyle(a).zIndex)-Number(b.style.zIndex||getComputedStyle(b).zIndex)).forEach((w,i)=>w.style.zIndex=String(i+2));win.style.zIndex='5';}
+function terminalIsForeground(){
+ return entered && !$('#terminal').hidden && !document.querySelector('dialog[open]') &&
+  windows.filter(win=>!win.hidden).every(win=>Number(getComputedStyle(win).zIndex)<=Number(getComputedStyle($('#terminal')).zIndex));
+}
+function focusTerminal(){
+ if(terminalIsForeground() && !window.getSelection()?.toString()) input.focus({preventScroll:true});
+}
 function showWindow(id,focus=true){const win=document.getElementById(id);win.hidden=false;raise(win);syncDock();if(focus){if(id==='terminal')input.focus({preventScroll:true});else win.querySelector('button')?.focus({preventScroll:true})}}
 function enter(focus=true){entered=true;$('#login').hidden=true;$('#desktop').inert=false;syncDock();if(focus)showWindow('terminal');}
 function lock(){entered=false;$('#login').hidden=false;$('#desktop').inert=true;$('#enter').focus();}
@@ -120,6 +127,18 @@ $('#enter').addEventListener('click',()=>enter());$('#lock').addEventListener('c
 $('#room-toggle').addEventListener('click',()=>{document.body.classList.toggle('expanded');$('#room-toggle').textContent=document.body.classList.contains('expanded')?'Reducir pantalla ↙':'Ampliar pantalla ↗';resetWindowPositions()});
 // Escape always provides a way back from the enlarged computer view.
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#screenshot-dialog').open){document.body.classList.remove('expanded');$('#room-toggle').textContent='Ampliar pantalla ↗';resetWindowPositions()}});
+// Typing belongs to the frontmost terminal, even after clicking the desktop.
+// Keep text selection, other editors, button activation and browser shortcuts intact.
+document.addEventListener('keydown',e=>{
+ if(e.defaultPrevented || e.isComposing || e.ctrlKey || e.metaKey || e.altKey ||
+  e.key.length!==1 || !terminalIsForeground() || window.getSelection()?.toString() ||
+  e.target.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"])') ||
+  (e.key===' ' && e.target.closest('button,a,[role="button"]'))) return;
+ input.focus({preventScroll:true});
+ input.setRangeText(e.key,input.selectionStart,input.selectionEnd,'end');
+ input.dispatchEvent(new Event('input',{bubbles:true}));
+ e.preventDefault();
+});
 $('#exit-expanded').addEventListener('click',()=>{document.body.classList.remove('expanded');$('#room-toggle').textContent='Ampliar pantalla ↗';resetWindowPositions()});
 $('#show-all').addEventListener('click',projectGrid);
 document.addEventListener('click',e=>{
@@ -127,7 +146,8 @@ document.addEventListener('click',e=>{
  const command=e.target.closest('[data-command],[data-entry-command]');if(command){if(!entered)enter(false);showWindow('terminal');run(command.dataset.command||command.dataset.entryCommand)}
  const project=e.target.closest('[data-project]');if(project)projectDetail(project.dataset.project);
  const shot=e.target.closest('[data-screenshot]');if(shot){const p=projects.find(p=>p.id===shot.dataset.screenshot);$('#screenshot-full').src=p.image;$('#screenshot-full').alt=`Captura real de ${p.title}`;$('#screenshot-caption').textContent=`${p.title} · ${p.id==='ibexa'?'Captura del README del repositorio':'Captura de la web pública'} · noviembre de 2026`;$('#screenshot-dialog').showModal()}
- const action=e.target.closest('[data-action]');if(action){const win=action.closest('.window');if(action.dataset.action==='maximize'){win.classList.toggle('maximized');action.setAttribute('aria-label',win.classList.contains('maximized')?'Restaurar ventana':'Maximizar ventana')}else{win.hidden=true;syncDock();document.querySelector(`.dock [data-open="${win.id}"]`)?.focus()}}
+ const action=e.target.closest('[data-action]');if(action){const win=action.closest('.window');if(action.dataset.action==='maximize'){win.classList.toggle('maximized');action.setAttribute('aria-label',win.classList.contains('maximized')?'Restaurar ventana':'Maximizar ventana')}else{win.hidden=true;syncDock();document.querySelector(`.dock [data-open="${win.id}"]`)?.focus()}focusTerminal()}
+ if(!e.target.closest('button,a,input,textarea,select,[contenteditable]')) focusTerminal();
 });
 function resetWindowPositions(){windows.forEach(win=>{win.style.left='';win.style.top='';win.style.right=''})}
 windows.forEach(win=>{
