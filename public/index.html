@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#141a20">
 <meta name="description" content="Entra en el ordenador de Roberto Pérez. Explora proyectos reales, aprende comandos y descubre su trabajo desde un escritorio inspirado en Linux.">
 <title>roberto@portfolio:~ — Entra en mi ordenador</title>
-<link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css"><script src="app.js" defer></script><script type="module" src="mines-ui.js"></script>
+<link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css"><script src="app.js" defer></script><script src="terminal-cursor.js" defer></script><script type="module" src="mines-ui.js"></script>
 </head>
 <body class="expanded large-text">
 <header class="room-header"><a href="#" class="identity">rp<span> / </span><span>Roberto Pérez</span></a><span class="room-caption">MI ORDENADOR. MIS PROYECTOS. PASA Y EXPLORA.</span><button id="room-toggle">Ampliar pantalla ↗</button></header>
@@ -19,7 +19,7 @@
 <div class="desktop-icons"><button data-open="files"><span class="folder-icon"></span>Proyectos</button><button data-open="terminal"><span class="terminal-icon">&gt;_</span>Terminal</button><button data-document="sobre-mi.md"><span class="file-icon">#</span>sobre-mi.md</button><button data-open="gallery"><span class="app-icon gallery-icon">▧</span>Capturas</button><button data-document="notas.md"><span class="app-icon notes-icon">≡</span>Notas</button><button data-open="settings"><span class="app-icon settings-icon">⚙</span>Ajustes</button></div>
 <section class="window terminal-window" id="terminal" aria-labelledby="terminal-title">
 <div class="titlebar"><span class="window-symbol">&gt;_</span><h1 id="terminal-title">roberto@portfolio: ~</h1><div class="window-actions"><button data-action="minimize" aria-label="Minimizar terminal">−</button><button data-action="maximize" aria-label="Maximizar terminal">□</button><button data-action="close" aria-label="Cerrar terminal">×</button></div></div>
-<div class="terminal-body" id="terminal-body"><div id="terminal-output" role="log" aria-label="Salida de la terminal" aria-live="polite"></div><form id="command-form" autocomplete="off"><label for="command-input"><span class="prompt-user">visitante@roberto</span>:<span id="prompt-path">~</span>$</label><input id="command-input" name="command" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Escribe un comando, por ejemplo help"></form></div>
+<div class="terminal-body" id="terminal-body"><div id="terminal-output" role="log" aria-label="Salida de la terminal" aria-live="polite"></div><form id="command-form" autocomplete="off"><label for="command-input"><span class="prompt-user">visitante@roberto</span>:<span id="prompt-path">~</span>$</label><span class="command-field"><input id="command-input" name="command" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Escribe un comando, por ejemplo help"><span id="terminal-cursor" aria-hidden="true" hidden></span></span></form></div>
 <div class="terminal-status"><span>bash · sesión de portfolio</span><span>Tab autocompleta · ↑ historial</span></div>
 </section>
 <section class="window files-window" id="files" aria-labelledby="files-title">
