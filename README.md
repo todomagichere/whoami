@@ -42,3 +42,9 @@ La terminal simula un sistema de archivos local. Nunca ejecuta comandos del sist
 ## Comprobaciones realizadas
 
 Pruebas en Chrome de entrada y bloqueo, navegación de carpetas, lectura de archivos, rutas inexistentes, Fibonacci y sus límites, salida segura de texto, historial, autocompletado, fichas de proyectos, ampliación de capturas, controles de ventanas y adaptación sin desbordamiento horizontal a 1440, 768, 390 y 320 px.
+
+## Selección y legibilidad
+
+Ocho proyectos: Etimología, Prepara tu mochila, Ibexa Content Type Info, Fibonacci, La gran aventura pirata, Firefox Perplexity Translator, Ibexa Breadcrumbs Bundle y Risk Master. El explorador, la terminal y la galería se generan desde `projects` en `public/app.js`.
+
+No usar tamaños de letra inferiores a **10 px**, tampoco en las reglas para móvil. Los textos principales mantienen tamaños mayores; 10 px es únicamente el mínimo permitido.
