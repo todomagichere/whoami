@@ -25,6 +25,7 @@ const buttons = Array.from({length:64}, (_,index) => {
 
 function tick(){document.querySelector('#mines-time').textContent=String(Math.floor((Date.now()-startedAt)/1000)).padStart(3,'0')}
 function act(index, flag){
+  if(['won','lost'].includes(game.state))return;
   if(flag)game.flag(index);else game.reveal(index);
   if(game.state!=='ready' && startedAt===null){startedAt=Date.now();timer=setInterval(tick,1000)}
   if(['won','lost'].includes(game.state)){clearInterval(timer);timer=null;tick()}
