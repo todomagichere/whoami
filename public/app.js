@@ -21,7 +21,7 @@ const about = 'Roberto Pérez Villegas\nDesarrollador · @todomagichere\n\nMi Gi
 const files = {
   [`${home}/sobre-mi.md`]: about,
   [`${home}/contacto.md`]: 'Puedes encontrarme en GitHub y LinkedIn.\nEscribe contact para abrir los enlaces.',
-  [`${home}/README.md`]: 'Bienvenido a mi ordenador.\n\n1. whoami — descubre quién soy\n2. ls proyectos — explora mis proyectos\n3. open etimologia — abre su captura y su historia\n4. help — aprende otros comandos\n\nTab completa comandos y rutas. Las flechas ↑ y ↓ recorren tu historial.'
+  [`${home}/README.md`]: '# Guía del escritorio\n\n1. whoami — descubre quién soy\n2. ls proyectos — explora mis proyectos\n3. open etimologia — abre su captura y su historia\n4. help — aprende otros comandos\n\nTab completa comandos y rutas. Las flechas ↑ y ↓ recorren tu historial.'
 };
 projects.forEach(p => files[`${home}/proyectos/${p.id}/README.md`] = `${p.title}\n${p.tag}\n\n${p.description}\n\n${p.lesson}\n\nCódigo: https://github.com/todomagichere/${p.repo}`);
 const directories = new Set([home,`${home}/proyectos`,...projects.map(p=>`${home}/proyectos/${p.id}`)]);
@@ -38,8 +38,7 @@ function explain(text){line(text,'explanation')}
 function scrollTerminal(){const body=$('#terminal-body');body.scrollTop=body.scrollHeight}
 function commandButton(command,label=command){const b=document.createElement('button');b.type='button';b.textContent=label;b.dataset.command=command;return b}
 function welcome(){
-  line('┌─ ROBERTO PÉREZ ──────────────────┐\n│  Código, proyectos y curiosidad. │\n└─────────────────────────────────┘','accent');
-  line('Bienvenido a mi ordenador. Estás en casa.','success');
+  line('while !succeed() { try; }','accent');
   line('Escribe un comando o pulsa una sugerencia.\nEmpieza por help si es tu primera terminal.','muted');
   const p=line('');['whoami','ls proyectos','help'].forEach(c=>p.append(commandButton(c)));
 }
@@ -94,7 +93,7 @@ function run(raw){
  case 'cd':{const path=resolvePath(arg||'~');if(directories.has(path)){cwd=path;updatePrompt();explain(`Ahora estás en ${shortPath()}. Prueba ls.`)}else line(`cd: no existe la carpeta «${arg}». Prueba cd ~/proyectos`,'error');break}
  case 'cat':{if(!arg){line('Uso: cat <archivo>. Por ejemplo: cat ~/sobre-mi.md','muted');break}const path=resolvePath(arg);if(Object.hasOwn(files,path)){line(files[path]);explain('cat muestra el contenido de un archivo de texto.')}else line(`cat: no existe «${arg}». Usa ls para ver los archivos de esta carpeta.`,'error');break}
  case 'projects':projectGrid();showWindow('files');line('Abriendo ~/proyectos…','success');break;
- case 'open':{if(arg.endsWith('.md')){const path=resolvePath(arg);if(Object.hasOwn(files,path)){openDocument(path);line('Abriendo el editor de texto…','success')}else line('No existe ese documento. Prueba open ~/sobre-mi.md','error');break}const app={ajustes:'settings',imagenes:'gallery',notas:'editor',monitor:'processes',contactos:'contact-app',editor:'editor'}[arg];if(app){showWindow(app);break}const id=(arg||'proyectos').replace(/\/$/,'').split('/').pop();if(['proyectos','.'].includes(id)){projectGrid();showWindow('files');line('Abriendo el explorador…','success')}else if(projectDetail(id)){line(`Abriendo ${id}: captura, descripción y código.`,'success')}else line(`No encuentro «${arg}». Puedes abrir: ${projects.map(p=>p.id).join(', ')}.`,'error');break}
+ case 'open':{if(arg.endsWith('.md')){const path=resolvePath(arg);if(Object.hasOwn(files,path)){openDocument(path);line('Abriendo el editor de texto…','success')}else line('No existe ese documento. Prueba open ~/sobre-mi.md','error');break}const app={buscaminas:'mines',mines:'mines',ajustes:'settings',imagenes:'gallery',notas:'editor',monitor:'processes',contactos:'contact-app',editor:'editor'}[arg];if(app){showWindow(app);break}const id=(arg||'proyectos').replace(/\/$/,'').split('/').pop();if(['proyectos','.'].includes(id)){projectGrid();showWindow('files');line('Abriendo el explorador…','success')}else if(projectDetail(id)){line(`Abriendo ${id}: captura, descripción y código.`,'success')}else line(`No encuentro «${arg}». Puedes abrir: ${projects.map(p=>p.id).join(', ')}.`,'error');break}
  case 'contact':{
    line('Hablemos de código, proyectos o esa idea que tienes en mente.');const p=line('');[['GitHub','https://github.com/todomagichere'],['LinkedIn','https://www.linkedin.com/in/robertoperezvillegas/']].forEach(([text,url])=>{const a=document.createElement('a');a.textContent=text+' ↗   ';a.href=url;a.target='_blank';a.rel='noopener noreferrer';p.append(a)});break}
  case 'fibonacci':{const n=Number(arg||'12');if(!Number.isInteger(n)||n<0||n>50){line('Prueba un número entero entre 0 y 50. Ejemplo: fibonacci 12','error');break}const values=[0,1];for(let i=2;i<=n;i++)values.push(values[i-1]+values[i-2]);line(`F(${n}) = ${values[n]}\n\n${values.slice(0,n+1).join(' → ')}`,'success');explain('Cada término suma los dos anteriores. Esta implementación recorre la secuencia una vez: tiempo O(n). Mi paquete PHP explora tres métodos. Abre open fibonacci.');break}
@@ -117,7 +116,7 @@ input.addEventListener('keydown',e=>{
  if(e.ctrlKey&&e.key.toLowerCase()==='c'){e.preventDefault();line(`visitante@roberto:${shortPath()}$ ${input.value}^C`,'muted');input.value='';scrollTerminal()}
  if(e.key==='Tab'&&!e.shiftKey){
    const parts=input.value.split(/\s+/);const fragment=parts.at(-1);let candidates;
-   if(parts.length===1)candidates=commands;else if(parts[0]==='open')candidates=['proyectos','sobre-mi.md','ajustes','imagenes','editor','monitor','contactos',...projects.map(p=>p.id)];else{
+   if(parts.length===1)candidates=commands;else if(parts[0]==='open')candidates=['proyectos','sobre-mi.md','ajustes','imagenes','editor','monitor','contactos','buscaminas',...projects.map(p=>p.id)];else{
      const slash=fragment.lastIndexOf('/');const prefix=slash>=0?fragment.slice(0,slash+1):'';const base=resolvePath(prefix||'.');
      candidates=[...directories,...Object.keys(files)].filter(p=>p.startsWith(base+'/')&&!p.slice(base.length+1).includes('/')).map(p=>prefix+p.slice(base.length+1)+(directories.has(p)?'/':''));
    }
@@ -172,11 +171,15 @@ const applications = [
  {id:'settings',name:'Ajustes',icon:'⚙',description:'Tu escritorio, a tu gusto'},
  {id:'processes',name:'Monitor de aplicaciones',icon:'▥',description:'Gestiona las ventanas abiertas'},
  {id:'contact-app',name:'Contactos',icon:'↗',description:'GitHub y LinkedIn'},
+ {id:'mines',name:'Buscaminas',icon:'✹',description:'8 × 8 · diez minas, una pausa'},
  {id:'guide',name:'Ayuda',icon:'?',description:'Aprende a usar la terminal'}
 ];
 files[home+'/sobre-mi.md']='# Roberto Pérez Villegas\n\nDesarrollador · @todomagichere\n\n## Lo que me mueve\n\n'+about.split('\n\n').slice(1).join('\n\n')+'\n\n## Por dónde empezar\n\n- Etimología: un juego sobre el origen de las palabras.\n- Ibexa: información del contenido, a un clic.\n- GNOME: capturas de pantalla en un solo gesto.\n\nAbre la carpeta Proyectos para ver las capturas y el código.\n';
 files[home+'/tecnologias.md']='# Tecnologías entre mis proyectos\n\n## PHP e Ibexa\n\nExtensiones para el back office y experimentos con algoritmos.\nProyectos: ibexa-contenttype-info-tab y fibonacci.\n\n## JavaScript y navegador\n\nJuegos diarios, herramientas e interfaces interactivas.\nProyecto: etimologia.\n\n## GNOME Shell\n\nCambios pequeños en el comportamiento del escritorio.\nProyecto: gnome-instant-area-screenshot.\n\n## HTML, CSS y Docker\n\nPortales estáticos y entornos de desarrollo reproducibles.\nProyecto: prepara-tu-mochila.\n';
-files[home+'/notas.md']='# Cuaderno del visitante\n\nEste documento es tuyo mientras exploras el escritorio.\nEscribe aquí, pulsa Guardar y léelo con cat ~/notas.md.\n\nLos cambios duran hasta que recargues la página.\n\n## Comandos para probar\n\nls proyectos\ncd proyectos/etimologia\ncat README.md\nopen etimologia\n\n## Tus ideas\n\n';
+files[home+'/notas.md']='# Cuaderno del visitante\n\nEste documento es tuyo mientras exploras el escritorio.\nEscribe aquí y léelo con cat ~/notas.md.\n\nTus notas se guardan automáticamente en este navegador.\n\n## Comandos para probar\n\nls proyectos\ncd proyectos/etimologia\ncat README.md\nopen etimologia\n\n## Tus ideas\n\n';
+const notesKey='whoami.notes.v1';
+let notesStorageAvailable=true;
+try{const saved=localStorage.getItem(notesKey);if(saved!==null)files[home+'/notas.md']=saved}catch{notesStorageAvailable=false}
 let currentDocument=home+'/sobre-mi.md';
 const drafts=new Map();
 function rememberDraft(){if(currentDocument&&$('#editor-text').value!==files[currentDocument])drafts.set(currentDocument,$('#editor-text').value);else drafts.delete(currentDocument)}
@@ -184,7 +187,7 @@ function loadDocument(path){
  currentDocument=path;$('#editor-text').value=drafts.get(path)??files[path];
  const name=path.slice(home.length+1);$('#editor-tab-name').textContent=name;$('#editor-title').textContent=name+' — gedit';
  const select=$('#editor-file');if(![...select.options].some(o=>o.value===name)){const option=document.createElement('option');option.value=name;option.textContent=name;select.append(option)}select.value=name;
- $('#editor-save-status').textContent='Borrador de esta sesión';$('#editor-text').setSelectionRange(0,0);$('#editor-text').scrollTop=0;$('#editor-text').scrollLeft=0;updateEditor();
+ $('#editor-save-status').textContent=path===home+'/notas.md'?(notesStorageAvailable?'Notas guardadas en este navegador':'Almacenamiento no disponible; copia tus notas'):'Borrador de esta sesión';$('#editor-text').setSelectionRange(0,0);$('#editor-text').scrollTop=0;$('#editor-text').scrollLeft=0;updateEditor();
 }
 function openDocument(path){if(!Object.hasOwn(files,path))return;rememberDraft();loadDocument(path);showWindow('editor')}
 function updateEditor(){
@@ -192,9 +195,17 @@ function updateEditor(){
  $('#editor-lines').textContent=Array.from({length:text.value.split('\n').length},(_,i)=>i+1).join('\n');$('#editor-lines').scrollTop=text.scrollTop;
  $('#editor-dirty').textContent=text.value===files[currentDocument]?'':'● Sin guardar';
 }
-$('#editor-text').addEventListener('input',()=>{rememberDraft();updateEditor()});['click','keyup','select'].forEach(event=>$('#editor-text').addEventListener(event,updateEditor));
+$('#editor-text').addEventListener('input',()=>{rememberDraft();if(currentDocument===home+'/notas.md')saveDocument();else updateEditor()});['click','keyup','select'].forEach(event=>$('#editor-text').addEventListener(event,updateEditor));
 $('#editor-text').addEventListener('scroll',()=>$('#editor-lines').scrollTop=$('#editor-text').scrollTop);
-function saveDocument(){files[currentDocument]=$('#editor-text').value;drafts.delete(currentDocument);$('#editor-save-status').textContent='Guardado en esta sesión';updateEditor()}
+function saveDocument(){
+ files[currentDocument]=$('#editor-text').value;drafts.delete(currentDocument);
+ let status='Guardado en esta sesión';
+ if(currentDocument===home+'/notas.md'){
+  try{localStorage.setItem(notesKey,files[currentDocument]);notesStorageAvailable=true;status='Guardado en este navegador'}
+  catch{notesStorageAvailable=false;status='No se pudo guardar; copia tus notas antes de salir'}
+ }
+ $('#editor-save-status').textContent=status;updateEditor();
+}
 $('#editor-save').addEventListener('click',saveDocument);
 $('#editor-wrap').addEventListener('change',()=>{const wrap=$('#editor-wrap').checked;$('#editor').classList.toggle('wrapped',wrap);$('#editor-text').wrap=wrap?'soft':'off'});
 $('#editor-undo').addEventListener('click',()=>{drafts.delete(currentDocument);loadDocument(currentDocument);$('#editor-text').focus()});
@@ -212,7 +223,20 @@ function showFolder(folder){
  const entries=folder==='home'?[['Proyectos','projects'],['Documentos','documents'],['Imágenes','gallery']]:[['sobre-mi.md'],['tecnologias.md'],['notas.md'],['README.md']];
  entries.forEach(([name,target])=>{const button=document.createElement('button');const icon=document.createElement('span');icon.className=target?'folder-icon':'file-icon';icon.textContent=target?'':'#';const title=document.createElement('span');title.textContent=name;button.append(icon,title);if(target==='gallery')button.dataset.open='gallery';else if(target)button.dataset.folder=target;else button.dataset.document=name;grid.append(button)});area.append(grid);showWindow('files');
 }
-document.querySelectorAll('button[data-theme]').forEach(button=>button.addEventListener('click',()=>{document.body.dataset.theme=button.dataset.theme;document.querySelectorAll('button[data-theme]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)))}));
+document.querySelectorAll('button[data-theme]').forEach(button=>button.addEventListener('click',()=>{clearWallpaper();document.body.dataset.theme=button.dataset.theme;$('.wallpaper').style.backgroundColor='';document.querySelectorAll('button[data-theme]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)))}));
 document.querySelectorAll('[data-size]').forEach(button=>button.addEventListener('click',()=>{document.body.classList.toggle('large-text',button.dataset.size==='large');document.querySelectorAll('[data-size]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)))}));
 $('#reduce-motion').checked=matchMedia('(prefers-reduced-motion:reduce)').matches;$('#reduce-motion').addEventListener('change',()=>document.body.classList.toggle('reduce-motion',$('#reduce-motion').checked));
+let wallpaperUrl='';
+let wallpaperRequest=0;
+function clearWallpaper(){wallpaperRequest++;if(wallpaperUrl)URL.revokeObjectURL(wallpaperUrl);wallpaperUrl='';$('.wallpaper').style.backgroundImage='none';$('#wallpaper-file').value='';$('#wallpaper-status').textContent='La imagen se queda en tu navegador durante esta visita.'}
+$('#wallpaper-file').addEventListener('change',async()=>{
+ const file=$('#wallpaper-file').files[0];if(!file)return;
+ const request=++wallpaperRequest;
+ if(!['image/png','image/jpeg','image/webp','image/gif','image/avif'].includes(file.type)){$('#wallpaper-status').textContent='Elige una imagen PNG, JPG, WebP, GIF o AVIF.';return}
+ const url=URL.createObjectURL(file);const image=new Image();image.src=url;
+ try{await image.decode();if(request!==wallpaperRequest){URL.revokeObjectURL(url);return}if(wallpaperUrl)URL.revokeObjectURL(wallpaperUrl);wallpaperUrl=url;$('.wallpaper').style.backgroundImage=`url("${url}")`;document.querySelectorAll('button[data-theme]').forEach(b=>b.setAttribute('aria-pressed','false'));$('#wallpaper-status').textContent=file.name+' · imagen local';}
+ catch{URL.revokeObjectURL(url);if(request===wallpaperRequest)$('#wallpaper-status').textContent='No se puede abrir esa imagen. Prueba con otra.'}
+});
+$('#wallpaper-reset').addEventListener('click',clearWallpaper);
+$('#wallpaper-color').addEventListener('input',()=>{clearWallpaper();$('.wallpaper').style.backgroundColor=$('#wallpaper-color').value;document.querySelectorAll('button[data-theme]').forEach(b=>b.setAttribute('aria-pressed','false'))});
 clock();setInterval(clock,30000);projectGrid();welcome();loadDocument(home+'/sobre-mi.md');renderGallery();renderApps();syncDock();enter();
