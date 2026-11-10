@@ -143,7 +143,6 @@ document.addEventListener('keydown',e=>{
  input.dispatchEvent(new Event('input',{bubbles:true}));
  e.preventDefault();
 });
-$('#exit-expanded').addEventListener('click',()=>{document.body.classList.remove('expanded');$('#room-toggle').textContent='Ampliar pantalla ↗';resetWindowPositions()});
 $('#show-all').addEventListener('click',projectGrid);
 document.addEventListener('click',e=>{
  const doc=e.target.closest('[data-document]');if(doc)openDocument(home+'/'+doc.dataset.document);
