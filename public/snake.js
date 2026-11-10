@@ -81,13 +81,13 @@
     turnLocked = false;
     const vector = vectors[direction];
     const head = snake[0];
-    const x = head % width + vector.x;
-    const y = Math.floor(head / width) + vector.y;
+    const x = (head % width + vector.x + width) % width;
+    const y = (Math.floor(head / width) + vector.y + width) % width;
     const next = y * width + x;
     const eating = next === food;
     const body = eating ? snake : snake.slice(0, -1);
 
-    if (x < 0 || x >= width || y < 0 || y >= width || body.includes(next)) {
+    if (body.includes(next)) {
       finish('Fin de la partida.');
       return;
     }
@@ -124,7 +124,7 @@
     if (state === 'paused') {
       state = 'running';
       startButton.textContent = 'Pausar';
-      status.textContent = 'Partida en curso. Evita los bordes y la serpiente.';
+      status.textContent = 'Partida en curso. Evita chocar con la serpiente.';
       timer = setInterval(tick, 125);
       board.focus({preventScroll: true});
       return;
@@ -132,7 +132,7 @@
     reset();
     state = 'running';
     startButton.textContent = 'Pausar';
-    status.textContent = 'Partida en curso. Evita los bordes y la serpiente.';
+    status.textContent = 'Partida en curso. Evita chocar con la serpiente.';
     timer = setInterval(tick, 125);
     board.focus({preventScroll: true});
   }

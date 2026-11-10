@@ -20,7 +20,7 @@ Desde la raíz del repositorio, abre http://localhost:8081. La primera visita mu
 - Menú Aplicaciones con búsqueda; galería de capturas reales; monitor para mostrar o cerrar ventanas.
 - Ajustes: diseños Linux, Windows 11 y Windows 3.1; texto pequeño, cómodo o grande (grande por defecto); fondos de color, tres ilustraciones WebP, selector de color libre e imagen propia del dispositivo; reducción de animaciones. Las imágenes se usan localmente, sin subirlas a un servidor.
 - Buscaminas: 8×8, diez minas, primer clic seguro, apertura de áreas vacías, banderas, cronómetro, reinicio, victoria y derrota. Clic derecho o F marca; las flechas navegan. En móvil hay un modo banderas. También se abre con `open buscaminas`.
-- Snake: partida arcade en una cuadrícula de 16×16, puntuación récord local, controles de flechas o WASD, pausa con espacio y controles táctiles. Se abre con `snake` o `open snake`.
+- Snake: partida arcade en una cuadrícula de 16×16, puntuación récord local, controles de flechas o WASD, pausa con espacio y controles táctiles. Los bordes conectan con el lado opuesto. Se abre con `snake`.
 - `fibonacci 12` explica el cálculo.
 - Tab para autocompletar, flechas para historial, Ctrl+L para limpiar.
 - Mover, minimizar, cerrar y maximizar ventanas; reabrirlas desde el dock.
