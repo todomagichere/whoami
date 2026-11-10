@@ -201,7 +201,41 @@ function initDesktopIcons(){
    place(icon,parseFloat(icon.style.left)+dx,parseFloat(icon.style.top)+dy);remember(icon);save();
   });
  });
- arrange();window.addEventListener('resize',arrange);
+ const menu=$('#desktop-context-menu'),organize=$('#desktop-organize-icons');
+ function closeMenu(restoreFocus=false){if(menu.hidden)return;menu.hidden=true;if(restoreFocus)desktop.focus({preventScroll:true})}
+ function organizeIcons(){
+  const top=$('.panel').offsetHeight+10;
+  const iconWidth=icons[0]?.offsetWidth||104,iconHeight=Math.max(...icons.map(icon=>icon.offsetHeight),1);
+  const stepX=iconWidth+8,stepY=iconHeight+8;
+  const usableHeight=Math.max(iconHeight,desktop.clientHeight-top-90);
+  const rows=Math.max(1,Math.floor(usableHeight/stepY));
+  const columns=Math.max(1,Math.floor((desktop.clientWidth-16)/stepX));
+  const horizontal=matchMedia('(max-width:700px)').matches;
+  icons.forEach((icon,index)=>{
+   const column=horizontal?index%columns:Math.floor(index/rows);
+   const row=horizontal?Math.floor(index/columns):index%rows;
+   place(icon,8+column*stepX,top+row*stepY);remember(icon);
+  });
+  save();closeMenu();
+ }
+ desktop.addEventListener('contextmenu',event=>{
+  if(event.target.closest('.window,.panel,.dock,.desktop-hint,dialog,#desktop-context-menu'))return;
+  if(event.target!==desktop&&!event.target.closest('.desktop-icons'))return;
+  event.preventDefault();
+  const rect=desktop.getBoundingClientRect();
+  const targetRect=event.target.getBoundingClientRect();
+  const x=(event.clientX||targetRect.left)-rect.left,y=(event.clientY||targetRect.bottom)-rect.top;
+  menu.hidden=false;
+  menu.style.left=`${clamp(x,0,Math.max(0,rect.width-menu.offsetWidth))}px`;
+  menu.style.top=`${clamp(y,$('.panel').offsetHeight,Math.max($('.panel').offsetHeight,rect.height-menu.offsetHeight))}px`;
+  organize.focus({preventScroll:true});
+ });
+ organize.addEventListener('click',organizeIcons);
+ document.addEventListener('pointerdown',event=>{if(!menu.hidden&&!menu.contains(event.target))closeMenu()});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!menu.hidden){event.preventDefault();closeMenu(true)}});
+ window.addEventListener('resize',()=>{closeMenu();arrange()});
+ new MutationObserver(()=>{if(!$('#login').hidden)closeMenu()}).observe($('#login'),{attributes:true,attributeFilter:['hidden']});
+ arrange();
 }
 windows.forEach(win=>{
  win.addEventListener('pointerdown',()=>raise(win));

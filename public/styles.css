@@ -177,3 +177,16 @@ body[data-layout-style="windows31"] .window[hidden]{transform:none}
 .disk-card{padding:20px;border:1px solid #d6cbda;border-radius:12px;background:#fff;box-shadow:0 5px 20px #3e27450a}.disk-card-heading{display:flex;align-items:center;gap:14px}.disk-card-heading img{width:48px;height:48px}.disk-card-heading div{display:grid;gap:4px;flex:1}.disk-card-heading strong{font-size:16px}.disk-card-heading div span{font-size:13px;color:#817488}.disk-card-heading>span{font-weight:700;color:#716084}.disk-meter{height:10px;margin:18px 0 9px;border-radius:20px;background:#e9e2ed;overflow:hidden}.disk-meter span{display:block;height:100%;min-width:0;border-radius:inherit;background:linear-gradient(90deg,#9676bd,#647db5);transition:width .3s}.disk-totals{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:#716678}
 .computer-content h4{margin:28px 0 10px;font-size:15px}.storage-breakdown{border-top:1px solid #ddd3e0}.storage-breakdown>div{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:14px 0;border-bottom:1px solid #ddd3e0}.storage-breakdown span{display:grid;gap:4px}.storage-breakdown small{font-size:12px;color:#817488}.storage-breakdown strong{font-size:13px;white-space:nowrap}.storage-note{margin-top:22px;padding:16px 18px;border-radius:8px;background:#eae5ee;color:#655b6d;font-size:13px;line-height:1.5}.storage-note p{margin:6px 0 0}.storage-note strong{color:#51465b}
 @media(max-width:700px){.computer-content{padding:18px}.computer-heading{flex-wrap:wrap}.disk-card{padding:15px}.disk-totals{flex-wrap:wrap}}
+
+/* Desktop context menu */
+.desktop-context-menu{position:absolute;z-index:200;min-width:210px;padding:5px;border:1px solid #665a70;border-radius:8px;background:#302c39;box-shadow:0 12px 30px #0005;color:#f4eff6}
+.desktop-context-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:5px;text-align:left;font-size:14px}
+.desktop-context-menu button:hover,.desktop-context-menu button:focus-visible{background:#51475c;filter:none}
+.desktop-context-menu button span{font-size:18px;color:#d7c7e9}
+body[data-layout-style="windows11"] .desktop-context-menu{background:#f5f7fbeF;color:#283443;border-color:#c0cbd9}
+body[data-layout-style="windows11"] .desktop-context-menu button:hover,body[data-layout-style="windows11"] .desktop-context-menu button:focus-visible{background:#dce5f1}
+body[data-layout-style="windows11"] .desktop-context-menu button span{color:#536e94}
+body[data-layout-style="windows31"] .desktop-context-menu{border:2px outset white;border-radius:0;background:#c0c0c0;color:#111;box-shadow:2px 2px #3338}
+body[data-layout-style="windows31"] .desktop-context-menu button{border-radius:0}
+body[data-layout-style="windows31"] .desktop-context-menu button:hover,body[data-layout-style="windows31"] .desktop-context-menu button:focus-visible{background:#000080;color:white}
+body[data-layout-style="windows31"] .desktop-context-menu button span{color:inherit}
