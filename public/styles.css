@@ -23,3 +23,25 @@
 
 /* Small source screenshots retain their proportions in project thumbnails. */
 .project-tile img.contained-image{object-fit:contain;object-position:center;padding:16px;background:#e8e6e1}
+
+/* Snake is a small arcade machine inside the desktop. */
+.snake-window{background:#e8e9d8;left:31%;width:min(620px,62%);height:690px}
+.snake-content{display:flex;flex:1;min-height:0;flex-direction:column;align-items:center;gap:14px;overflow:auto;padding:20px;color:#29351c}
+.snake-heading{width:min(100%,470px)}
+.snake-heading .eyebrow{color:#66784e}
+.snake-heading h3{margin:8px 0;font:700 30px/1.05 var(--display);letter-spacing:-.04em}
+.snake-heading p{margin:0;color:#59644a;font-size:14px;line-height:1.5}
+.snake-scoreboard{width:min(100%,470px);display:flex;align-items:center;gap:12px}
+.snake-scoreboard>div{display:flex;flex-direction:column;gap:3px;min-width:70px}
+.snake-scoreboard span{font:10px var(--mono);letter-spacing:.08em;color:#66784e}
+.snake-scoreboard output{font:700 20px var(--mono);font-variant-numeric:tabular-nums}
+.snake-scoreboard button{margin-left:auto;padding:10px 14px;border:1px solid #485d32;border-radius:4px;background:#3e512a;color:#f3f0da;font-size:14px}
+.snake-board{width:min(100%,420px);aspect-ratio:1;display:grid;grid-template-columns:repeat(16,minmax(0,1fr));grid-template-rows:repeat(16,minmax(0,1fr));overflow:hidden;border:8px solid #29351c;background-color:#20291c;background-image:linear-gradient(#ffffff0c 1px,transparent 1px),linear-gradient(90deg,#ffffff0c 1px,transparent 1px);background-size:6.25% 6.25%;box-shadow:0 10px 22px #29351c30;outline-offset:3px;touch-action:none}
+.snake-cell{display:block;min-width:0;min-height:0}
+.snake-body{background:#a6c868;border:1px solid #526b36;border-radius:3px}
+.snake-head{background:#d5ef89;border:2px solid #526b36;border-radius:4px;box-shadow:inset -3px -3px 0 #91b74f}
+.snake-food{position:relative;transform:scale(.68);border-radius:50%;background:#f08b65;box-shadow:inset -4px -4px 0 #ca5f4e}
+.snake-touch-controls{display:none}
+.snake-status{width:min(100%,420px);margin:0;color:#59644a;font-size:12px;line-height:1.5}
+.snake-icon{background:#bdcc90;color:#3b5129}
+@media(max-width:700px){.snake-window{left:8px;top:149px;width:calc(100% - 16px);height:calc(100% - 235px)}.snake-content{padding:12px;gap:10px}.snake-heading h3{font-size:24px}.snake-heading p{font-size:12px}.snake-scoreboard{gap:8px}.snake-scoreboard>div{min-width:58px}.snake-scoreboard output{font-size:18px}.snake-scoreboard button{padding:9px;font-size:12px}.snake-board{width:min(100%, min(52vh,380px));border-width:5px}.snake-touch-controls{display:grid;justify-items:center;gap:3px}.snake-touch-controls>div{display:flex;gap:3px}.snake-touch-controls button{width:42px;height:36px;padding:0;border:1px solid #86956d;border-radius:4px;background:#f6f5e9;color:#3e512a;font-size:18px;touch-action:manipulation}.snake-status{font-size:11px}.dock button,.dock a{width:calc((100vw - 32px)/9);min-width:0}}

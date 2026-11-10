@@ -19,7 +19,7 @@ let historyIndex = 0;
 const home = '/home/roberto';
 const input = $('#command-input');
 const output = $('#terminal-output');
-const commands = ['help','whoami','neofetch','ls','pwd','cd','cat','open','projects','contact','fibonacci','clear','history','date','echo','exit'];
+const commands = ['help','whoami','neofetch','ls','pwd','cd','cat','open','projects','contact','fibonacci','snake','clear','history','date','echo','exit'];
 const about = 'Roberto Pérez Villegas\nDesarrollador · @todomagichere\n\nMi GitHub reúne extensiones de Ibexa, extensiones de Firefox, invitaciones web y juegos. Me interesa explorar ideas construyéndolas: desde el origen de las palabras hasta herramientas para navegar y organizar partidas.\n\nEste portfolio también es un experimento. Puedes recorrerlo con el ratón o descubrirlo desde esta terminal.';
 const files = {
   [`${home}/sobre-mi.md`]: about,
@@ -53,7 +53,7 @@ function terminalIsForeground(){
 function focusTerminal(){
  if(terminalIsForeground() && !window.getSelection()?.toString()) input.focus({preventScroll:true});
 }
-function showWindow(id,focus=true){const win=document.getElementById(id);if(!win||!win.classList.contains('window'))return;$('#launcher').close();win.hidden=false;raise(win);syncDock();if(focus){if(id==='terminal')input.focus({preventScroll:true});else if(id==='editor')$('#editor-text').focus({preventScroll:true});else win.querySelector('button')?.focus({preventScroll:true})}}
+function showWindow(id,focus=true){const win=document.getElementById(id);if(!win||!win.classList.contains('window'))return;$('#launcher').close();win.hidden=false;raise(win);syncDock();if(focus){if(id==='terminal')input.focus({preventScroll:true});else if(id==='editor')$('#editor-text').focus({preventScroll:true});else if(id==='snake')$('#snake-board').focus({preventScroll:true});else win.querySelector('button')?.focus({preventScroll:true})}}
 function enter(focus=true){entered=true;$('#login').hidden=true;$('#desktop').inert=false;syncDock();if(focus)showWindow('terminal');}
 function lock(){entered=false;$('#login').hidden=false;$('#desktop').inert=true;$('#enter').focus();}
 function projectGrid(){
@@ -87,7 +87,7 @@ function run(raw){
  switch(name){
  case 'help':
    line('TU MAPA DEL ESCRITORIO','success');
-   line('whoami              Quién soy\nneofetch            Mi ficha de desarrollador\nls [carpeta]        Listar archivos\npwd                 Mostrar dónde estás\ncd proyectos        Entrar en una carpeta\ncd ..               Volver a la carpeta anterior\ncat sobre-mi.md     Leer un archivo\nopen etimologia     Abrir un proyecto\nopen sobre-mi.md    Leer en el editor\nopen ajustes        Personalizar escritorio\nopen monitor        Ventanas abiertas\nprojects            Abrir el explorador\ncontact             Encontrarme en la red\nfibonacci 12        Calcular y aprender\nclear               Limpiar la terminal\nhistory             Ver tus comandos\nexit                Volver a la pantalla de entrada');
+   line('whoami              Quién soy\nneofetch            Mi ficha de desarrollador\nls [carpeta]        Listar archivos\npwd                 Mostrar dónde estás\ncd proyectos        Entrar en una carpeta\ncd ..               Volver a la carpeta anterior\ncat sobre-mi.md     Leer un archivo\nopen etimologia     Abrir un proyecto\nopen sobre-mi.md    Leer en el editor\nopen ajustes        Personalizar escritorio\nopen monitor        Ventanas abiertas\nopen snake          Jugar a Snake\nsnake               Abrir la sala recreativa\nprojects            Abrir el explorador\ncontact             Encontrarme en la red\nfibonacci 12        Calcular y aprender\nclear               Limpiar la terminal\nhistory             Ver tus comandos\nexit                Volver a la pantalla de entrada');
    explain('Tab autocompleta. ↑ y ↓ recorren el historial. Ctrl+L limpia. Los comandos son una simulación local para explorar el portfolio.');break;
  case 'whoami':line(about,'success');explain('En Linux, whoami devuelve el usuario actual. Aquí te presenta al dueño del escritorio.');break;
  case 'neofetch':line('      .--.       roberto@portfolio\n     |o_o |      ──────────────────────────\n     |:_/ |      Nombre   Roberto Pérez\n    //   \\ \\     GitHub   @todomagichere\n   (|     | )    Código   PHP · JavaScript\n  /\u0027\\_   _/\u0027\\   Taller   Ibexa · Firefox · Web\n  \\___)=(___/    Proyectos   '+projects.length+' seleccionados','accent');explain('neofetch suele mostrar información del sistema. Esta versión muestra mi perfil y los proyectos seleccionados.');break;
@@ -95,8 +95,9 @@ function run(raw){
  case 'ls':listDirectory(resolvePath(args.find(a=>!a.startsWith('-'))||'.'));break;
  case 'cd':{const path=resolvePath(arg||'~');if(directories.has(path)){cwd=path;updatePrompt();explain(`Ahora estás en ${shortPath()}. Prueba ls.`)}else line(`cd: no existe la carpeta «${arg}». Prueba cd ~/proyectos`,'error');break}
  case 'cat':{if(!arg){line('Uso: cat <archivo>. Por ejemplo: cat ~/sobre-mi.md','muted');break}const path=resolvePath(arg);if(Object.hasOwn(files,path)){line(files[path]);explain('cat muestra el contenido de un archivo de texto.')}else line(`cat: no existe «${arg}». Usa ls para ver los archivos de esta carpeta.`,'error');break}
+ case 'snake':showWindow('snake');line('Sala recreativa abierta. ¡A por esa manzana!','success');break;
  case 'projects':projectGrid();showWindow('files');line('Abriendo ~/proyectos…','success');break;
- case 'open':{if(arg.endsWith('.md')){const path=resolvePath(arg);if(Object.hasOwn(files,path)){openDocument(path);line('Abriendo el editor de texto…','success')}else line('No existe ese documento. Prueba open ~/sobre-mi.md','error');break}const app={buscaminas:'mines',mines:'mines',ajustes:'settings',imagenes:'gallery',notas:'editor',monitor:'processes',contactos:'contact-app',editor:'editor'}[arg];if(app){showWindow(app);break}const id=(arg||'proyectos').replace(/\/$/,'').split('/').pop();if(['proyectos','.'].includes(id)){projectGrid();showWindow('files');line('Abriendo el explorador…','success')}else if(projectDetail(id)){line(`Abriendo ${id}: captura, descripción y código.`,'success')}else line(`No encuentro «${arg}». Puedes abrir: ${projects.map(p=>p.id).join(', ')}.`,'error');break}
+ case 'open':{if(arg.endsWith('.md')){const path=resolvePath(arg);if(Object.hasOwn(files,path)){openDocument(path);line('Abriendo el editor de texto…','success')}else line('No existe ese documento. Prueba open ~/sobre-mi.md','error');break}const app={snake:'snake',serpiente:'snake',buscaminas:'mines',mines:'mines',ajustes:'settings',imagenes:'gallery',notas:'editor',monitor:'processes',contactos:'contact-app',editor:'editor'}[arg];if(app){showWindow(app);break}const id=(arg||'proyectos').replace(/\/$/,'').split('/').pop();if(['proyectos','.'].includes(id)){projectGrid();showWindow('files');line('Abriendo el explorador…','success')}else if(projectDetail(id)){line(`Abriendo ${id}: captura, descripción y código.`,'success')}else line(`No encuentro «${arg}». Puedes abrir: ${projects.map(p=>p.id).join(', ')}.`,'error');break}
  case 'contact':{
    line('Hablemos de código, proyectos o esa idea que tienes en mente.');const p=line('');[['GitHub','https://github.com/todomagichere'],['LinkedIn','https://www.linkedin.com/in/robertoperezvillegas/']].forEach(([text,url])=>{const a=document.createElement('a');a.textContent=text+' ↗   ';a.href=url;a.target='_blank';a.rel='noopener noreferrer';p.append(a)});break}
  case 'fibonacci':{const n=Number(arg||'12');if(!Number.isInteger(n)||n<0||n>50){line('Prueba un número entero entre 0 y 50. Ejemplo: fibonacci 12','error');break}const values=[0,1];for(let i=2;i<=n;i++)values.push(values[i-1]+values[i-2]);line(`F(${n}) = ${values[n]}\n\n${values.slice(0,n+1).join(' → ')}`,'success');explain('Cada término suma los dos anteriores. Esta implementación recorre la secuencia una vez: tiempo O(n). Mi paquete PHP explora tres métodos. Abre open fibonacci.');break}
@@ -119,7 +120,7 @@ input.addEventListener('keydown',e=>{
  if(e.ctrlKey&&e.key.toLowerCase()==='c'){e.preventDefault();line(`visitante@roberto:${shortPath()}$ ${input.value}^C`,'muted');input.value='';scrollTerminal()}
  if(e.key==='Tab'&&!e.shiftKey){
    const parts=input.value.split(/\s+/);const fragment=parts.at(-1);let candidates;
-   if(parts.length===1)candidates=commands;else if(parts[0]==='open')candidates=['proyectos','sobre-mi.md','ajustes','imagenes','editor','monitor','contactos','buscaminas',...projects.map(p=>p.id)];else{
+   if(parts.length===1)candidates=commands;else if(parts[0]==='open')candidates=['proyectos','sobre-mi.md','ajustes','imagenes','editor','monitor','contactos','buscaminas','snake','serpiente',...projects.map(p=>p.id)];else{
      const slash=fragment.lastIndexOf('/');const prefix=slash>=0?fragment.slice(0,slash+1):'';const base=resolvePath(prefix||'.');
      candidates=[...directories,...Object.keys(files)].filter(p=>p.startsWith(base+'/')&&!p.slice(base.length+1).includes('/')).map(p=>prefix+p.slice(base.length+1)+(directories.has(p)?'/':''));
    }
@@ -135,7 +136,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySele
 document.addEventListener('keydown',e=>{
  if(e.defaultPrevented || e.isComposing || e.ctrlKey || e.metaKey || e.altKey ||
   e.key.length!==1 || !terminalIsForeground() || window.getSelection()?.toString() ||
-  e.target.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"])') ||
+  e.target.closest('input,textarea,select,[data-terminal-exempt],[contenteditable]:not([contenteditable="false"])') ||
   (e.key===' ' && e.target.closest('button,a,[role="button"]'))) return;
  input.focus({preventScroll:true});
  input.setRangeText(e.key,input.selectionStart,input.selectionEnd,'end');
@@ -175,6 +176,7 @@ const applications = [
  {id:'processes',name:'Monitor de aplicaciones',icon:'▥',description:'Gestiona las ventanas abiertas'},
  {id:'contact-app',name:'Contactos',icon:'↗',description:'GitHub y LinkedIn'},
  {id:'mines',name:'Buscaminas',icon:'✹',description:'8 × 8 · diez minas, una pausa'},
+ {id:'snake',name:'Snake',icon:'▦',description:'Arcade · flechas, WASD y píxeles'},
  {id:'guide',name:'Ayuda',icon:'?',description:'Aprende a usar la terminal'}
 ];
 files[home+'/sobre-mi.md']='# Roberto Pérez Villegas\n\nDesarrollador · @todomagichere\n\n## Lo que me mueve\n\n'+about.split('\n\n').slice(1).join('\n\n')+'\n\n## Por dónde empezar\n\n- Etimología: un juego sobre el origen de las palabras.\n- Ibexa: información del contenido, a un clic.\n- La gran aventura pirata: una invitación con temática de aventura.\n\nAbre la carpeta Proyectos para ver las capturas y el código.\n';

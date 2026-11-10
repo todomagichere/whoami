@@ -1,6 +1,6 @@
 # whoami — portfolio-os
 
-Portfolio de Roberto Pérez Villegas como un ordenador con escritorio inspirado en Linux. Escritorio ampliado, ventanas movibles, terminal didáctica y nueve aplicaciones: Archivos, Terminal, Editor de texto, Imágenes, Ajustes, Monitor de aplicaciones, Contactos, Ayuda y Buscaminas.
+Portfolio de Roberto Pérez Villegas como un ordenador con escritorio inspirado en Linux. Escritorio ampliado, ventanas movibles, terminal didáctica y diez aplicaciones: Archivos, Terminal, Editor de texto, Imágenes, Ajustes, Monitor de aplicaciones, Contactos, Ayuda, Buscaminas y Snake.
 
 ## Ver en local
 
@@ -20,6 +20,7 @@ Desde la raíz del repositorio, abre http://localhost:8081. El escritorio aparec
 - Menú Aplicaciones con búsqueda; galería de capturas reales; monitor para mostrar o cerrar ventanas.
 - Ajustes: texto grande por defecto, tres fondos, selector de color libre, imagen propia del dispositivo y reducción de animaciones. Las imágenes se usan localmente, sin subirlas a un servidor.
 - Buscaminas: 8×8, diez minas, primer clic seguro, apertura de áreas vacías, banderas, cronómetro, reinicio, victoria y derrota. Clic derecho o F marca; las flechas navegan. En móvil hay un modo banderas. También se abre con `open buscaminas`.
+- Snake: partida arcade en una cuadrícula de 16×16, puntuación récord local, controles de flechas o WASD, pausa con espacio y controles táctiles. Se abre con `snake` o `open snake`.
 - `fibonacci 12` explica el cálculo.
 - Tab para autocompletar, flechas para historial, Ctrl+L para limpiar.
 - Mover, minimizar, cerrar y maximizar ventanas; reabrirlas desde el dock.
@@ -33,7 +34,8 @@ La terminal simula un sistema de archivos local. Nunca ejecuta comandos del sist
 - `public/styles.css`: monitor, escritorio, ventanas y versión móvil.
 - `public/app.js`: comandos, archivos virtuales, proyectos, almacenamiento de notas, fondos y gestión de ventanas.
 - `public/mines.mjs`: lógica del Buscaminas.
-- `public/mines-ui.js`: interfaz, controles y cronómetro del juego.
+- `public/mines-ui.js`: interfaz, controles y cronómetro del Buscaminas.
+- `public/snake.js`: partida y controles de Snake.
 - `tests/mines.test.mjs`: pruebas de generación, primer clic seguro, banderas, victoria, derrota y reinicio (`node --test tests/mines.test.mjs`).
 - `public/assets/`: capturas reales de los proyectos.
 - `docs/content-sources.md`: fuentes y datos pendientes de confirmar.
