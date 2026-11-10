@@ -157,3 +157,4 @@ body[data-layout-style="windows31"] .terminal-status{background:#3d4349;color:#c
 @keyframes login-avatar-enter{from{opacity:0;transform:translateX(-28px) scale(.92)}to{opacity:1;transform:translateX(0) scale(1)}}
 @keyframes login-enter-left{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:translateX(0)}}
 @keyframes login-enter-right{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
+.avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
