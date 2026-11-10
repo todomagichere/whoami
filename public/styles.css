@@ -111,3 +111,8 @@ body[data-layout-style="windows31"] .app-content,body[data-layout-style="windows
 body[data-layout-style="windows31"] .login{background:#008080}
 body[data-layout-style="windows31"] .login button{border:2px outset #fff;border-radius:0;background:#c0c0c0;color:#111}
 body[data-layout-style="windows31"] .resize-se{background:linear-gradient(135deg,transparent 68%,#555 69% 74%,transparent 75% 82%,#555 83% 88%,transparent 89%)}
+
+/* Desktop shortcuts share the dock's illustrated icon style. */
+.desktop-icons .desktop-image{display:block;width:44px;height:44px;object-fit:contain;pointer-events:none;filter:drop-shadow(0 3px 3px #0004)}
+@media(max-width:700px){.desktop-icons .desktop-image{width:30px;height:30px}}
+@media(max-height:650px) and (min-width:701px){.desktop-icons .desktop-image{width:32px;height:32px}}
