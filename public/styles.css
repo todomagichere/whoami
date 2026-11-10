@@ -116,3 +116,12 @@ body[data-layout-style="windows31"] .resize-se{background:linear-gradient(135deg
 .desktop-icons .desktop-image{display:block;width:44px;height:44px;object-fit:contain;pointer-events:none;filter:drop-shadow(0 3px 3px #0004)}
 @media(max-width:700px){.desktop-icons .desktop-image{width:30px;height:30px}}
 @media(max-height:650px) and (min-width:701px){.desktop-icons .desktop-image{width:32px;height:32px}}
+
+/* Smaller window controls, with the original clickable area. */
+.window-actions button{position:relative;isolation:isolate;padding:0;background:transparent!important;font-size:13px;line-height:1}
+.window-actions button::before{content:'';position:absolute;inset:5px;z-index:-1;border-radius:inherit;background:#ffffff0b}
+.window-actions button:last-child::before{background:#9e696b}
+.window-actions button:hover::before{background:#71677e}
+body[data-layout-style="windows31"] .window-actions button{border:0;background:transparent!important;font-size:11px}
+body[data-layout-style="windows31"] .window-actions button::before{inset:4px;border:2px outset #fff;border-radius:0;background:#c0c0c0}
+body[data-layout-style="windows31"] .window-actions button:active::before{border-style:inset}
