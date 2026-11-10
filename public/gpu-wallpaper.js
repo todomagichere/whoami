@@ -8,7 +8,7 @@
   const login = document.querySelector('#login');
   const motionSetting = document.querySelector('#reduce-motion');
   const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
-  const defaultMessage = 'Paisaje espacial que responde al cursor.';
+  const defaultMessage = 'Galaxia interactiva que responde al cursor.';
   const pointer = {x: 0.5, y: 0.5, active: 0, smoothX: 0.5, smoothY: 0.5, smoothActive: 0};
   let state = null;
   let generation = 0;
@@ -271,7 +271,7 @@
       canvas.height = height;
     }
     try {
-      current.render(width, height, current.time);
+      current.render(width, height, current.time, pointer);
       current.frame = requestAnimationFrame(draw);
     } catch {
       if (state === current) unavailable();
@@ -308,7 +308,15 @@
     starting = true;
     status.textContent = 'Preparando el fondo interactivo…';
     try {
-      if (!skipWebGPU && navigator.gpu) {
+      if (!skipWebGPU) {
+        try {
+          const {createSpaceScene} = await import('./space-scene.js');
+          if (request === generation && toggle.checked && !reducedMotion()) {
+            renderer = createSpaceScene(freshCanvas('webgl-wallpaper'));
+          }
+        } catch { /* Use the existing GPU or WebGL renderer. */ }
+      }
+      if (!renderer && !skipWebGPU && navigator.gpu) {
         try { renderer = await createWebGPU(freshCanvas('gpu-wallpaper')); } catch { /* Try WebGL. */ }
       }
       if (request !== generation || !toggle.checked || reducedMotion()) {
