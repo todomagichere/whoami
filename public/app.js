@@ -58,6 +58,7 @@ const sessionKey='whoami.guest-session.v1';
 function enter(focus=true){entered=true;try{localStorage.setItem(sessionKey,'active')}catch{}windows.forEach(win=>{win.hidden=true});$('#login').hidden=true;$('#desktop').inert=false;syncDock();if(focus)$('#applications').focus({preventScroll:true});}
 function lock(){entered=false;try{localStorage.removeItem(sessionKey)}catch{}$('#login').hidden=false;$('#desktop').inert=true;$('#enter').focus();}
 function projectGrid(){
+ delete $('#project-content').dataset.userFolder;
  $('.file-status').textContent=projects.length+' proyectos · código abierto y experimentos';
  $('#file-address').textContent='⌂ /home/roberto/proyectos';
  const area=$('#project-content');area.replaceChildren();const grid=document.createElement('div');grid.className='project-grid';
@@ -66,6 +67,7 @@ function projectGrid(){
  const title=document.createElement('strong');title.textContent=p.title;const tag=document.createElement('small');tag.textContent=p.tag;button.append(title,tag);grid.append(button)});area.append(grid);area.scrollTop=0;
 }
 function projectDetail(id){
+ delete $('#project-content').dataset.userFolder;
  const p=projects.find(p=>p.id===id);if(!p)return false;
  const area=$('#project-content');area.replaceChildren();const back=document.createElement('button');back.className='back-button';back.textContent='← Todos los proyectos';back.addEventListener('click',projectGrid);area.append(back);
  const detail=document.createElement('article');detail.className='project-detail';
@@ -160,8 +162,21 @@ document.addEventListener('click',e=>{
  if(!e.target.closest('button,a,input,textarea,select,[data-resize],[contenteditable]')) focusTerminal();
 });
 function resetWindowPositions(){windows.forEach(win=>{win.style.left='';win.style.top='';win.style.right=''})}
+let refreshDesktopIcons=()=>{};
 function initDesktopIcons(){
- const desktop=$('#desktop'),container=$('.desktop-icons'),icons=[...container.querySelectorAll('button')],storageKey='whoami.desktop-icons.v1';
+ const desktop=$('#desktop'),container=$('.desktop-icons'),storageKey='whoami.desktop-icons.v1';
+ function makeUserIcon(path,isFolder){
+  const button=document.createElement('button'),image=document.createElement('img');
+  image.className='desktop-image';image.src=isFolder?'assets/dock/files.webp':'assets/dock/editor.webp';image.alt='';
+  button.append(image,document.createTextNode(path.slice(path.lastIndexOf('/')+1)));
+  if(isFolder)button.dataset.folder=path;else button.dataset.userDocument=path;
+  container.append(button);return button;
+ }
+ const prefix=desktopRoot+'/';
+ userFiles.folders.filter(path=>path.startsWith(prefix)&&!path.slice(prefix.length).includes('/')).forEach(path=>makeUserIcon(path,true));
+ Object.keys(userFiles.documents).filter(path=>path.startsWith(prefix)&&!path.slice(prefix.length).includes('/')).forEach(path=>makeUserIcon(path,false));
+ const icons=[...container.querySelectorAll('button')];
+ const iconKey=icon=>icon.dataset.open||icon.dataset.document||icon.dataset.folder||icon.dataset.userDocument;
  const screen=desktop.getBoundingClientRect();
  const initial=icons.map(icon=>{const rect=icon.getBoundingClientRect();return {left:rect.left-screen.left,top:rect.top-screen.top}});
  let saved={};try{saved=JSON.parse(localStorage.getItem(storageKey)||'{}')||{}}catch{}
@@ -169,12 +184,12 @@ function initDesktopIcons(){
  function bounds(icon){const top=$('.panel').offsetHeight;return {top,x:Math.max(0,desktop.clientWidth-icon.offsetWidth),y:Math.max(0,desktop.clientHeight-top-icon.offsetHeight)}}
  function clamp(value,min,max){return Math.min(max,Math.max(min,value))}
  function place(icon,x,y){const b=bounds(icon);icon.style.left=`${clamp(x,0,b.x)}px`;icon.style.top=`${clamp(y,b.top,b.top+b.y)}px`}
- function remember(icon){const b=bounds(icon),key=icon.dataset.open||icon.dataset.document;positions[key]={x:b.x?clamp(parseFloat(icon.style.left)/b.x,0,1):0,y:b.y?clamp((parseFloat(icon.style.top)-b.top)/b.y,0,1):0}}
+ function remember(icon){const b=bounds(icon),key=iconKey(icon);positions[key]={x:b.x?clamp(parseFloat(icon.style.left)/b.x,0,1):0,y:b.y?clamp((parseFloat(icon.style.top)-b.top)/b.y,0,1):0}}
  function save(){try{localStorage.setItem(storageKey,JSON.stringify(positions))}catch{}}
- function arrange(){icons.forEach(icon=>{const b=bounds(icon),pos=positions[icon.dataset.open||icon.dataset.document];place(icon,pos.x*b.x,b.top+pos.y*b.y)})}
+ function arrange(){icons.forEach(icon=>{const b=bounds(icon),pos=positions[iconKey(icon)];place(icon,pos.x*b.x,b.top+pos.y*b.y)})}
  container.classList.add('free-icons');
- icons.forEach((icon,index)=>{
-  const key=icon.dataset.open||icon.dataset.document,b=bounds(icon),pos=saved[key];
+ function registerIcon(icon,index){
+  const key=iconKey(icon),b=bounds(icon),pos=saved[key];
   positions[key]=pos&&Number.isFinite(pos.x)&&Number.isFinite(pos.y)?{x:clamp(pos.x,0,1),y:clamp(pos.y,0,1)}:{x:b.x?clamp(initial[index].left/b.x,0,1):0,y:b.y?clamp((initial[index].top-b.top)/b.y,0,1):0};
   icon.setAttribute('aria-describedby','desktop-icon-help');
   let drag=null,suppressClick=false;
@@ -200,7 +215,20 @@ function initDesktopIcons(){
    event.preventDefault();const step=event.shiftKey?48:16,dx=event.key==='ArrowLeft'?-step:event.key==='ArrowRight'?step:0,dy=event.key==='ArrowUp'?-step:event.key==='ArrowDown'?step:0;
    place(icon,parseFloat(icon.style.left)+dx,parseFloat(icon.style.top)+dy);remember(icon);save();
   });
- });
+ }
+ icons.forEach(registerIcon);
+ refreshDesktopIcons=()=>{
+  const existing=new Set(icons.map(iconKey));
+  const add=(path,isFolder)=>{
+   if(existing.has(path)||!path.startsWith(prefix)||path.slice(prefix.length).includes('/'))return;
+   const icon=makeUserIcon(path,isFolder),index=icons.length;icons.push(icon);
+   const height=icon.offsetHeight||80,width=icon.offsetWidth||104;
+   const rows=Math.max(1,Math.floor((desktop.clientHeight-$('.panel').offsetHeight-100)/(height+8)));
+   initial.push({left:8+Math.floor(index/rows)*(width+8),top:$('.panel').offsetHeight+10+(index%rows)*(height+8)});
+   registerIcon(icon,index);const b=bounds(icon),pos=positions[iconKey(icon)];place(icon,pos.x*b.x,b.top+pos.y*b.y);
+  };
+  userFiles.folders.forEach(path=>add(path,true));Object.keys(userFiles.documents).forEach(path=>add(path,false));
+ };
  const menu=$('#desktop-context-menu'),organize=$('#desktop-organize-icons');
  function closeMenu(restoreFocus=false){if(menu.hidden)return;menu.hidden=true;if(restoreFocus)desktop.focus({preventScroll:true})}
  function organizeIcons(){
@@ -219,18 +247,27 @@ function initDesktopIcons(){
   save();closeMenu();
  }
  desktop.addEventListener('contextmenu',event=>{
-  if(event.target.closest('.window,.panel,.dock,.desktop-hint,dialog,#desktop-context-menu'))return;
-  if(event.target!==desktop&&!event.target.closest('.desktop-icons,.wallpaper'))return;
+  const area=event.target.closest('#project-content');
+  const folder=area?.dataset.userFolder;
+  const onDesktop=!event.target.closest('.window,.panel,.dock,.desktop-hint,dialog,#desktop-context-menu') && (event.target===desktop||event.target.closest('.desktop-icons,.wallpaper'));
+  if(!onDesktop&&!folder)return;
   event.preventDefault();
+  contextCreationFolder=onDesktop?desktopRoot:folder;
+  contextFromDesktop=Boolean(onDesktop);
+  organize.hidden=!onDesktop;
   const rect=desktop.getBoundingClientRect();
   const targetRect=event.target.getBoundingClientRect();
   const x=(event.clientX||targetRect.left)-rect.left,y=(event.clientY||targetRect.bottom)-rect.top;
   menu.hidden=false;
   menu.style.left=`${clamp(x,0,Math.max(0,rect.width-menu.offsetWidth))}px`;
   menu.style.top=`${clamp(y,$('.panel').offsetHeight,Math.max($('.panel').offsetHeight,rect.height-menu.offsetHeight))}px`;
-  organize.focus({preventScroll:true});
+  menu.querySelector('[data-context-create]').focus({preventScroll:true});
  });
  organize.addEventListener('click',organizeIcons);
+ menu.querySelectorAll('[data-context-create]').forEach(button=>button.addEventListener('click',()=>{
+  currentUserFolder=contextCreationFolder;pendingUserKind=button.dataset.contextCreate;creationFromDesktop=contextFromDesktop;
+  closeMenu();openCreateDialog();
+ }));
  document.addEventListener('pointerdown',event=>{if(!menu.hidden&&!menu.contains(event.target))closeMenu()});
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!menu.hidden){event.preventDefault();closeMenu(true)}});
  window.addEventListener('resize',()=>{closeMenu();arrange()});
@@ -298,15 +335,17 @@ let notesStorageAvailable=true;
 try{const saved=localStorage.getItem(notesKey);if(saved!==null)files[home+'/notas.md']=saved}catch{notesStorageAvailable=false}
 const userFilesKey='whoami.user-files.v1';
 const documentsRoot=home+'/Documentos';
+const desktopRoot=home+'/Escritorio';
 let userFiles={folders:[],documents:{}};
 try {
  const saved=JSON.parse(localStorage.getItem(userFilesKey)||'null');
  if(saved&&Array.isArray(saved.folders)&&saved.documents&&typeof saved.documents==='object'){
-  userFiles.folders=saved.folders.filter(path=>typeof path==='string'&&path.startsWith(documentsRoot+'/'));
-  Object.entries(saved.documents).forEach(([path,content])=>{if(path.startsWith(documentsRoot+'/')&&typeof content==='string')userFiles.documents[path]=content});
+  userFiles.folders=saved.folders.filter(path=>typeof path==='string'&&path.startsWith(home+'/'));
+  Object.entries(saved.documents).forEach(([path,content])=>{if(path.startsWith(home+'/')&&typeof content==='string')userFiles.documents[path]=content});
  }
 }catch{}
 directories.add(documentsRoot);
+directories.add(desktopRoot);
 userFiles.folders.forEach(path=>directories.add(path));
 Object.entries(userFiles.documents).forEach(([path,content])=>{files[path]=content});
 function persistUserFiles(next){localStorage.setItem(userFilesKey,JSON.stringify(next));userFiles=next}
@@ -355,13 +394,14 @@ function renderGallery(){$('#gallery-count').textContent=projects.filter(p=>p.im
 function renderProcesses(){if(typeof applications==='undefined')return;const list=$('#process-list');list.replaceChildren();applications.filter(app=>!document.getElementById(app.id).hidden).forEach(app=>{const row=document.createElement('div');const title=document.createElement('span');title.textContent=app.icon+'  '+app.name;const open=document.createElement('button');open.textContent='Mostrar';open.dataset.open=app.id;const close=document.createElement('button');close.textContent='Cerrar';close.setAttribute('aria-label','Cerrar '+app.name);close.addEventListener('click',()=>{document.getElementById(app.id).hidden=true;syncDock();focusTerminal()});row.append(title,open,close);list.append(row)})}
 let currentUserFolder=documentsRoot;
 let pendingUserKind='';
+let contextCreationFolder=desktopRoot,contextFromDesktop=false,creationFromDesktop=false;
 function showFolder(folder){
  if(folder==='projects'){projectGrid();showWindow('files');return}
- const area=$('#project-content');area.replaceChildren();
+ const area=$('#project-content');area.replaceChildren();delete area.dataset.userFolder;
  const isHome=folder==='home';
- const path=folder==='documents'?documentsRoot:folder;
+ const path=isHome?home:folder==='documents'?documentsRoot:folder;
  if(!isHome&&!directories.has(path))return;
- if(!isHome)currentUserFolder=path;
+ currentUserFolder=path;area.dataset.userFolder=path;
  $('#file-address').textContent='⌂ '+(isHome?home:path);
  const grid=document.createElement('div');grid.className='folder-grid';
  function addEntry(name,target,type){
@@ -373,10 +413,10 @@ function showFolder(folder){
   else button.dataset.userDocument=target;
   grid.append(button);
  }
- if(isHome){addEntry('Proyectos','projects','folder');addEntry('Documentos','documents','folder');addEntry('Imágenes','gallery','gallery')}
- else {
+ {
+  if(isHome){addEntry('Proyectos','projects','folder');addEntry('Documentos','documents','folder');addEntry('Escritorio',desktopRoot,'folder');addEntry('Imágenes','gallery','gallery')}
   const toolbar=document.createElement('div');toolbar.className='user-files-toolbar';
-  if(path!==documentsRoot){const back=document.createElement('button');back.textContent='← Carpeta anterior';back.dataset.folder=path.slice(0,path.lastIndexOf('/'));toolbar.append(back)}
+  if(!isHome&&path!==documentsRoot&&path!==desktopRoot){const back=document.createElement('button');back.textContent='← Carpeta anterior';back.dataset.folder=path.slice(0,path.lastIndexOf('/'));toolbar.append(back)}
   for(const [label,kind] of [['Nueva carpeta','folder'],['Nuevo documento','document']]){const button=document.createElement('button');button.textContent=label;button.dataset.createUserFile=kind;toolbar.append(button)}
   area.append(toolbar);
   if(path===documentsRoot)for(const name of ['sobre-mi.md','tecnologias.md','notas.md','README.md'])addEntry(name,null,'builtin');
@@ -390,21 +430,24 @@ const createDialog=$('#create-user-file-dialog'),createForm=$('#create-user-file
 document.addEventListener('click',event=>{
  const open=event.target.closest('[data-user-document]');if(open)openDocument(open.dataset.userDocument);
  const create=event.target.closest('[data-create-user-file]');if(!create)return;
- pendingUserKind=create.dataset.createUserFile;createName.value='';createError.textContent='';
+ pendingUserKind=create.dataset.createUserFile;creationFromDesktop=false;openCreateDialog();
+});
+function openCreateDialog(){
+ createName.value='';createError.textContent='';
  $('#create-user-file-title').textContent=pendingUserKind==='folder'?'Nueva carpeta':'Nuevo documento';
  createDialog.showModal();createName.focus();
-});
+}
 createForm.addEventListener('submit',event=>{
  event.preventDefault();
  const name=createName.value.trim();
  if(!name||name==='.'||name==='..'||/[\/\\\x00-\x1f]/.test(name)){createError.textContent='Escribe un nombre válido, sin barras.';return}
  const path=currentUserFolder+'/'+name;
- if(directories.has(path)||Object.hasOwn(files,path)){createError.textContent='Ya existe un elemento con ese nombre.';return}
+ if((currentUserFolder===home&&['Proyectos','Documentos','Escritorio','Imágenes'].includes(name))||directories.has(path)||Object.hasOwn(files,path)){createError.textContent='Ya existe un elemento con ese nombre.';return}
  try{
   if(pendingUserKind==='folder'){persistUserFiles({...userFiles,folders:[...userFiles.folders,path]});directories.add(path)}
   else {persistUserFiles({...userFiles,documents:{...userFiles.documents,[path]:''}});files[path]=''}
  }catch{createError.textContent='No se pudo guardar. Comprueba el espacio disponible en el navegador.';return}
- createDialog.close();showFolder(currentUserFolder);
+ createDialog.close();refreshDesktopIcons();if(!creationFromDesktop)showFolder(currentUserFolder);
  if(pendingUserKind==='document')openDocument(path);
 });
 $('#create-user-file-cancel').addEventListener('click',()=>createDialog.close());
