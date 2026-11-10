@@ -170,7 +170,3 @@ body[data-layout-style="windows11"] .window[hidden]{transform:translateY(14px) s
 body[data-layout-style="windows31"] .window{transition-duration:.07s}
 body[data-layout-style="windows31"] .window[hidden]{transform:none}
 @starting-style{body[data-layout-style="windows31"] .window:not([hidden]){opacity:0;transform:none}}
-
-#gpu-wallpaper,#webgl-wallpaper{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.interactive-wallpaper{margin-top:18px}
-#gpu-wallpaper-status{margin:8px 0 0;font-size:12px;line-height:1.5;color:#6e6276}

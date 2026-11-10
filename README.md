@@ -18,7 +18,7 @@ Desde la raíz del repositorio, abre http://localhost:8081. La primera visita mu
 - `open sobre-mi.md` abre el documento en el editor inspirado en gedit.
 - Editor: documentos, ajuste de líneas, posición del cursor, edición y guardado; las notas se guardan automáticamente en localStorage y los demás documentos duran durante la visita; Ctrl+S guarda. `cat ~/notas.md` permite leer la nota guardada.
 - Menú Aplicaciones con búsqueda; galería de capturas reales; monitor para mostrar o cerrar ventanas.
-- Ajustes: diseños Linux, Windows 11 y Windows 3.1; texto pequeño, cómodo o grande (grande por defecto); fondos de color, tres ilustraciones WebP, selector de color libre e imagen propia del dispositivo; reducción de animaciones. Una galaxia interactiva opcional creada con Three.js responde al cursor y se detiene al reducir animaciones. Si WebGL 2 no está disponible, se utiliza un fondo alternativo con WebGPU o WebGL. Los fondos seleccionados, incluidas las imágenes propias, se guardan en el navegador sin subirlas a un servidor.
+- Ajustes: diseños Linux, Windows 11 y Windows 3.1; texto pequeño, cómodo o grande (grande por defecto); fondos de color, tres ilustraciones WebP, selector de color libre e imagen propia del dispositivo; reducción de animaciones. Los fondos seleccionados, incluidas las imágenes propias, se guardan en el navegador sin subirlas a un servidor.
 - Buscaminas: 8×8, diez minas, primer clic seguro, apertura de áreas vacías, banderas, cronómetro, reinicio, victoria y derrota. Clic derecho o F marca; las flechas navegan. En móvil hay un modo banderas. También se abre con `open buscaminas`.
 - Snake: partida arcade en una cuadrícula de 16×16, puntuación récord local, controles de flechas o WASD, pausa con espacio y controles táctiles. Los bordes conectan con el lado opuesto. Se abre con `snake`.
 - `fibonacci 12` explica el cálculo.
@@ -35,9 +35,6 @@ La terminal simula un sistema de archivos local. Nunca ejecuta comandos del sist
 - `public/styles.css`: monitor, escritorio, ventanas y versión móvil.
 - `public/app.js`: comandos, archivos virtuales, proyectos, almacenamiento de notas, fondos y gestión de ventanas.
 - `public/wallpaper.js`: selección y almacenamiento local de fondos.
-- `public/space-scene.js`: galaxia interactiva en Three.js.
-- `public/gpu-wallpaper.js`: ciclo de vida del fondo y alternativas WebGPU y WebGL.
-- `public/vendor/three/`: Three.js r187 y su licencia MIT, distribuidos localmente.
 - `public/mines.mjs`: lógica del Buscaminas.
 - `public/mines-ui.js`: interfaz, controles y cronómetro del Buscaminas.
 - `public/snake.js`: partida y controles de Snake.
