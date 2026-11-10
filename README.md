@@ -18,13 +18,13 @@ Desde la raíz del repositorio, abre http://localhost:8081. La primera visita mu
 - `open sobre-mi.md` abre el documento en el editor inspirado en gedit.
 - Editor: documentos, ajuste de líneas, posición del cursor, edición y guardado; las notas se guardan automáticamente en localStorage y los demás documentos duran durante la visita; Ctrl+S guarda. `cat ~/notas.md` permite leer la nota guardada.
 - Menú Aplicaciones con búsqueda; galería de capturas reales; monitor para mostrar o cerrar ventanas.
-- Ajustes: diseños Linux, Windows 11 y Windows 3.1; texto pequeño, cómodo o grande (grande por defecto); fondos de color, tres ilustraciones WebP, selector de color libre e imagen propia del dispositivo; reducción de animaciones. Las imágenes se usan localmente, sin subirlas a un servidor.
+- Ajustes: diseños Linux, Windows 11 y Windows 3.1; texto pequeño, cómodo o grande (grande por defecto); fondos de color, tres ilustraciones WebP, selector de color libre e imagen propia del dispositivo; reducción de animaciones. Un fondo interactivo opcional con WebGPU responde al cursor en navegadores compatibles y se detiene al reducir animaciones. Las imágenes se usan localmente, sin subirlas a un servidor.
 - Buscaminas: 8×8, diez minas, primer clic seguro, apertura de áreas vacías, banderas, cronómetro, reinicio, victoria y derrota. Clic derecho o F marca; las flechas navegan. En móvil hay un modo banderas. También se abre con `open buscaminas`.
 - Snake: partida arcade en una cuadrícula de 16×16, puntuación récord local, controles de flechas o WASD, pausa con espacio y controles táctiles. Los bordes conectan con el lado opuesto. Se abre con `snake`.
 - `fibonacci 12` explica el cálculo.
 - Tab para autocompletar, flechas para historial, Ctrl+L para limpiar.
 - Arrastrar los iconos del escritorio o moverlos con las flechas del teclado. Sus posiciones se guardan en el navegador.
-- Mover, minimizar, cerrar y maximizar ventanas; reabrirlas desde el dock.
+- Mover, minimizar, cerrar y maximizar ventanas; reabrirlas desde el dock. La apertura y el cierre usan transiciones adaptadas a cada diseño.
 - Ampliar el monitor; Escape o el botón ↙ del panel para restaurarlo.
 
 La terminal simula un sistema de archivos local. Nunca ejecuta comandos del sistema ni usa `eval`. Las entradas se muestran como texto. No se utilizan cookies ni analítica. `notas.md` se guarda automáticamente en `localStorage` bajo `whoami.notes.v1`, se restaura al cargar y permanece en ese navegador. Si el almacenamiento falla, el editor conserva el texto y muestra que no se ha podido guardar. Los demás documentos, ajustes y fondos personalizados duran hasta recargar la página.
@@ -34,6 +34,7 @@ La terminal simula un sistema de archivos local. Nunca ejecuta comandos del sist
 - `public/index.html`: estructura del ordenador y sus ventanas.
 - `public/styles.css`: monitor, escritorio, ventanas y versión móvil.
 - `public/app.js`: comandos, archivos virtuales, proyectos, almacenamiento de notas, fondos y gestión de ventanas.
+- `public/gpu-wallpaper.js`: fondo interactivo opcional con WebGPU.
 - `public/mines.mjs`: lógica del Buscaminas.
 - `public/mines-ui.js`: interfaz, controles y cronómetro del Buscaminas.
 - `public/snake.js`: partida y controles de Snake.
