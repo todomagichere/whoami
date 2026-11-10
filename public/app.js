@@ -2,7 +2,7 @@
 
 const $ = selector => document.querySelector(selector);
 const projects = [
-  {id:'etimologia',title:'Etimología',repo:'etimologia',tag:'JavaScript · Juego diario',image:'assets/etimologia.png',site:'https://etimologia.es',description:'Un juego diario para descubrir las raíces de las palabras. Cada partida propone una palabra, permite explorar su origen y enlaza al Diccionario de la lengua española.',lesson:'Un producto pequeño con un reto diario, estadísticas locales y una experiencia completa en el navegador.'},
+  {id:'etimologia',title:'Etimología',repo:'etimologia',tag:'HTML · CSS · JavaScript',thumbnail:'assets/etimologia-cover.webp',image:'assets/etimologia.png',site:'https://etimologia.es',description:'Juego diario en español para identificar el significado de las raíces que forman una palabra y conocer su origen.',lesson:'Funciona íntegramente en el navegador, sin cuentas ni base de datos; el entorno local utiliza Docker.',features:['Un reto diario seleccionado a partir de la fecha y un banco de palabras.','Pista opcional, desglose de raíces y enlace a la entrada del DLE.','Estadísticas guardadas en el navegador y opciones para compartir el resultado.']},
   {id:'mochila',title:'Prepara tu mochila',repo:'prepara-tu-mochila',tag:'Web · Preparación cotidiana',image:'assets/mochila.png',site:'https://preparatumochila.com',description:'Un portal en español sobre preparación del hogar y mochilas de salida de 72 horas.',lesson:'Organizar información práctica y convertirla en un recorrido que ayuda a preparar un kit.'},
   {id:'ibexa',title:'Ibexa · Content Type Info',repo:'ibexa-contenttype-info-tab',tag:'PHP · Ibexa',image:'assets/ibexa.png',description:'Una pestaña con la información del tipo de contenido en la vista de ubicación del back office de Ibexa. Evita buscar esa información navegando por varias pantallas.',lesson:'Una pequeña extensión puede resolver una fricción repetida en el trabajo de otros desarrolladores.'},
   {id:'fibonacci',title:'Fibonacci',repo:'fibonacci',tag:'PHP · Algoritmos',symbol:'0 1 1 2 3 5 8',description:'Tres métodos para calcular Fibonacci y explorar complejidades exponencial, lineal y logarítmica.',lesson:'El mismo resultado no implica el mismo coste. Prueba «fibonacci 12» en la terminal.'},
@@ -26,7 +26,7 @@ const files = {
   [`${home}/contacto.md`]: 'Puedes encontrarme en GitHub y LinkedIn.\nEscribe contact para abrir los enlaces.',
   [`${home}/README.md`]: '# Guía del escritorio\n\n1. whoami — descubre quién soy\n2. ls proyectos — explora mis proyectos\n3. open etimologia — abre su captura y su historia\n4. help — aprende otros comandos\n\nTab completa comandos y rutas. Las flechas ↑ y ↓ recorren tu historial.'
 };
-projects.forEach(p => files[`${home}/proyectos/${p.id}/README.md`] = `${p.title}\n${p.tag}\n\n${p.description}\n\n${p.lesson}\n\nCódigo: https://github.com/todomagichere/${p.repo}`);
+projects.forEach(p => files[`${home}/proyectos/${p.id}/README.md`] = `${p.title}\n${p.tag}\n\n${p.description}\n\n${p.lesson}${p.features?.length?'\n\nCaracterísticas:\n'+p.features.map(feature=>'- '+feature).join('\n'):''}\n\nCódigo: https://github.com/todomagichere/${p.repo}`);
 const directories = new Set([home,`${home}/proyectos`,...projects.map(p=>`${home}/proyectos/${p.id}`)]);
 function resolvePath(raw='~') {
   const value = raw === '~' ? home : raw.startsWith('~/') ? home+raw.slice(1) : raw.startsWith('/') ? raw : `${cwd}/${raw}`;
@@ -62,7 +62,7 @@ function projectGrid(){
  $('#file-address').textContent='⌂ /home/roberto/proyectos';
  const area=$('#project-content');area.replaceChildren();const grid=document.createElement('div');grid.className='project-grid';
  projects.forEach(p=>{const button=document.createElement('button');button.className='project-tile';button.dataset.project=p.id;button.setAttribute('aria-label',`Abrir ${p.title}`);
- if(p.image){const img=document.createElement('img');img.src=p.image;img.alt=`${p.imageLabel||'Captura real'} de ${p.title}`;img.loading='lazy';if(p.id==='ibexa-breadcrumbs-bundle')img.className='contained-image';button.append(img)}else{const art=document.createElement('div');art.className='code-preview';art.textContent=p.symbol;button.append(art)}
+ if(p.image){const img=document.createElement('img');img.src=p.thumbnail||p.image;img.alt=p.thumbnail?`Portada de ${p.title}`:`${p.imageLabel||'Captura real'} de ${p.title}`;img.loading='lazy';if(p.id==='ibexa-breadcrumbs-bundle')img.className='contained-image';button.append(img)}else{const art=document.createElement('div');art.className='code-preview';art.textContent=p.symbol;button.append(art)}
  const title=document.createElement('strong');title.textContent=p.title;const tag=document.createElement('small');tag.textContent=p.tag;button.append(title,tag);grid.append(button)});area.append(grid);area.scrollTop=0;
 }
 function projectDetail(id){
@@ -71,6 +71,7 @@ function projectDetail(id){
  const detail=document.createElement('article');detail.className='project-detail';
  if(p.image){const b=document.createElement('button');b.className='screenshot-button';b.dataset.screenshot=p.id;const img=document.createElement('img');img.src=p.image;img.alt=`${p.imageLabel||'Captura real'} de ${p.title}`;const caption=document.createElement('span');caption.textContent=p.imageLabel?'↗ Ampliar imagen del proyecto':'↗ Ampliar captura real';b.append(img,caption);detail.append(b)}
  const tag=document.createElement('p');tag.className='detail-tag';tag.textContent=p.tag;const h=document.createElement('h3');h.textContent=p.title;const description=document.createElement('p');description.textContent=p.description;const lesson=document.createElement('p');lesson.textContent=p.lesson;detail.append(tag,h,description,lesson);
+ if(p.features?.length){const heading=document.createElement('h4');heading.textContent='Características';const list=document.createElement('ul');list.className='project-features';p.features.forEach(feature=>{const item=document.createElement('li');item.textContent=feature;list.append(item)});detail.append(heading,list)}
  const links=document.createElement('div');links.className='project-links';const link=(title,url)=>{const a=document.createElement('a');a.textContent=title;a.href=url;a.target='_blank';a.rel='noopener noreferrer';links.append(a)};link('Ver código ↗',`https://github.com/todomagichere/${p.repo}`);if(p.site)link('Abrir web ↗',p.site);detail.append(links);area.append(detail);area.scrollTop=0;showWindow('files',false);back.focus({preventScroll:true});return true;
 }
 function listDirectory(path){

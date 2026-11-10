@@ -134,3 +134,7 @@ body[data-layout-style="windows31"] .terminal-body .accent,body[data-layout-styl
 body[data-layout-style="windows31"] .terminal-body .error{color:#e4b4ac}
 body[data-layout-style="windows31"] #command-input{color:#e1e3df}
 body[data-layout-style="windows31"] .terminal-status{background:#3d4349;color:#c2cbc4;border-color:#626b68}
+
+.project-detail h4{margin:22px 0 8px;font-size:16px;color:#51415f}
+.project-features{margin:0 0 22px;padding-left:22px;font-size:var(--body-size);line-height:1.65;color:#51415f}
+.project-features li+li{margin-top:7px}

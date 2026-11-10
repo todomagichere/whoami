@@ -17,9 +17,10 @@ Nombre completo y perfil LinkedIn facilitados por el usuario. Usuario GitHub con
 
 ## Capturas reales
 
-Consultadas y capturadas el 9 de noviembre de 2026:
+Imágenes consultadas para este portfolio:
 
-- `public/assets/etimologia.png`: https://etimologia.es — captura de la web pública.
+- `public/assets/etimologia.png`: https://etimologia.es — captura de la web pública actualizada el 10 de noviembre de 2026.
+- `public/assets/etimologia-cover.webp`: https://etimologia.es/social-card.webp — portada oficial del proyecto.
 - `public/assets/mochila.png`: https://preparatumochila.com — captura de la web pública, tras rechazar las cookies opcionales.
 - `public/assets/ibexa.png`: imagen publicada en el README del repositorio: https://github.com/todomagichere/ibexa-contenttype-info-tab-bundle/assets/23119890/91dc450c-149b-4cae-a560-a4b1bdabb8c8
 
