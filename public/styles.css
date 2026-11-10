@@ -125,3 +125,12 @@ body[data-layout-style="windows31"] .resize-se{background:linear-gradient(135deg
 body[data-layout-style="windows31"] .window-actions button{border:0;background:transparent!important;font-size:11px}
 body[data-layout-style="windows31"] .window-actions button::before{inset:4px;border:2px outset #fff;border-radius:0;background:#c0c0c0}
 body[data-layout-style="windows31"] .window-actions button:active::before{border-style:inset}
+
+/* Windows 3.1 terminal: muted dark surface and readable text. */
+body[data-layout-style="windows31"] .terminal-window{--green:#b9d6b1;background:#30343b;color:#e1e3df}
+body[data-layout-style="windows31"] .terminal-body{background:#30343b;color:#e1e3df;scrollbar-color:#8b9692 #30343b}
+body[data-layout-style="windows31"] .terminal-body .muted,body[data-layout-style="windows31"] .terminal-body .explanation{color:#b9c3be}
+body[data-layout-style="windows31"] .terminal-body .accent,body[data-layout-style="windows31"] .terminal-body a,body[data-layout-style="windows31"] #prompt-path{color:#bcc9dc}
+body[data-layout-style="windows31"] .terminal-body .error{color:#e4b4ac}
+body[data-layout-style="windows31"] #command-input{color:#e1e3df}
+body[data-layout-style="windows31"] .terminal-status{background:#3d4349;color:#c2cbc4;border-color:#626b68}
