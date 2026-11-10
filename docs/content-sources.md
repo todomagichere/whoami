@@ -34,6 +34,10 @@ El usuario pidió un PC con Linux, comandos didácticos y pantallazos de proyect
 
 El usuario indicó que tiene 15 años de experiencia en desarrollo y que sus tecnologías principales son PHP, Symfony y JavaScript. Quiere mostrar lo que hace y lo que ha hecho, sin indicar disponibilidad laboral. LinkedIn no permitió acceder al contenido; no se han inventado empleadores, cargos, certificaciones ni fechas.
 
+## Información aportada por Roberto
+
+Etimología fue desarrollado por Roberto de forma individual. La idea surgió al hablar con personas que no conocían bien la procedencia de las palabras y de su propio interés por su origen.
+
 ## Imágenes de los proyectos añadidos
 
 - `risk-master.png`: captura del README, https://github.com/user-attachments/assets/1e7cd384-a548-4fae-95e0-59a3892529aa
