@@ -220,7 +220,7 @@ function initDesktopIcons(){
  }
  desktop.addEventListener('contextmenu',event=>{
   if(event.target.closest('.window,.panel,.dock,.desktop-hint,dialog,#desktop-context-menu'))return;
-  if(event.target!==desktop&&!event.target.closest('.desktop-icons'))return;
+  if(event.target!==desktop&&!event.target.closest('.desktop-icons,.wallpaper'))return;
   event.preventDefault();
   const rect=desktop.getBoundingClientRect();
   const targetRect=event.target.getBoundingClientRect();
