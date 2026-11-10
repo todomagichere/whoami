@@ -244,6 +244,7 @@ window.addEventListener('resize',resetWindowPositions);
 function clock(){const now=new Date();$('#clock').textContent=now.toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' · '+now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});$('#login-time').textContent=now.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})+' · '+now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}
 
 const applications = [
+ {id:'computer',name:'Mi PC',icon:'▣',description:'Almacenamiento del escritorio'},
  {id:'terminal',name:'Terminal',icon:'>_',description:'Comandos y navegación'},
  {id:'files',name:'Archivos',icon:'▱',description:'Proyectos y documentos'},
  {id:'editor',name:'Editor de texto',icon:'▤',description:'Sobre mí, tecnologías y notas'},
