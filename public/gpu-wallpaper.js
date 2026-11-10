@@ -8,45 +8,63 @@
   const login = document.querySelector('#login');
   const motionSetting = document.querySelector('#reduce-motion');
   const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
-  const defaultMessage = 'Constelación que responde al cursor.';
-  const pointer = {x: 0.5, y: 0.5, active: 0};
+  const defaultMessage = 'Paisaje espacial que responde al cursor.';
+  const pointer = {x: 0.5, y: 0.5, active: 0, smoothX: 0.5, smoothY: 0.5, smoothActive: 0};
   let state = null;
   let generation = 0;
   let starting = false;
 
+  // The two shaders share the same three depth layers and soft nebula.
   const shader = /* wgsl */ `
     struct Parameters {
       resolution: vec2f,
+      time: f32,
+      pointerStrength: f32,
+      pointer: vec2f,
       padding: vec2f,
     }
     @group(0) @binding(0) var<uniform> u: Parameters;
-    @group(0) @binding(1) var<storage, read> points: array<vec4f, 33>;
 
     @vertex fn vertex_main(@builtin(vertex_index) index: u32) -> @builtin(position) vec4f {
       var vertices = array<vec2f, 3>(vec2f(-1.0, -1.0), vec2f(3.0, -1.0), vec2f(-1.0, 3.0));
       return vec4f(vertices[index], 0.0, 1.0);
     }
 
+    fn hash(p: vec2f) -> f32 {
+      return fract(sin(dot(p, vec2f(127.1, 311.7))) * 43758.5453);
+    }
+
+    fn stars(uv: vec2f, density: f32, depth: f32, time: f32, parallax: vec2f) -> f32 {
+      let field = uv * density + vec2f(time * 0.009, time * 0.004) * depth + parallax * depth;
+      let cell = floor(field);
+      let local = fract(field);
+      let random = hash(cell);
+      let center = vec2f(0.18 + 0.64 * random, 0.18 + 0.64 * hash(cell + 19.7));
+      let distance = length(local - center);
+      let size = mix(0.018, 0.045, hash(cell + 41.3));
+      let core = 1.0 - smoothstep(size * 0.3, size, distance);
+      let glow = (1.0 - smoothstep(size, size * 4.5, distance)) * 0.16;
+      let twinkle = 0.7 + 0.3 * sin(time * (0.5 + random) + random * 6.283);
+      return (core + glow) * twinkle * step(0.25, random);
+    }
+
     @fragment fn fragment_main(@builtin(position) position: vec4f) -> @location(0) vec4f {
-      let shortest = min(u.resolution.x, u.resolution.y);
-      let uv = (position.xy - u.resolution * 0.5) / shortest;
-      var light = 0.0;
-      for (var i = 0u; i < 32u; i = i + 1u) {
-        let p = points[i].xy;
-        let next = points[i + 1u].xy;
-        let d = length(uv - p);
-        light += (1.0 - smoothstep(0.0015, 0.0045, d)) * 0.42;
-        light += (1.0 - smoothstep(0.0, 0.035, d)) * 0.035;
-        let segment = next - p;
-        let segmentLength = length(segment);
-        if (segmentLength < 0.28) {
-          let amount = clamp(dot(uv - p, segment) / max(dot(segment, segment), 0.0001), 0.0, 1.0);
-          let lineDistance = length(uv - p - amount * segment);
-          light += (1.0 - smoothstep(0.0005, 0.0025, lineDistance)) * 0.16;
-        }
-      }
-      let alpha = clamp(light, 0.0, 0.6);
-      return vec4f(vec3f(0.74, 0.9, 0.85) * alpha, alpha);
+      let uv = (position.xy - u.resolution * 0.5) / min(u.resolution.x, u.resolution.y);
+      let parallax = (u.pointer - vec2f(0.5)) * u.pointerStrength;
+      let time = u.time;
+      let drift = uv + parallax * 0.035;
+      let wave = sin(drift.x * 3.1 + drift.y * 2.0 + sin(drift.y * 2.8 - time * 0.055) + time * 0.025);
+      let cloud = pow(max(0.0, 1.0 - abs(drift.y + drift.x * 0.38 + wave * 0.12)), 4.0);
+      let violet = cloud * (0.5 + 0.5 * sin(drift.x * 2.2 - time * 0.025));
+      let blue = cloud * (1.0 - violet * 0.55);
+      let far = stars(uv, 23.0, 0.3, time, parallax) * 0.30;
+      let middle = stars(uv, 14.0, 0.65, time, parallax) * 0.50;
+      let near = stars(uv, 8.0, 1.1, time, parallax) * 0.72;
+      let starlight = far + middle + near;
+      let nebulaAlpha = cloud * 0.24;
+      let alpha = clamp(nebulaAlpha + starlight * 0.8, 0.0, 0.88);
+      let color = vec3f(0.22, 0.13, 0.48) * violet * 0.20 + vec3f(0.08, 0.37, 0.55) * blue * 0.18 + vec3f(0.78, 0.88, 1.0) * starlight * 0.8;
+      return vec4f(min(color, vec3f(alpha)), alpha);
     }
   `;
 
@@ -57,32 +75,37 @@
 
   const fragmentShader = `
     uniform vec2 resolution;
-    uniform vec4 points[14];
+    uniform float time;
+    uniform float active;
+    uniform vec2 pointer;
 
-    float nodeLight(vec2 uv, vec2 p, vec2 next) {
-      float distanceToPoint = length(uv - p);
-      float light = (1.0 - smoothstep(0.0015, 0.0045, distanceToPoint)) * 0.42;
-      light += (1.0 - smoothstep(0.0, 0.035, distanceToPoint)) * 0.035;
-      vec2 segment = next - p;
-      if (length(segment) < 0.28) {
-        float amount = clamp(dot(uv - p, segment) / max(dot(segment, segment), 0.0001), 0.0, 1.0);
-        float lineDistance = length(uv - p - amount * segment);
-        light += (1.0 - smoothstep(0.0005, 0.0025, lineDistance)) * 0.16;
-      }
-      return light;
+    float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    float stars(vec2 uv, float density, float depth, vec2 parallax) {
+      vec2 field = uv * density + vec2(time * 0.009, time * 0.004) * depth + parallax * depth;
+      vec2 cell = floor(field);
+      vec2 local = fract(field);
+      float random = hash(cell);
+      vec2 center = vec2(0.18 + 0.64 * random, 0.18 + 0.64 * hash(cell + 19.7));
+      float distanceToStar = length(local - center);
+      float size = mix(0.018, 0.045, hash(cell + 41.3));
+      float core = 1.0 - smoothstep(size * 0.3, size, distanceToStar);
+      float glow = (1.0 - smoothstep(size, size * 4.5, distanceToStar)) * 0.16;
+      float twinkle = 0.7 + 0.3 * sin(time * (0.5 + random) + random * 6.283);
+      return (core + glow) * twinkle * step(0.25, random);
     }
-
     void main() {
-      float shortest = min(resolution.x, resolution.y);
       vec2 pixel = vec2(gl_FragCoord.x, resolution.y - gl_FragCoord.y);
-      vec2 uv = (pixel - resolution * 0.5) / shortest;
-      float light = 0.0;
-      for (int i = 0; i < 13; i++) {
-        light += nodeLight(uv, points[i].xy, points[i].zw);
-        light += nodeLight(uv, points[i].zw, points[i + 1].xy);
-      }
-      float alpha = clamp(light, 0.0, 0.6);
-      gl_FragColor = vec4(vec3(0.74, 0.9, 0.85) * alpha, alpha);
+      vec2 uv = (pixel - resolution * 0.5) / min(resolution.x, resolution.y);
+      vec2 parallax = (pointer - vec2(0.5)) * active;
+      vec2 drift = uv + parallax * 0.035;
+      float wave = sin(drift.x * 3.1 + drift.y * 2.0 + sin(drift.y * 2.8 - time * 0.055) + time * 0.025);
+      float cloud = pow(max(0.0, 1.0 - abs(drift.y + drift.x * 0.38 + wave * 0.12)), 4.0);
+      float violet = cloud * (0.5 + 0.5 * sin(drift.x * 2.2 - time * 0.025));
+      float blue = cloud * (1.0 - violet * 0.55);
+      float starlight = stars(uv, 23.0, 0.3, parallax) * 0.30 + stars(uv, 14.0, 0.65, parallax) * 0.50 + stars(uv, 8.0, 1.1, parallax) * 0.72;
+      float alpha = clamp(cloud * 0.24 + starlight * 0.8, 0.0, 0.88);
+      vec3 color = vec3(0.22, 0.13, 0.48) * violet * 0.20 + vec3(0.08, 0.37, 0.55) * blue * 0.18 + vec3(0.78, 0.88, 1.0) * starlight * 0.8;
+      gl_FragColor = vec4(min(color, vec3(alpha)), alpha);
     }
   `;
 
@@ -110,24 +133,6 @@
     }
   }
 
-  function updatePoints(points, width, height, time) {
-    const shortest = Math.min(width, height);
-    const aspectX = width / shortest, aspectY = height / shortest;
-    const mouseX = (pointer.x - 0.5) * aspectX, mouseY = (pointer.y - 0.5) * aspectY;
-    const hash = value => { const n = Math.sin(value * 127.1) * 43758.5453; return n - Math.floor(n); };
-    for (let i = 0; i < 33; i++) {
-      const index = i + 1;
-      let x = (hash(index * 2.7) - 0.5) * aspectX * 0.92 + Math.sin(time * 0.17 + index) * 0.012;
-      let y = (hash(index * 7.3) - 0.5) * aspectY * 0.92 + Math.cos(time * 0.13 + index * 1.4) * 0.012;
-      const dx = x - mouseX, dy = y - mouseY, distance = Math.hypot(dx, dy);
-      const t = Math.min(1, distance / 0.25), influence = (1 - t * t * (3 - 2 * t)) * pointer.active;
-      x += dx / Math.max(distance, 0.001) * influence * 0.045;
-      y += dy / Math.max(distance, 0.001) * influence * 0.045;
-      points[i * 4] = x;
-      points[i * 4 + 1] = y;
-    }
-  }
-
   async function createWebGPU(canvas) {
     let device = null;
     let context = null;
@@ -148,15 +153,13 @@
         fragment: {module, entryPoint: 'fragment_main', targets: [{format}]},
         primitive: {topology: 'triangle-list'}
       });
-      const buffer = device.createBuffer({size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST});
-      const pointBuffer = device.createBuffer({size: 33 * 4 * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST});
+      const buffer = device.createBuffer({size: 32, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST});
       const bindGroup = device.createBindGroup({layout: pipeline.getBindGroupLayout(0),
-        entries: [{binding: 0, resource: {buffer}}, {binding: 1, resource: {buffer: pointBuffer}}]});
+        entries: [{binding: 0, resource: {buffer}}]});
       return {
         kind: 'webgpu', canvas, device,
-        render(width, height, points) {
-          device.queue.writeBuffer(buffer, 0, new Float32Array([width, height, 0, 0]));
-          device.queue.writeBuffer(pointBuffer, 0, points);
+        render(width, height, time) {
+          device.queue.writeBuffer(buffer, 0, new Float32Array([width, height, time, pointer.smoothActive, pointer.smoothX, pointer.smoothY, 0, 0]));
           const encoder = device.createCommandEncoder();
           const pass = encoder.beginRenderPass({
             colorAttachments: [{view: context.getCurrentTexture().createView(),
@@ -209,18 +212,15 @@
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
       const position = gl.getAttribLocation(program, 'position');
       const resolution = gl.getUniformLocation(program, 'resolution');
-      const pointLocation = gl.getUniformLocation(program, 'points[0]');
-      if (position < 0 || !resolution || !pointLocation) throw new Error('Shader input unavailable');
-      const packed = new Float32Array(14 * 4);
+      const timeLocation = gl.getUniformLocation(program, 'time');
+      const pointerLocation = gl.getUniformLocation(program, 'pointer');
+      const activeLocation = gl.getUniformLocation(program, 'active');
+      if (position < 0 || !resolution || !timeLocation || !pointerLocation || !activeLocation) throw new Error('Shader input unavailable');
       gl.deleteShader(vertex); vertex = null;
       gl.deleteShader(fragment); fragment = null;
       return {
         kind: 'webgl', canvas, gl,
-        render(width, height, points) {
-          for (let i = 0; i < 28; i++) {
-            packed[i * 2] = points[i * 4];
-            packed[i * 2 + 1] = points[i * 4 + 1];
-          }
+        render(width, height, time) {
           gl.viewport(0, 0, width, height);
           gl.clearColor(0, 0, 0, 0);
           gl.clear(gl.COLOR_BUFFER_BIT);
@@ -229,7 +229,9 @@
           gl.enableVertexAttribArray(position);
           gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
           gl.uniform2f(resolution, width, height);
-          gl.uniform4fv(pointLocation, packed);
+          gl.uniform1f(timeLocation, time);
+          gl.uniform2f(pointerLocation, pointer.smoothX, pointer.smoothY);
+          gl.uniform1f(activeLocation, pointer.smoothActive);
           gl.drawArrays(gl.TRIANGLES, 0, 3);
         },
         dispose() { gl.deleteBuffer(buffer); gl.deleteProgram(program); }
@@ -248,11 +250,13 @@
     if (!current) return;
     current.frame = 0;
     if (!toggle.checked || reducedMotion() || document.hidden || !login.hidden) return;
-    if (timestamp - current.lastFrame < 1000 / 30) {
-      current.frame = requestAnimationFrame(draw);
-      return;
-    }
+    const elapsed = current.lastFrame ? Math.min((timestamp - current.lastFrame) / 1000, 0.1) : 0;
     current.lastFrame = timestamp;
+    current.time += elapsed;
+    const easing = 1 - Math.exp(-elapsed * 3);
+    pointer.smoothX += (pointer.x - pointer.smoothX) * easing;
+    pointer.smoothY += (pointer.y - pointer.smoothY) * easing;
+    pointer.smoothActive += (pointer.active - pointer.smoothActive) * easing;
     const canvas = current.canvas;
     const rect = canvas.getBoundingClientRect();
     if (!rect.width || !rect.height) {
@@ -267,8 +271,7 @@
       canvas.height = height;
     }
     try {
-      updatePoints(current.points, width, height, timestamp / 1000);
-      current.render(width, height, current.points);
+      current.render(width, height, current.time);
       current.frame = requestAnimationFrame(draw);
     } catch {
       if (state === current) unavailable();
@@ -317,7 +320,7 @@
         renderer.dispose();
         return;
       }
-      const current = {...renderer, points: new Float32Array(33 * 4), frame: 0, lastFrame: 0};
+      const current = {...renderer, time: 0, frame: 0, lastFrame: 0};
       state = current;
       starting = false;
       status.textContent = 'Fondo interactivo activado.';
