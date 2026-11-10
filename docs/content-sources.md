@@ -31,7 +31,7 @@ El usuario pidió un PC con Linux, comandos didácticos y pantallazos de proyect
 
 ## Pendiente
 
-LinkedIn no permitió acceder al contenido. Faltan titular, trayectoria y experiencia profesional aportados por el usuario. No se han inventado empleadores, cargos, certificaciones ni fechas. El texto de presentación en primera persona es un borrador editorial basado en los repositorios públicos.
+El usuario indicó que tiene 15 años de experiencia en desarrollo y que sus tecnologías principales son PHP, Symfony y JavaScript. Quiere mostrar lo que hace y lo que ha hecho, sin indicar disponibilidad laboral. LinkedIn no permitió acceder al contenido; no se han inventado empleadores, cargos, certificaciones ni fechas.
 
 ## Imágenes de los proyectos añadidos
 
