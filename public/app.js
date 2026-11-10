@@ -304,26 +304,9 @@ function showFolder(folder){
  const entries=folder==='home'?[['Proyectos','projects'],['Documentos','documents'],['Imágenes','gallery']]:[['sobre-mi.md'],['tecnologias.md'],['notas.md'],['README.md']];
  entries.forEach(([name,target])=>{const button=document.createElement('button');const icon=document.createElement('span');icon.className=target?'folder-icon':'file-icon';icon.textContent=target?'':'#';const title=document.createElement('span');title.textContent=name;button.append(icon,title);if(target==='gallery')button.dataset.open='gallery';else if(target)button.dataset.folder=target;else button.dataset.document=name;grid.append(button)});area.append(grid);showWindow('files');
 }
-const wallpaperButtons=[...document.querySelectorAll('[data-theme],[data-wallpaper]')];
-function selectWallpaperButton(selected){wallpaperButtons.forEach(button=>button.setAttribute('aria-pressed',String(button===selected)))}
-document.querySelectorAll('button[data-theme]').forEach(button=>button.addEventListener('click',()=>{clearWallpaper();document.body.dataset.theme=button.dataset.theme;$('.wallpaper').style.backgroundColor='';selectWallpaperButton(button);$('#wallpaper-status').textContent='Fondo '+button.textContent.trim()+' · color del sistema'}));
-document.querySelectorAll('button[data-wallpaper]').forEach(button=>button.addEventListener('click',()=>{clearWallpaper();document.body.dataset.theme='ink';$('.wallpaper').style.backgroundColor='';$('.wallpaper').style.backgroundImage=`url("${button.dataset.wallpaper}")`;selectWallpaperButton(button);$('#wallpaper-status').textContent='Fondo '+button.textContent.trim()+' · WebP'}));
 document.querySelectorAll('button[data-layout-style]').forEach(button=>button.addEventListener('click',()=>{document.body.dataset.layoutStyle=button.dataset.layoutStyle;document.querySelectorAll('button[data-layout-style]').forEach(option=>option.setAttribute('aria-pressed',String(option===button)))}));
 document.querySelectorAll('[data-size]').forEach(button=>button.addEventListener('click',()=>{document.body.classList.remove('small-text','large-text');if(button.dataset.size==='small')document.body.classList.add('small-text');if(button.dataset.size==='large')document.body.classList.add('large-text');document.querySelectorAll('[data-size]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)))}));
 $('#reduce-motion').checked=matchMedia('(prefers-reduced-motion:reduce)').matches;$('#reduce-motion').addEventListener('change',()=>document.body.classList.toggle('reduce-motion',$('#reduce-motion').checked));
-let wallpaperUrl='';
-let wallpaperRequest=0;
-function clearWallpaper(){wallpaperRequest++;if(wallpaperUrl)URL.revokeObjectURL(wallpaperUrl);wallpaperUrl='';$('.wallpaper').style.backgroundImage='none';$('#wallpaper-file').value='';$('#wallpaper-status').textContent='La imagen se queda en tu navegador durante esta visita.'}
-$('#wallpaper-file').addEventListener('change',async()=>{
- const file=$('#wallpaper-file').files[0];if(!file)return;
- const request=++wallpaperRequest;
- if(!['image/png','image/jpeg','image/webp','image/gif','image/avif'].includes(file.type)){$('#wallpaper-status').textContent='Elige una imagen PNG, JPG, WebP, GIF o AVIF.';return}
- const url=URL.createObjectURL(file);const image=new Image();image.src=url;
- try{await image.decode();if(request!==wallpaperRequest){URL.revokeObjectURL(url);return}if(wallpaperUrl)URL.revokeObjectURL(wallpaperUrl);wallpaperUrl=url;$('.wallpaper').style.backgroundImage=`url("${url}")`;document.body.dataset.theme='ink';selectWallpaperButton(null);$('#wallpaper-status').textContent=file.name+' · imagen local';}
- catch{URL.revokeObjectURL(url);if(request===wallpaperRequest)$('#wallpaper-status').textContent='No se puede abrir esa imagen. Prueba con otra.'}
-});
-$('#wallpaper-reset').addEventListener('click',()=>{clearWallpaper();document.body.dataset.theme='ink';$('.wallpaper').style.backgroundColor='';selectWallpaperButton(document.querySelector('[data-theme=ink]'))});
-$('#wallpaper-color').addEventListener('input',()=>{clearWallpaper();$('.wallpaper').style.backgroundColor=$('#wallpaper-color').value;selectWallpaperButton(null)});
 clock();setInterval(clock,30000);projectGrid();welcome();loadDocument(home+'/sobre-mi.md');renderGallery();renderApps();syncDock();initDesktopIcons();
 let sessionActive=false;try{sessionActive=localStorage.getItem(sessionKey)==='active'}catch{}
 if(sessionActive)enter();else $('#enter').focus({preventScroll:true});
