@@ -162,7 +162,7 @@ document.addEventListener('click',e=>{
  if(!e.target.closest('button,a,input,textarea,select,[data-resize],[contenteditable]')) focusTerminal();
 });
 function resetWindowPositions(){windows.forEach(win=>{win.style.left='';win.style.top='';win.style.right=''})}
-let refreshDesktopIcons=()=>{};
+let refreshDesktopIcons=(createdPath,desktopPoint)=>{};
 function initDesktopIcons(){
  const desktop=$('#desktop'),container=$('.desktop-icons'),storageKey='whoami.desktop-icons.v1';
  function makeUserIcon(path,isFolder){
@@ -217,7 +217,7 @@ function initDesktopIcons(){
   });
  }
  icons.forEach(registerIcon);
- refreshDesktopIcons=()=>{
+ refreshDesktopIcons=(createdPath,desktopPoint)=>{
   const existing=new Set(icons.map(iconKey));
   const add=(path,isFolder)=>{
    if(existing.has(path)||!path.startsWith(prefix)||path.slice(prefix.length).includes('/'))return;
@@ -225,7 +225,9 @@ function initDesktopIcons(){
    const height=icon.offsetHeight||80,width=icon.offsetWidth||104;
    const rows=Math.max(1,Math.floor((desktop.clientHeight-$('.panel').offsetHeight-100)/(height+8)));
    initial.push({left:8+Math.floor(index/rows)*(width+8),top:$('.panel').offsetHeight+10+(index%rows)*(height+8)});
-   registerIcon(icon,index);const b=bounds(icon),pos=positions[iconKey(icon)];place(icon,pos.x*b.x,b.top+pos.y*b.y);
+   registerIcon(icon,index);const b=bounds(icon),pos=positions[iconKey(icon)];
+   if(path===createdPath&&desktopPoint){place(icon,desktopPoint.x-icon.offsetWidth/2,desktopPoint.y);remember(icon);save()}
+   else place(icon,pos.x*b.x,b.top+pos.y*b.y);
   };
   userFiles.folders.forEach(path=>add(path,true));Object.keys(userFiles.documents).forEach(path=>add(path,false));
  };
@@ -258,6 +260,7 @@ function initDesktopIcons(){
   const rect=desktop.getBoundingClientRect();
   const targetRect=event.target.getBoundingClientRect();
   const x=(event.clientX||targetRect.left)-rect.left,y=(event.clientY||targetRect.bottom)-rect.top;
+  contextDesktopPoint=onDesktop?{x,y}:null;
   menu.hidden=false;
   menu.style.left=`${clamp(x,0,Math.max(0,rect.width-menu.offsetWidth))}px`;
   menu.style.top=`${clamp(y,$('.panel').offsetHeight,Math.max($('.panel').offsetHeight,rect.height-menu.offsetHeight))}px`;
@@ -265,7 +268,7 @@ function initDesktopIcons(){
  });
  organize.addEventListener('click',organizeIcons);
  menu.querySelectorAll('[data-context-create]').forEach(button=>button.addEventListener('click',()=>{
-  currentUserFolder=contextCreationFolder;pendingUserKind=button.dataset.contextCreate;creationFromDesktop=contextFromDesktop;
+  currentUserFolder=contextCreationFolder;pendingUserKind=button.dataset.contextCreate;creationFromDesktop=contextFromDesktop;creationDesktopPoint=contextDesktopPoint;
   closeMenu();openCreateDialog();
  }));
  document.addEventListener('pointerdown',event=>{if(!menu.hidden&&!menu.contains(event.target))closeMenu()});
@@ -394,7 +397,7 @@ function renderGallery(){$('#gallery-count').textContent=projects.filter(p=>p.im
 function renderProcesses(){if(typeof applications==='undefined')return;const list=$('#process-list');list.replaceChildren();applications.filter(app=>!document.getElementById(app.id).hidden).forEach(app=>{const row=document.createElement('div');const title=document.createElement('span');title.textContent=app.icon+'  '+app.name;const open=document.createElement('button');open.textContent='Mostrar';open.dataset.open=app.id;const close=document.createElement('button');close.textContent='Cerrar';close.setAttribute('aria-label','Cerrar '+app.name);close.addEventListener('click',()=>{document.getElementById(app.id).hidden=true;syncDock();focusTerminal()});row.append(title,open,close);list.append(row)})}
 let currentUserFolder=documentsRoot;
 let pendingUserKind='';
-let contextCreationFolder=desktopRoot,contextFromDesktop=false,creationFromDesktop=false;
+let contextCreationFolder=desktopRoot,contextFromDesktop=false,creationFromDesktop=false,contextDesktopPoint=null,creationDesktopPoint=null;
 function showFolder(folder){
  if(folder==='projects'){projectGrid();showWindow('files');return}
  const area=$('#project-content');area.replaceChildren();delete area.dataset.userFolder;
@@ -447,7 +450,7 @@ createForm.addEventListener('submit',event=>{
   if(pendingUserKind==='folder'){persistUserFiles({...userFiles,folders:[...userFiles.folders,path]});directories.add(path)}
   else {persistUserFiles({...userFiles,documents:{...userFiles.documents,[path]:''}});files[path]=''}
  }catch{createError.textContent='No se pudo guardar. Comprueba el espacio disponible en el navegador.';return}
- createDialog.close();refreshDesktopIcons();if(!creationFromDesktop)showFolder(currentUserFolder);
+ createDialog.close();refreshDesktopIcons(path,creationFromDesktop?creationDesktopPoint:null);if(!creationFromDesktop)showFolder(currentUserFolder);
  if(pendingUserKind==='document')openDocument(path);
 });
 $('#create-user-file-cancel').addEventListener('click',()=>createDialog.close());
