@@ -24,6 +24,23 @@
 /* Small source screenshots retain their proportions in project thumbnails. */
 .project-tile img.contained-image{object-fit:contain;object-position:center;padding:16px;background:#e8e6e1}
 
+/* Dock icons are small illustrations rather than font glyphs. */
+.dock .dock-image{display:block;width:40px;height:40px;object-fit:contain;pointer-events:none;filter:drop-shadow(0 2px 2px #0004)}
+@media(max-width:700px){.dock .dock-image{width:29px;height:29px}}
+
+/* Eight edge and corner grips keep every desktop window resizable. */
+.resize-handle{position:absolute;z-index:30;display:block;opacity:.18;touch-action:none;outline-offset:-2px}
+.window:hover>.resize-handle,.resize-handle:focus-visible{opacity:.85}
+.resize-n,.resize-s{left:12px;right:12px;height:7px;cursor:ns-resize}
+.resize-n{top:0}.resize-s{bottom:0}
+.resize-e,.resize-w{top:12px;bottom:12px;width:7px;cursor:ew-resize}
+.resize-e{right:0}.resize-w{left:0}
+.resize-ne,.resize-se,.resize-sw,.resize-nw{width:15px;height:15px}
+.resize-ne{top:0;right:0;cursor:nesw-resize}.resize-se{right:0;bottom:0;cursor:nwse-resize;background:linear-gradient(135deg,transparent 68%,#81788b 69% 74%,transparent 75% 82%,#81788b 83% 88%,transparent 89%)}
+.resize-sw{bottom:0;left:0;cursor:nesw-resize}.resize-nw{top:0;left:0;cursor:nwse-resize}
+.window.maximized>.resize-handle{display:none}
+@media(max-width:700px){.resize-handle{display:none}}
+
 /* Snake is a small arcade machine inside the desktop. */
 .snake-window{background:#e8e9d8;left:31%;width:min(620px,62%);height:690px}
 .snake-content{display:flex;flex:1;min-height:0;flex-direction:column;align-items:center;gap:14px;overflow:auto;padding:20px;color:#29351c}
@@ -45,3 +62,52 @@
 .snake-status{width:min(100%,420px);margin:0;color:#59644a;font-size:12px;line-height:1.5}
 .snake-icon{background:#bdcc90;color:#3b5129}
 @media(max-width:700px){.snake-window{left:8px;top:149px;width:calc(100% - 16px);height:calc(100% - 235px)}.snake-content{padding:12px;gap:10px}.snake-heading h3{font-size:24px}.snake-heading p{font-size:12px}.snake-scoreboard{gap:8px}.snake-scoreboard>div{min-width:58px}.snake-scoreboard output{font-size:18px}.snake-scoreboard button{padding:9px;font-size:12px}.snake-board{width:min(100%, min(52vh,380px));border-width:5px}.snake-touch-controls{display:grid;justify-items:center;gap:3px}.snake-touch-controls>div{display:flex;gap:3px}.snake-touch-controls button{width:42px;height:36px;padding:0;border:1px solid #86956d;border-radius:4px;background:#f6f5e9;color:#3e512a;font-size:18px;touch-action:manipulation}.snake-status{font-size:11px}.dock button,.dock a{width:calc((100vw - 32px)/9);min-width:0}}
+
+/* Three coherent desktop skins, selectable without reloading the session. */
+.small-text{--body-size:14px;--code-size:13px}
+.small-text .editor-workspace textarea,.small-text .editor-workspace pre{font-size:13px}
+.layout-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.layout-options button{display:flex;min-width:0;flex-direction:column;align-items:flex-start;gap:7px;padding:8px;border:1px solid #c9c0d0;border-radius:7px;text-align:left}
+.layout-options button[aria-pressed=true]{border:2px solid #705c85;background:#e9e3ed}
+.layout-options strong{font-size:14px}.layout-options small{font-size:11px;line-height:1.35;color:#756b7d}
+.layout-preview{position:relative;width:100%;height:70px;overflow:hidden;border-radius:4px;background:#28283b}
+.layout-preview i{position:absolute;top:0;left:0;right:0;height:9px;background:#d8d5dd}
+.layout-preview b{position:absolute;left:20%;right:8%;top:21%;height:56%;border:2px solid #c7c0d1;background:#f1efeb}
+.layout-linux i{background:#373441}.layout-linux b{background:#f2efeb;border-radius:4px}
+.layout-windows11{background:linear-gradient(135deg,#17335b,#567ba5)}.layout-windows11 i{height:12px;background:#edf3f9cc}.layout-windows11 b{left:28%;right:28%;border:1px solid #b7cee6;border-radius:6px;background:#eef4fae8}
+.layout-windows31{background:#008080;border-radius:0}.layout-windows31 i{background:#000080}.layout-windows31 b{left:9%;right:9%;top:17%;height:67%;border:3px outset #eee;background:#c0c0c0;border-radius:0}
+.wallpaper-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.wallpaper-presets button{min-width:0;padding:5px;border:1px solid #c4b8cd;border-radius:6px;text-align:left;font-size:12px}
+.wallpaper-presets button[aria-pressed=true]{border:2px solid #6e5a81;background:#e4dceb}
+.wallpaper-presets img{display:block;width:100%;height:55px;object-fit:cover;border-radius:3px;margin-bottom:5px}
+.wallpaper-presets span{display:block;padding:2px 3px}
+@media(max-width:700px){.layout-options{grid-template-columns:1fr}.layout-options button{display:grid;grid-template-columns:90px 1fr;gap:4px 10px;align-items:center}.layout-preview{grid-row:span 2;height:56px}.wallpaper-presets img{height:48px}}
+
+body[data-layout-style="windows11"]{--wall:#243b5a;--wall-ink:#e2efff;--green:#84c4f1;--text:#eff5fc}
+body[data-layout-style="windows11"] .panel{background:#e6edf4d9;color:#34445a;border-bottom:1px solid #ffffff80;backdrop-filter:blur(18px)}
+body[data-layout-style="windows11"] .dock{background:#e8eff8e8;border-color:#ffffffaa;border-radius:22px;box-shadow:0 12px 38px #14294166}
+body[data-layout-style="windows11"] .dock button,body[data-layout-style="windows11"] .dock a{border-radius:12px}
+body[data-layout-style="windows11"] .dock i{background:#3988cc}
+body[data-layout-style="windows11"] .window{border-color:#b9ccdf;border-radius:12px;box-shadow:0 24px 70px #101e2f66}
+body[data-layout-style="windows11"] .titlebar{background:#e8eff7;color:#293d55;border-bottom:1px solid #cbd8e5}
+body[data-layout-style="windows11"] .window-symbol{color:#5089b4}
+body[data-layout-style="windows11"] .window-actions button{border-radius:8px;color:#354960}
+body[data-layout-style="windows11"] .app-content,body[data-layout-style="windows11"] .editor-window{background:#f5f8fc}
+body[data-layout-style="windows11"] .login{background:radial-gradient(ellipse at 50% 110%,#416e9b,#1c3150 65%)}
+body[data-layout-style="windows31"]{--wall:#008080;--wall-ink:#ffffff;--green:#ffffff;--text:#f7f7f7;--panel:#c0c0c0}
+body[data-layout-style="windows31"] .panel{background:#c0c0c0;color:#111;border:2px outset #fff;font-family:Tahoma,Arial,sans-serif}
+body[data-layout-style="windows31"] .activities,body[data-layout-style="windows31"] .system-status button{color:#111}
+body[data-layout-style="windows31"] .dock{left:0;right:0;bottom:0;transform:none;width:100%;justify-content:flex-start;gap:6px;padding:5px 8px;background:#c0c0c0;border:2px outset #fff;border-radius:0;box-shadow:none;backdrop-filter:none}
+body[data-layout-style="windows31"] .dock button,body[data-layout-style="windows31"] .dock a{border:2px outset #fff;border-radius:0;background:#c0c0c0}
+body[data-layout-style="windows31"] .dock button:active,body[data-layout-style="windows31"] .dock a:active{border-style:inset;transform:none}
+body[data-layout-style="windows31"] .window{border:2px outset #fff;border-radius:0;background:#c0c0c0;color:#111;box-shadow:2px 2px #111;min-width:280px}
+body[data-layout-style="windows31"] .titlebar{height:34px;margin:2px 2px 0;padding:0 7px;background:#000080;color:#fff;border-radius:0;cursor:grab}
+body[data-layout-style="windows31"] .titlebar h1,body[data-layout-style="windows31"] .titlebar h2{text-align:left;font:700 13px Tahoma,Arial,sans-serif;letter-spacing:0}
+body[data-layout-style="windows31"] .window-symbol{color:#fff}
+body[data-layout-style="windows31"] .window-actions{gap:3px}
+body[data-layout-style="windows31"] .window-actions button{width:24px;height:24px;border:2px outset #fff;border-radius:0;background:#c0c0c0;color:#111;font:700 16px Tahoma,Arial,sans-serif}
+body[data-layout-style="windows31"] .window-actions button:active{border-style:inset}
+body[data-layout-style="windows31"] .app-content,body[data-layout-style="windows31"] .editor-window,body[data-layout-style="windows31"] .files-window,body[data-layout-style="windows31"] .guide-window{background:#c0c0c0;color:#111}
+body[data-layout-style="windows31"] .login{background:#008080}
+body[data-layout-style="windows31"] .login button{border:2px outset #fff;border-radius:0;background:#c0c0c0;color:#111}
+body[data-layout-style="windows31"] .resize-se{background:linear-gradient(135deg,transparent 68%,#555 69% 74%,transparent 75% 82%,#555 83% 88%,transparent 89%)}

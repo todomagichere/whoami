@@ -35,7 +35,7 @@ function resolvePath(raw='~') {
   return '/'+parts.join('/');
 }
 function shortPath(path=cwd) {return path===home?'~':path.startsWith(home+'/')?'~'+path.slice(home.length):path}
-function updatePrompt(){ $('#prompt-path').textContent=shortPath();$('#terminal-title').textContent=`roberto@portfolio: ${shortPath()}`; }
+function updatePrompt(){ $('#prompt-path').textContent=shortPath();$('#terminal-title').textContent=`rperez@portfolio: ${shortPath()}`; }
 function line(text,className='') { const p=document.createElement('p');p.textContent=text;p.className=className;output.append(p);return p; }
 function explain(text){line(text,'explanation')}
 function scrollTerminal(){const body=$('#terminal-body');body.scrollTop=body.scrollHeight}
@@ -90,7 +90,7 @@ function run(raw){
    line('whoami              Quién soy\nneofetch            Mi ficha de desarrollador\nls [carpeta]        Listar archivos\npwd                 Mostrar dónde estás\ncd proyectos        Entrar en una carpeta\ncd ..               Volver a la carpeta anterior\ncat sobre-mi.md     Leer un archivo\nopen etimologia     Abrir un proyecto\nopen sobre-mi.md    Leer en el editor\nopen ajustes        Personalizar escritorio\nopen monitor        Ventanas abiertas\nopen snake          Jugar a Snake\nsnake               Abrir la sala recreativa\nprojects            Abrir el explorador\ncontact             Encontrarme en la red\nfibonacci 12        Calcular y aprender\nclear               Limpiar la terminal\nhistory             Ver tus comandos\nexit                Volver a la pantalla de entrada');
    explain('Tab autocompleta. ↑ y ↓ recorren el historial. Ctrl+L limpia. Los comandos son una simulación local para explorar el portfolio.');break;
  case 'whoami':line(about,'success');explain('En Linux, whoami devuelve el usuario actual. Aquí te presenta al dueño del escritorio.');break;
- case 'neofetch':line('      .--.       roberto@portfolio\n     |o_o |      ──────────────────────────\n     |:_/ |      Nombre   Roberto Pérez\n    //   \\ \\     GitHub   @todomagichere\n   (|     | )    Código   PHP · JavaScript\n  /\u0027\\_   _/\u0027\\   Taller   Ibexa · Firefox · Web\n  \\___)=(___/    Proyectos   '+projects.length+' seleccionados','accent');explain('neofetch suele mostrar información del sistema. Esta versión muestra mi perfil y los proyectos seleccionados.');break;
+ case 'neofetch':line('      .--.       rperez@portfolio\n     |o_o |      ──────────────────────────\n     |:_/ |      Nombre   Roberto Pérez\n    //   \\ \\     GitHub   @todomagichere\n   (|     | )    Código   PHP · JavaScript\n  /\u0027\\_   _/\u0027\\   Taller   Ibexa · Firefox · Web\n  \\___)=(___/    Proyectos   '+projects.length+' seleccionados','accent');explain('neofetch suele mostrar información del sistema. Esta versión muestra mi perfil y los proyectos seleccionados.');break;
  case 'pwd':line(cwd,'accent');explain('pwd significa print working directory: muestra la carpeta en la que estás.');break;
  case 'ls':listDirectory(resolvePath(args.find(a=>!a.startsWith('-'))||'.'));break;
  case 'cd':{const path=resolvePath(arg||'~');if(directories.has(path)){cwd=path;updatePrompt();explain(`Ahora estás en ${shortPath()}. Prueba ls.`)}else line(`cd: no existe la carpeta «${arg}». Prueba cd ~/proyectos`,'error');break}
@@ -136,7 +136,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySele
 document.addEventListener('keydown',e=>{
  if(e.defaultPrevented || e.isComposing || e.ctrlKey || e.metaKey || e.altKey ||
   e.key.length!==1 || !terminalIsForeground() || window.getSelection()?.toString() ||
-  e.target.closest('input,textarea,select,[data-terminal-exempt],[contenteditable]:not([contenteditable="false"])') ||
+  e.target.closest('input,textarea,select,[data-terminal-exempt],[data-resize],[contenteditable]:not([contenteditable="false"])') ||
   (e.key===' ' && e.target.closest('button,a,[role="button"]'))) return;
  input.focus({preventScroll:true});
  input.setRangeText(e.key,input.selectionStart,input.selectionEnd,'end');
@@ -153,11 +153,40 @@ document.addEventListener('click',e=>{
  const project=e.target.closest('[data-project]');if(project)projectDetail(project.dataset.project);
  const shot=e.target.closest('[data-screenshot]');if(shot){const p=projects.find(p=>p.id===shot.dataset.screenshot);$('#screenshot-full').src=p.image;$('#screenshot-full').alt=`${p.imageLabel||'Captura real'} de ${p.title}`;$('#screenshot-caption').textContent=`${p.title} · ${p.imageSource||(p.id==='ibexa'?'Captura del README del repositorio':'Captura de la web pública')} · noviembre de 2026`;$('#screenshot-dialog').showModal()}
  const action=e.target.closest('[data-action]');if(action){const win=action.closest('.window');if(action.dataset.action==='maximize'){win.classList.toggle('maximized');action.setAttribute('aria-label',win.classList.contains('maximized')?'Restaurar ventana':'Maximizar ventana')}else{win.hidden=true;syncDock();document.querySelector(`.dock [data-open="${win.id}"]`)?.focus()}focusTerminal()}
- if(!e.target.closest('button,a,input,textarea,select,[contenteditable]')) focusTerminal();
+ if(!e.target.closest('button,a,input,textarea,select,[data-resize],[contenteditable]')) focusTerminal();
 });
 function resetWindowPositions(){windows.forEach(win=>{win.style.left='';win.style.top='';win.style.right=''})}
 windows.forEach(win=>{
  win.addEventListener('pointerdown',()=>raise(win));
+ const edges=['n','e','s','w','ne','se','sw','nw'];
+ edges.forEach(edge=>{
+  const handle=document.createElement('span');handle.className=`resize-handle resize-${edge}`;handle.dataset.resize=edge;handle.tabIndex=0;handle.setAttribute('role','separator');handle.setAttribute('aria-label',`Redimensionar ${win.querySelector('.titlebar h1,.titlebar h2')?.textContent||'ventana'}`);handle.setAttribute('aria-orientation',['e','w'].includes(edge)?'vertical':'horizontal');win.append(handle);
+  let resize=null;
+  handle.addEventListener('pointerdown',e=>{
+   if(win.classList.contains('maximized')||matchMedia('(max-width:700px)').matches)return;
+   e.preventDefault();e.stopPropagation();raise(win);const rect=win.getBoundingClientRect(),screen=$('#desktop').getBoundingClientRect();resize={edge,x:e.clientX,y:e.clientY,left:rect.left-screen.left,top:rect.top-screen.top,width:rect.width,height:rect.height};handle.setPointerCapture(e.pointerId);
+  });
+  handle.addEventListener('pointermove',e=>{
+   if(!resize)return;
+   const desktop=$('#desktop'),dx=e.clientX-resize.x,dy=e.clientY-resize.y,minWidth=Math.max(280,parseFloat(getComputedStyle(win).minWidth)||280),minHeight=180,maxWidth=desktop.clientWidth-resize.left,maxHeight=desktop.clientHeight-resize.top-60;
+   let width=resize.width,height=resize.height,left=resize.left,top=resize.top;
+   if(resize.edge.includes('e'))width=Math.min(maxWidth,Math.max(minWidth,resize.width+dx));
+   if(resize.edge.includes('w')){width=Math.min(resize.left+resize.width,Math.max(minWidth,resize.width-dx));left=resize.left+resize.width-width}
+   if(resize.edge.includes('s'))height=Math.min(maxHeight,Math.max(minHeight,resize.height+dy));
+   if(resize.edge.includes('n')){height=Math.min(resize.top+resize.height,Math.max(minHeight,resize.height-dy));top=resize.top+resize.height-height}
+   win.style.left=`${left}px`;win.style.top=`${top}px`;win.style.right='auto';win.style.width=`${width}px`;win.style.height=`${height}px`;win.style.maxHeight='none';
+  });
+  const stopResize=()=>{resize=null};handle.addEventListener('pointerup',stopResize);handle.addEventListener('pointercancel',stopResize);
+  handle.addEventListener('keydown',e=>{
+   if(!e.key.startsWith('Arrow')||win.classList.contains('maximized'))return;
+   e.preventDefault();const amount=e.shiftKey?48:16,rect=win.getBoundingClientRect(),screen=$('#desktop').getBoundingClientRect();let width=rect.width,height=rect.height,left=rect.left-screen.left,top=rect.top-screen.top;
+   if(e.key==='ArrowRight')width=Math.min($('#desktop').clientWidth-left,width+amount);
+   if(e.key==='ArrowLeft')width=Math.max(280,width-amount);
+   if(e.key==='ArrowDown')height=Math.min($('#desktop').clientHeight-top-60,height+amount);
+   if(e.key==='ArrowUp')height=Math.max(180,height-amount);
+   win.style.left=`${left}px`;win.style.top=`${top}px`;win.style.right='auto';win.style.width=`${width}px`;win.style.height=`${height}px`;win.style.maxHeight='none';
+  });
+ });
  const bar=win.querySelector('.titlebar');let drag;
  bar.addEventListener('dblclick',e=>{if(!e.target.closest('button'))win.classList.toggle('maximized')});
  bar.addEventListener('pointerdown',e=>{if(e.target.closest('button')||win.classList.contains('maximized')||matchMedia('(max-width:600px)').matches)return;const rect=win.getBoundingClientRect();const screen=$('#desktop').getBoundingClientRect();drag={x:e.clientX,y:e.clientY,left:rect.left-screen.left,top:rect.top-screen.top};bar.setPointerCapture(e.pointerId)});
@@ -228,8 +257,12 @@ function showFolder(folder){
  const entries=folder==='home'?[['Proyectos','projects'],['Documentos','documents'],['Imágenes','gallery']]:[['sobre-mi.md'],['tecnologias.md'],['notas.md'],['README.md']];
  entries.forEach(([name,target])=>{const button=document.createElement('button');const icon=document.createElement('span');icon.className=target?'folder-icon':'file-icon';icon.textContent=target?'':'#';const title=document.createElement('span');title.textContent=name;button.append(icon,title);if(target==='gallery')button.dataset.open='gallery';else if(target)button.dataset.folder=target;else button.dataset.document=name;grid.append(button)});area.append(grid);showWindow('files');
 }
-document.querySelectorAll('button[data-theme]').forEach(button=>button.addEventListener('click',()=>{clearWallpaper();document.body.dataset.theme=button.dataset.theme;$('.wallpaper').style.backgroundColor='';document.querySelectorAll('button[data-theme]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)))}));
-document.querySelectorAll('[data-size]').forEach(button=>button.addEventListener('click',()=>{document.body.classList.toggle('large-text',button.dataset.size==='large');document.querySelectorAll('[data-size]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)))}));
+const wallpaperButtons=[...document.querySelectorAll('[data-theme],[data-wallpaper]')];
+function selectWallpaperButton(selected){wallpaperButtons.forEach(button=>button.setAttribute('aria-pressed',String(button===selected)))}
+document.querySelectorAll('button[data-theme]').forEach(button=>button.addEventListener('click',()=>{clearWallpaper();document.body.dataset.theme=button.dataset.theme;$('.wallpaper').style.backgroundColor='';selectWallpaperButton(button);$('#wallpaper-status').textContent='Fondo '+button.textContent.trim()+' · color del sistema'}));
+document.querySelectorAll('button[data-wallpaper]').forEach(button=>button.addEventListener('click',()=>{clearWallpaper();document.body.dataset.theme='ink';$('.wallpaper').style.backgroundColor='';$('.wallpaper').style.backgroundImage=`url("${button.dataset.wallpaper}")`;selectWallpaperButton(button);$('#wallpaper-status').textContent='Fondo '+button.textContent.trim()+' · WebP'}));
+document.querySelectorAll('button[data-layout-style]').forEach(button=>button.addEventListener('click',()=>{document.body.dataset.layoutStyle=button.dataset.layoutStyle;document.querySelectorAll('button[data-layout-style]').forEach(option=>option.setAttribute('aria-pressed',String(option===button)))}));
+document.querySelectorAll('[data-size]').forEach(button=>button.addEventListener('click',()=>{document.body.classList.remove('small-text','large-text');if(button.dataset.size==='small')document.body.classList.add('small-text');if(button.dataset.size==='large')document.body.classList.add('large-text');document.querySelectorAll('[data-size]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)))}));
 $('#reduce-motion').checked=matchMedia('(prefers-reduced-motion:reduce)').matches;$('#reduce-motion').addEventListener('change',()=>document.body.classList.toggle('reduce-motion',$('#reduce-motion').checked));
 let wallpaperUrl='';
 let wallpaperRequest=0;
@@ -239,9 +272,9 @@ $('#wallpaper-file').addEventListener('change',async()=>{
  const request=++wallpaperRequest;
  if(!['image/png','image/jpeg','image/webp','image/gif','image/avif'].includes(file.type)){$('#wallpaper-status').textContent='Elige una imagen PNG, JPG, WebP, GIF o AVIF.';return}
  const url=URL.createObjectURL(file);const image=new Image();image.src=url;
- try{await image.decode();if(request!==wallpaperRequest){URL.revokeObjectURL(url);return}if(wallpaperUrl)URL.revokeObjectURL(wallpaperUrl);wallpaperUrl=url;$('.wallpaper').style.backgroundImage=`url("${url}")`;document.querySelectorAll('button[data-theme]').forEach(b=>b.setAttribute('aria-pressed','false'));$('#wallpaper-status').textContent=file.name+' · imagen local';}
+ try{await image.decode();if(request!==wallpaperRequest){URL.revokeObjectURL(url);return}if(wallpaperUrl)URL.revokeObjectURL(wallpaperUrl);wallpaperUrl=url;$('.wallpaper').style.backgroundImage=`url("${url}")`;document.body.dataset.theme='ink';selectWallpaperButton(null);$('#wallpaper-status').textContent=file.name+' · imagen local';}
  catch{URL.revokeObjectURL(url);if(request===wallpaperRequest)$('#wallpaper-status').textContent='No se puede abrir esa imagen. Prueba con otra.'}
 });
-$('#wallpaper-reset').addEventListener('click',clearWallpaper);
-$('#wallpaper-color').addEventListener('input',()=>{clearWallpaper();$('.wallpaper').style.backgroundColor=$('#wallpaper-color').value;document.querySelectorAll('button[data-theme]').forEach(b=>b.setAttribute('aria-pressed','false'))});
+$('#wallpaper-reset').addEventListener('click',()=>{clearWallpaper();document.body.dataset.theme='ink';$('.wallpaper').style.backgroundColor='';selectWallpaperButton(document.querySelector('[data-theme=ink]'))});
+$('#wallpaper-color').addEventListener('input',()=>{clearWallpaper();$('.wallpaper').style.backgroundColor=$('#wallpaper-color').value;selectWallpaperButton(null)});
 clock();setInterval(clock,30000);projectGrid();welcome();loadDocument(home+'/sobre-mi.md');renderGallery();renderApps();syncDock();enter();
