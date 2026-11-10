@@ -86,7 +86,7 @@ function run(raw){
  const [name,...args]=tokens;const arg=args.join(' ');
  switch(name){
  case 'help':
-   line('TU MAPA DEL ESCRITORIO','success');
+   line('COMANDOS DISPONIBLES','success');
    line('whoami              Quién soy\nneofetch            Mi ficha de desarrollador\nls [carpeta]        Listar archivos\npwd                 Mostrar dónde estás\ncd proyectos        Entrar en una carpeta\ncd ..               Volver a la carpeta anterior\ncat sobre-mi.md     Leer un archivo\nopen etimologia     Abrir un proyecto\nopen sobre-mi.md    Leer en el editor\nopen ajustes        Personalizar escritorio\nopen monitor        Ventanas abiertas\nopen snake          Jugar a Snake\nsnake               Abrir la sala recreativa\nprojects            Abrir el explorador\ncontact             Encontrarme en la red\nfibonacci 12        Calcular y aprender\nclear               Limpiar la terminal\nhistory             Ver tus comandos\nexit                Volver a la pantalla de entrada');
    explain('Tab autocompleta. ↑ y ↓ recorren el historial. Ctrl+L limpia. Los comandos son una simulación local para explorar el portfolio.');break;
  case 'whoami':line(about,'success');explain('En Linux, whoami devuelve el usuario actual. Aquí te presenta al dueño del escritorio.');break;
@@ -95,18 +95,18 @@ function run(raw){
  case 'ls':listDirectory(resolvePath(args.find(a=>!a.startsWith('-'))||'.'));break;
  case 'cd':{const path=resolvePath(arg||'~');if(directories.has(path)){cwd=path;updatePrompt();explain(`Ahora estás en ${shortPath()}. Prueba ls.`)}else line(`cd: no existe la carpeta «${arg}». Prueba cd ~/proyectos`,'error');break}
  case 'cat':{if(!arg){line('Uso: cat <archivo>. Por ejemplo: cat ~/sobre-mi.md','muted');break}const path=resolvePath(arg);if(Object.hasOwn(files,path)){line(files[path]);explain('cat muestra el contenido de un archivo de texto.')}else line(`cat: no existe «${arg}». Usa ls para ver los archivos de esta carpeta.`,'error');break}
- case 'snake':showWindow('snake');line('Sala recreativa abierta. ¡A por esa manzana!','success');break;
+ case 'snake':showWindow('snake');line('Snake abierto.','success');break;
  case 'projects':projectGrid();showWindow('files');line('Abriendo ~/proyectos…','success');break;
  case 'open':{if(arg.endsWith('.md')){const path=resolvePath(arg);if(Object.hasOwn(files,path)){openDocument(path);line('Abriendo el editor de texto…','success')}else line('No existe ese documento. Prueba open ~/sobre-mi.md','error');break}const app={snake:'snake',serpiente:'snake',buscaminas:'mines',mines:'mines',ajustes:'settings',imagenes:'gallery',notas:'editor',monitor:'processes',contactos:'contact-app',editor:'editor'}[arg];if(app){showWindow(app);break}const id=(arg||'proyectos').replace(/\/$/,'').split('/').pop();if(['proyectos','.'].includes(id)){projectGrid();showWindow('files');line('Abriendo el explorador…','success')}else if(projectDetail(id)){line(`Abriendo ${id}: captura, descripción y código.`,'success')}else line(`No encuentro «${arg}». Puedes abrir: ${projects.map(p=>p.id).join(', ')}.`,'error');break}
  case 'contact':{
-   line('Hablemos de código, proyectos o esa idea que tienes en mente.');const p=line('');[['GitHub','https://github.com/todomagichere'],['LinkedIn','https://www.linkedin.com/in/robertoperezvillegas/']].forEach(([text,url])=>{const a=document.createElement('a');a.textContent=text+' ↗   ';a.href=url;a.target='_blank';a.rel='noopener noreferrer';p.append(a)});break}
+   line('Perfiles de contacto:');const p=line('');[['GitHub','https://github.com/todomagichere'],['LinkedIn','https://www.linkedin.com/in/robertoperezvillegas/']].forEach(([text,url])=>{const a=document.createElement('a');a.textContent=text+' ↗   ';a.href=url;a.target='_blank';a.rel='noopener noreferrer';p.append(a)});break}
  case 'fibonacci':{const n=Number(arg||'12');if(!Number.isInteger(n)||n<0||n>50){line('Prueba un número entero entre 0 y 50. Ejemplo: fibonacci 12','error');break}const values=[0,1];for(let i=2;i<=n;i++)values.push(values[i-1]+values[i-2]);line(`F(${n}) = ${values[n]}\n\n${values.slice(0,n+1).join(' → ')}`,'success');explain('Cada término suma los dos anteriores. Esta implementación recorre la secuencia una vez: tiempo O(n). Mi paquete PHP explora tres métodos. Abre open fibonacci.');break}
  case 'clear':output.replaceChildren();break;
  case 'history':line(history.map((c,i)=>`${i+1}  ${c}`).join('\n'));break;
  case 'date':line(new Date().toLocaleString('es-ES'));break;
  case 'echo':line(arg);break;
- case 'sudo':line('Aquí no hacen falta privilegios. Toda la curiosidad viene desbloqueada. Prueba help.','success');break;
- case 'exit':line('Hasta la próxima. Tu sesión se conserva mientras la página esté abierta.');lock();break;
+ case 'sudo':line('Este escritorio no ejecuta comandos con privilegios. Escribe help para ver los comandos disponibles.','success');break;
+ case 'exit':line('Sesión bloqueada. Los datos de la sesión se conservan mientras la página esté abierta.');lock();break;
  default:line(`No conozco «${name}». Escribe help para ver los comandos disponibles.`,'error');
  }
  while(output.childElementCount>160)output.firstElementChild.remove();
@@ -197,7 +197,7 @@ window.addEventListener('resize',resetWindowPositions);
 function clock(){const now=new Date();$('#clock').textContent=now.toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' · '+now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});$('#login-time').textContent=now.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})+' · '+now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}
 
 const applications = [
- {id:'terminal',name:'Terminal',icon:'>_',description:'Comandos y descubrimientos'},
+ {id:'terminal',name:'Terminal',icon:'>_',description:'Comandos y navegación'},
  {id:'files',name:'Archivos',icon:'▱',description:'Proyectos y documentos'},
  {id:'editor',name:'Editor de texto',icon:'▤',description:'Sobre mí, tecnologías y notas'},
  {id:'gallery',name:'Imágenes',icon:'▧',description:'Capturas reales de proyectos'},

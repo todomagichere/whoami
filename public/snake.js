@@ -102,7 +102,7 @@
       }
       if (snake.length === cells.length) {
         render();
-        finish('¡Has llenado el tablero!');
+        finish('Tablero completado.');
         return;
       }
       placeFood();
@@ -124,7 +124,7 @@
     if (state === 'paused') {
       state = 'running';
       startButton.textContent = 'Pausar';
-      status.textContent = 'En marcha. ¡No choques contigo!';
+      status.textContent = 'Partida en curso. Evita los bordes y la serpiente.';
       timer = setInterval(tick, 125);
       board.focus({preventScroll: true});
       return;
@@ -132,7 +132,7 @@
     reset();
     state = 'running';
     startButton.textContent = 'Pausar';
-    status.textContent = 'En marcha. ¡No choques contigo!';
+    status.textContent = 'Partida en curso. Evita los bordes y la serpiente.';
     timer = setInterval(tick, 125);
     board.focus({preventScroll: true});
   }
