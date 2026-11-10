@@ -38,7 +38,7 @@ La terminal simula un sistema de archivos local. Nunca ejecuta comandos del sist
 - `public/mines-ui.js`: interfaz, controles y cronómetro del Buscaminas.
 - `public/snake.js`: partida y controles de Snake.
 - `tests/mines.test.mjs`: pruebas de generación, primer clic seguro, banderas, victoria, derrota y reinicio (`node --test tests/mines.test.mjs`).
-- `public/assets/`: capturas de proyectos, iconos SVG del dock y fondos WebP.
+- `public/assets/`: capturas de proyectos, iconos y fondos en formato WebP.
 - `docs/content-sources.md`: fuentes y datos pendientes de confirmar.
 - `scripts/build.py`: prepara `dist/` para publicación estática.
 

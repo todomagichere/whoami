@@ -19,10 +19,10 @@ Nombre completo y perfil LinkedIn facilitados por el usuario. Usuario GitHub con
 
 Imágenes consultadas para este portfolio:
 
-- `public/assets/etimologia.png`: https://etimologia.es — captura de la web pública actualizada el 10 de noviembre de 2026.
+- `public/assets/etimologia.webp`: https://etimologia.es — captura de la web pública actualizada el 10 de noviembre de 2026.
 - `public/assets/etimologia-cover.webp`: https://etimologia.es/social-card.webp — portada oficial del proyecto.
-- `public/assets/mochila.png`: https://preparatumochila.com — captura de la web pública, tras rechazar las cookies opcionales.
-- `public/assets/ibexa.png`: imagen publicada en el README del repositorio: https://github.com/todomagichere/ibexa-contenttype-info-tab-bundle/assets/23119890/91dc450c-149b-4cae-a560-a4b1bdabb8c8
+- `public/assets/mochila.webp`: https://preparatumochila.com — captura de la web pública, tras rechazar las cookies opcionales.
+- `public/assets/ibexa.webp`: imagen publicada en el README del repositorio: https://github.com/todomagichere/ibexa-contenttype-info-tab-bundle/assets/23119890/91dc450c-149b-4cae-a560-a4b1bdabb8c8
 
 Firefox Perplexity Translator y Fibonacci se representan con símbolos de código, no con capturas ficticias. La terminal y el escritorio son una simulación hecha para este portfolio. La información del comando neofetch describe el portfolio y sus proyectos, no un sistema Linux real.
 
@@ -40,8 +40,8 @@ Etimología fue desarrollado por Roberto de forma individual. La idea surgió al
 
 ## Imágenes de los proyectos añadidos
 
-- `risk-master.png`: captura del README, https://github.com/user-attachments/assets/1e7cd384-a548-4fae-95e0-59a3892529aa
-- `ibexa-breadcrumbs.png`: ejemplo renderizado del README, https://user-images.githubusercontent.com/23119890/142036902-9b3434c5-ebd1-4cc3-a289-e8fdfa57994a.png
+- `risk-master.webp`: captura del README, https://github.com/user-attachments/assets/1e7cd384-a548-4fae-95e0-59a3892529aa
+- `ibexa-breadcrumbs.webp`: ejemplo renderizado del README, https://user-images.githubusercontent.com/23119890/142036902-9b3434c5-ebd1-4cc3-a289-e8fdfa57994a.png
 - `pirata.webp`: recurso visual original, no captura de pantalla, https://raw.githubusercontent.com/todomagichere/la-gran-aventura-pirata/main/src/assets/mapa-del-tesoro.7c2f.webp
 
 La descripción de Risk Master se contrastó con su interfaz React: el README menciona Next.js, pero el código consultado utiliza React, TypeScript y Vite. No se ha atribuido Next.js al proyecto.
