@@ -157,6 +157,49 @@ document.addEventListener('click',e=>{
  if(!e.target.closest('button,a,input,textarea,select,[data-resize],[contenteditable]')) focusTerminal();
 });
 function resetWindowPositions(){windows.forEach(win=>{win.style.left='';win.style.top='';win.style.right=''})}
+function initDesktopIcons(){
+ const desktop=$('#desktop'),container=$('.desktop-icons'),icons=[...container.querySelectorAll('button')],storageKey='whoami.desktop-icons.v1';
+ const screen=desktop.getBoundingClientRect();
+ const initial=icons.map(icon=>{const rect=icon.getBoundingClientRect();return {left:rect.left-screen.left,top:rect.top-screen.top}});
+ let saved={};try{saved=JSON.parse(localStorage.getItem(storageKey)||'{}')||{}}catch{}
+ const positions={};
+ function bounds(icon){const top=$('.panel').offsetHeight;return {top,x:Math.max(0,desktop.clientWidth-icon.offsetWidth),y:Math.max(0,desktop.clientHeight-top-icon.offsetHeight)}}
+ function clamp(value,min,max){return Math.min(max,Math.max(min,value))}
+ function place(icon,x,y){const b=bounds(icon);icon.style.left=`${clamp(x,0,b.x)}px`;icon.style.top=`${clamp(y,b.top,b.top+b.y)}px`}
+ function remember(icon){const b=bounds(icon),key=icon.dataset.open||icon.dataset.document;positions[key]={x:b.x?clamp(parseFloat(icon.style.left)/b.x,0,1):0,y:b.y?clamp((parseFloat(icon.style.top)-b.top)/b.y,0,1):0}}
+ function save(){try{localStorage.setItem(storageKey,JSON.stringify(positions))}catch{}}
+ function arrange(){icons.forEach(icon=>{const b=bounds(icon),pos=positions[icon.dataset.open||icon.dataset.document];place(icon,pos.x*b.x,b.top+pos.y*b.y)})}
+ container.classList.add('free-icons');
+ icons.forEach((icon,index)=>{
+  const key=icon.dataset.open||icon.dataset.document,b=bounds(icon),pos=saved[key];
+  positions[key]=pos&&Number.isFinite(pos.x)&&Number.isFinite(pos.y)?{x:clamp(pos.x,0,1),y:clamp(pos.y,0,1)}:{x:b.x?clamp(initial[index].left/b.x,0,1):0,y:b.y?clamp((initial[index].top-b.top)/b.y,0,1):0};
+  icon.setAttribute('aria-describedby','desktop-icon-help');
+  let drag=null,suppressClick=false;
+  icon.addEventListener('pointerdown',event=>{
+   if(!event.isPrimary||event.button!==0)return;
+   drag={id:event.pointerId,x:event.clientX,y:event.clientY,left:parseFloat(icon.style.left),top:parseFloat(icon.style.top),moved:false};icon.setPointerCapture(event.pointerId);
+  });
+  icon.addEventListener('pointermove',event=>{
+   if(!drag||event.pointerId!==drag.id)return;
+   const dx=event.clientX-drag.x,dy=event.clientY-drag.y;
+   if(!drag.moved&&Math.hypot(dx,dy)<6)return;
+   drag.moved=true;icon.classList.add('dragging');place(icon,drag.left+dx,drag.top+dy);event.preventDefault();
+  });
+  icon.addEventListener('pointerup',event=>{
+   if(!drag||event.pointerId!==drag.id)return;
+   if(drag.moved){remember(icon);save();suppressClick=true;setTimeout(()=>{suppressClick=false},0)}
+   drag=null;icon.classList.remove('dragging');
+  });
+  icon.addEventListener('pointercancel',()=>{drag=null;icon.classList.remove('dragging');arrange()});
+  icon.addEventListener('click',event=>{if(suppressClick){event.preventDefault();event.stopImmediatePropagation();suppressClick=false}},true);
+  icon.addEventListener('keydown',event=>{
+   if(event.altKey||event.ctrlKey||event.metaKey||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key))return;
+   event.preventDefault();const step=event.shiftKey?48:16,dx=event.key==='ArrowLeft'?-step:event.key==='ArrowRight'?step:0,dy=event.key==='ArrowUp'?-step:event.key==='ArrowDown'?step:0;
+   place(icon,parseFloat(icon.style.left)+dx,parseFloat(icon.style.top)+dy);remember(icon);save();
+  });
+ });
+ arrange();window.addEventListener('resize',arrange);
+}
 windows.forEach(win=>{
  win.addEventListener('pointerdown',()=>raise(win));
  const edges=['n','e','s','w','ne','se','sw','nw'];
@@ -278,6 +321,6 @@ $('#wallpaper-file').addEventListener('change',async()=>{
 });
 $('#wallpaper-reset').addEventListener('click',()=>{clearWallpaper();document.body.dataset.theme='ink';$('.wallpaper').style.backgroundColor='';selectWallpaperButton(document.querySelector('[data-theme=ink]'))});
 $('#wallpaper-color').addEventListener('input',()=>{clearWallpaper();$('.wallpaper').style.backgroundColor=$('#wallpaper-color').value;selectWallpaperButton(null)});
-clock();setInterval(clock,30000);projectGrid();welcome();loadDocument(home+'/sobre-mi.md');renderGallery();renderApps();syncDock();
+clock();setInterval(clock,30000);projectGrid();welcome();loadDocument(home+'/sobre-mi.md');renderGallery();renderApps();syncDock();initDesktopIcons();
 let sessionActive=false;try{sessionActive=localStorage.getItem(sessionKey)==='active'}catch{}
 if(sessionActive)enter();else $('#enter').focus({preventScroll:true});

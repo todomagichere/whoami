@@ -23,6 +23,7 @@ Desde la raíz del repositorio, abre http://localhost:8081. La primera visita mu
 - Snake: partida arcade en una cuadrícula de 16×16, puntuación récord local, controles de flechas o WASD, pausa con espacio y controles táctiles. Los bordes conectan con el lado opuesto. Se abre con `snake`.
 - `fibonacci 12` explica el cálculo.
 - Tab para autocompletar, flechas para historial, Ctrl+L para limpiar.
+- Arrastrar los iconos del escritorio o moverlos con las flechas del teclado. Sus posiciones se guardan en el navegador.
 - Mover, minimizar, cerrar y maximizar ventanas; reabrirlas desde el dock.
 - Ampliar el monitor; Escape o el botón ↙ del panel para restaurarlo.
 
