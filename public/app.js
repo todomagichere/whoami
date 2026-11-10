@@ -54,8 +54,9 @@ function focusTerminal(){
  if(terminalIsForeground() && !window.getSelection()?.toString()) input.focus({preventScroll:true});
 }
 function showWindow(id,focus=true){const win=document.getElementById(id);if(!win||!win.classList.contains('window'))return;$('#launcher').close();win.hidden=false;raise(win);syncDock();if(focus){if(id==='terminal')input.focus({preventScroll:true});else if(id==='editor')$('#editor-text').focus({preventScroll:true});else if(id==='snake')$('#snake-board').focus({preventScroll:true});else win.querySelector('button')?.focus({preventScroll:true})}}
-function enter(focus=true){entered=true;$('#login').hidden=true;$('#desktop').inert=false;syncDock();if(focus)showWindow('terminal');}
-function lock(){entered=false;$('#login').hidden=false;$('#desktop').inert=true;$('#enter').focus();}
+const sessionKey='whoami.guest-session.v1';
+function enter(focus=true){entered=true;try{localStorage.setItem(sessionKey,'active')}catch{}$('#login').hidden=true;$('#desktop').inert=false;syncDock();if(focus)showWindow('terminal');}
+function lock(){entered=false;try{localStorage.removeItem(sessionKey)}catch{}$('#login').hidden=false;$('#desktop').inert=true;$('#enter').focus();}
 function projectGrid(){
  $('.file-status').textContent=projects.length+' proyectos · código abierto y experimentos';
  $('#file-address').textContent='⌂ /home/roberto/proyectos';
@@ -276,4 +277,6 @@ $('#wallpaper-file').addEventListener('change',async()=>{
 });
 $('#wallpaper-reset').addEventListener('click',()=>{clearWallpaper();document.body.dataset.theme='ink';$('.wallpaper').style.backgroundColor='';selectWallpaperButton(document.querySelector('[data-theme=ink]'))});
 $('#wallpaper-color').addEventListener('input',()=>{clearWallpaper();$('.wallpaper').style.backgroundColor=$('#wallpaper-color').value;selectWallpaperButton(null)});
-clock();setInterval(clock,30000);projectGrid();welcome();loadDocument(home+'/sobre-mi.md');renderGallery();renderApps();syncDock();enter();
+clock();setInterval(clock,30000);projectGrid();welcome();loadDocument(home+'/sobre-mi.md');renderGallery();renderApps();syncDock();
+let sessionActive=false;try{sessionActive=localStorage.getItem(sessionKey)==='active'}catch{}
+if(sessionActive)enter();else $('#enter').focus({preventScroll:true});
