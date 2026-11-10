@@ -102,7 +102,7 @@ function run(raw){
  case 'cat':{if(!arg){line('Uso: cat <archivo>. Por ejemplo: cat ~/sobre-mi.md','muted');break}const path=resolvePath(arg);if(Object.hasOwn(files,path)){line(files[path]);explain('cat muestra el contenido de un archivo de texto.')}else line(`cat: no existe «${arg}». Usa ls para ver los archivos de esta carpeta.`,'error');break}
  case 'snake':showWindow('snake');line('Snake abierto.','success');break;
  case 'projects':projectGrid();showWindow('files');line('Abriendo ~/proyectos…','success');break;
- case 'open':{if(arg.endsWith('.md')){const path=resolvePath(arg);if(Object.hasOwn(files,path)){openDocument(path);line('Abriendo el editor de texto…','success')}else line('No existe ese documento. Prueba open ~/sobre-mi.md','error');break}const app={buscaminas:'mines',mines:'mines',ajustes:'settings',imagenes:'gallery',notas:'editor',monitor:'processes',contactos:'contact-app',editor:'editor'}[arg];if(app){showWindow(app);break}const id=(arg||'proyectos').replace(/\/$/,'').split('/').pop();if(['proyectos','.'].includes(id)){projectGrid();showWindow('files');line('Abriendo el explorador…','success')}else if(projectDetail(id)){line(`Abriendo ${id}: captura, descripción y código.`,'success')}else line(`No encuentro «${arg}». Puedes abrir: ${projects.map(p=>p.id).join(', ')}.`,'error');break}
+ case 'open':{if(Object.hasOwn(files,resolvePath(arg))||arg.endsWith('.md')){const path=resolvePath(arg);if(Object.hasOwn(files,path)){openDocument(path);line('Abriendo el editor de texto…','success')}else line('No existe ese documento. Prueba open ~/sobre-mi.md','error');break}const app={buscaminas:'mines',mines:'mines',ajustes:'settings',imagenes:'gallery',notas:'editor',monitor:'processes',contactos:'contact-app',editor:'editor'}[arg];if(app){showWindow(app);break}const id=(arg||'proyectos').replace(/\/$/,'').split('/').pop();if(['proyectos','.'].includes(id)){projectGrid();showWindow('files');line('Abriendo el explorador…','success')}else if(projectDetail(id)){line(`Abriendo ${id}: captura, descripción y código.`,'success')}else line(`No encuentro «${arg}». Puedes abrir: ${projects.map(p=>p.id).join(', ')}.`,'error');break}
  case 'contact':{
    line('Perfiles de contacto:');const p=line('');[['GitHub','https://github.com/todomagichere'],['LinkedIn','https://www.linkedin.com/in/robertoperezvillegas/']].forEach(([text,url])=>{const a=document.createElement('a');a.textContent=text+' ↗   ';a.href=url;a.target='_blank';a.rel='noopener noreferrer';p.append(a)});break}
  case 'fibonacci':{const n=Number(arg||'12');if(!Number.isInteger(n)||n<0||n>50){line('Prueba un número entero entre 0 y 50. Ejemplo: fibonacci 12','error');break}const values=[0,1];for(let i=2;i<=n;i++)values.push(values[i-1]+values[i-2]);line(`F(${n}) = ${values[n]}\n\n${values.slice(0,n+1).join(' → ')}`,'success');explain('Cada término suma los dos anteriores. Esta implementación recorre la secuencia una vez: tiempo O(n). Mi paquete PHP explora tres métodos. Abre open fibonacci.');break}
@@ -296,6 +296,21 @@ files[home+'/notas.md']='# Cuaderno del visitante\n\nEste documento es tuyo mien
 const notesKey='whoami.notes.v1';
 let notesStorageAvailable=true;
 try{const saved=localStorage.getItem(notesKey);if(saved!==null)files[home+'/notas.md']=saved}catch{notesStorageAvailable=false}
+const userFilesKey='whoami.user-files.v1';
+const documentsRoot=home+'/Documentos';
+let userFiles={folders:[],documents:{}};
+try {
+ const saved=JSON.parse(localStorage.getItem(userFilesKey)||'null');
+ if(saved&&Array.isArray(saved.folders)&&saved.documents&&typeof saved.documents==='object'){
+  userFiles.folders=saved.folders.filter(path=>typeof path==='string'&&path.startsWith(documentsRoot+'/'));
+  Object.entries(saved.documents).forEach(([path,content])=>{if(path.startsWith(documentsRoot+'/')&&typeof content==='string')userFiles.documents[path]=content});
+ }
+}catch{}
+directories.add(documentsRoot);
+userFiles.folders.forEach(path=>directories.add(path));
+Object.entries(userFiles.documents).forEach(([path,content])=>{files[path]=content});
+function persistUserFiles(next){localStorage.setItem(userFilesKey,JSON.stringify(next));userFiles=next}
+function isUserDocument(path){return Object.hasOwn(userFiles.documents,path)}
 let currentDocument=home+'/sobre-mi.md';
 const drafts=new Map();
 function rememberDraft(){if(currentDocument&&$('#editor-text').value!==files[currentDocument])drafts.set(currentDocument,$('#editor-text').value);else drafts.delete(currentDocument)}
@@ -303,7 +318,7 @@ function loadDocument(path){
  currentDocument=path;$('#editor-text').value=drafts.get(path)??files[path];
  const name=path.slice(home.length+1);$('#editor-tab-name').textContent=name;$('#editor-title').textContent=name+' — gedit';
  const select=$('#editor-file');if(![...select.options].some(o=>o.value===name)){const option=document.createElement('option');option.value=name;option.textContent=name;select.append(option)}select.value=name;
- $('#editor-save-status').textContent=path===home+'/notas.md'?(notesStorageAvailable?'Notas guardadas en este navegador':'Almacenamiento no disponible; copia tus notas'):'Borrador de esta sesión';$('#editor-text').setSelectionRange(0,0);$('#editor-text').scrollTop=0;$('#editor-text').scrollLeft=0;updateEditor();
+ $('#editor-save-status').textContent=path===home+'/notas.md'?(notesStorageAvailable?'Notas guardadas en este navegador':'Almacenamiento no disponible; copia tus notas'):isUserDocument(path)?'Guardado en este navegador':'Borrador de esta sesión';$('#editor-text').setSelectionRange(0,0);$('#editor-text').scrollTop=0;$('#editor-text').scrollLeft=0;updateEditor();
 }
 function openDocument(path){if(!Object.hasOwn(files,path))return;rememberDraft();loadDocument(path);showWindow('editor')}
 function updateEditor(){
@@ -311,11 +326,17 @@ function updateEditor(){
  $('#editor-lines').textContent=Array.from({length:text.value.split('\n').length},(_,i)=>i+1).join('\n');$('#editor-lines').scrollTop=text.scrollTop;
  $('#editor-dirty').textContent=text.value===files[currentDocument]?'':'● Sin guardar';
 }
-$('#editor-text').addEventListener('input',()=>{rememberDraft();if(currentDocument===home+'/notas.md')saveDocument();else updateEditor()});['click','keyup','select'].forEach(event=>$('#editor-text').addEventListener(event,updateEditor));
+$('#editor-text').addEventListener('input',()=>{rememberDraft();if(currentDocument===home+'/notas.md'||isUserDocument(currentDocument))saveDocument();else updateEditor()});['click','keyup','select'].forEach(event=>$('#editor-text').addEventListener(event,updateEditor));
 $('#editor-text').addEventListener('scroll',()=>$('#editor-lines').scrollTop=$('#editor-text').scrollTop);
 function saveDocument(){
- files[currentDocument]=$('#editor-text').value;drafts.delete(currentDocument);
+ const value=$('#editor-text').value;
  let status='Guardado en esta sesión';
+ if(isUserDocument(currentDocument)){
+  try{persistUserFiles({...userFiles,documents:{...userFiles.documents,[currentDocument]:value}});files[currentDocument]=value;drafts.delete(currentDocument);status='Guardado en este navegador'}
+  catch{status='No se pudo guardar; copia el texto antes de salir'}
+  $('#editor-save-status').textContent=status;updateEditor();return;
+ }
+ files[currentDocument]=value;drafts.delete(currentDocument);
  if(currentDocument===home+'/notas.md'){
   try{localStorage.setItem(notesKey,files[currentDocument]);notesStorageAvailable=true;status='Guardado en este navegador'}
   catch{notesStorageAvailable=false;status='No se pudo guardar; copia tus notas antes de salir'}
@@ -332,13 +353,61 @@ function showApplications(){if(!entered)enter(false);$('#app-search').value='';r
 $('#applications').addEventListener('click',showApplications);$('#dock-applications').addEventListener('click',showApplications);$('#app-search').addEventListener('input',renderApps);
 function renderGallery(){$('#gallery-count').textContent=projects.filter(p=>p.image).length+' imágenes de proyectos';const grid=$('#gallery-grid');projects.filter(p=>p.image).forEach(p=>{const button=document.createElement('button');button.dataset.screenshot=p.id;const img=document.createElement('img');img.src=p.image;img.alt=(p.imageLabel||'Captura')+' de '+p.title;const title=document.createElement('strong');title.textContent=p.title;button.append(img,title);grid.append(button)})}
 function renderProcesses(){if(typeof applications==='undefined')return;const list=$('#process-list');list.replaceChildren();applications.filter(app=>!document.getElementById(app.id).hidden).forEach(app=>{const row=document.createElement('div');const title=document.createElement('span');title.textContent=app.icon+'  '+app.name;const open=document.createElement('button');open.textContent='Mostrar';open.dataset.open=app.id;const close=document.createElement('button');close.textContent='Cerrar';close.setAttribute('aria-label','Cerrar '+app.name);close.addEventListener('click',()=>{document.getElementById(app.id).hidden=true;syncDock();focusTerminal()});row.append(title,open,close);list.append(row)})}
+let currentUserFolder=documentsRoot;
+let pendingUserKind='';
 function showFolder(folder){
  if(folder==='projects'){projectGrid();showWindow('files');return}
- const area=$('#project-content');area.replaceChildren();$('#file-address').textContent=folder==='home'?'⌂ /home/roberto':'⌂ /home/roberto/Documentos';
+ const area=$('#project-content');area.replaceChildren();
+ const isHome=folder==='home';
+ const path=folder==='documents'?documentsRoot:folder;
+ if(!isHome&&!directories.has(path))return;
+ if(!isHome)currentUserFolder=path;
+ $('#file-address').textContent='⌂ '+(isHome?home:path);
  const grid=document.createElement('div');grid.className='folder-grid';
- const entries=folder==='home'?[['Proyectos','projects'],['Documentos','documents'],['Imágenes','gallery']]:[['sobre-mi.md'],['tecnologias.md'],['notas.md'],['README.md']];
- entries.forEach(([name,target])=>{const button=document.createElement('button');const icon=document.createElement('span');icon.className=target?'folder-icon':'file-icon';icon.textContent=target?'':'#';const title=document.createElement('span');title.textContent=name;button.append(icon,title);if(target==='gallery')button.dataset.open='gallery';else if(target)button.dataset.folder=target;else button.dataset.document=name;grid.append(button)});area.append(grid);showWindow('files');
+ function addEntry(name,target,type){
+  const button=document.createElement('button');const icon=document.createElement('span');icon.className=type==='folder'||type==='gallery'?'folder-icon':'file-icon';icon.textContent=type==='folder'||type==='gallery'?'':'#';
+  const title=document.createElement('span');title.textContent=name;button.append(icon,title);
+  if(type==='builtin')button.dataset.document=name;
+  else if(type==='gallery')button.dataset.open='gallery';
+  else if(type==='folder')button.dataset.folder=target;
+  else button.dataset.userDocument=target;
+  grid.append(button);
+ }
+ if(isHome){addEntry('Proyectos','projects','folder');addEntry('Documentos','documents','folder');addEntry('Imágenes','gallery','gallery')}
+ else {
+  const toolbar=document.createElement('div');toolbar.className='user-files-toolbar';
+  if(path!==documentsRoot){const back=document.createElement('button');back.textContent='← Carpeta anterior';back.dataset.folder=path.slice(0,path.lastIndexOf('/'));toolbar.append(back)}
+  for(const [label,kind] of [['Nueva carpeta','folder'],['Nuevo documento','document']]){const button=document.createElement('button');button.textContent=label;button.dataset.createUserFile=kind;toolbar.append(button)}
+  area.append(toolbar);
+  if(path===documentsRoot)for(const name of ['sobre-mi.md','tecnologias.md','notas.md','README.md'])addEntry(name,null,'builtin');
+  const prefix=path+'/';
+  userFiles.folders.filter(item=>item.startsWith(prefix)&&!item.slice(prefix.length).includes('/')).sort((a,b)=>a.localeCompare(b,'es')).forEach(item=>addEntry(item.slice(prefix.length),item,'folder'));
+  Object.keys(userFiles.documents).filter(item=>item.startsWith(prefix)&&!item.slice(prefix.length).includes('/')).sort((a,b)=>a.localeCompare(b,'es')).forEach(item=>addEntry(item.slice(prefix.length),item,'document'));
+ }
+ area.append(grid);showWindow('files');
 }
+const createDialog=$('#create-user-file-dialog'),createForm=$('#create-user-file-form'),createName=$('#create-user-file-name'),createError=$('#create-user-file-error');
+document.addEventListener('click',event=>{
+ const open=event.target.closest('[data-user-document]');if(open)openDocument(open.dataset.userDocument);
+ const create=event.target.closest('[data-create-user-file]');if(!create)return;
+ pendingUserKind=create.dataset.createUserFile;createName.value='';createError.textContent='';
+ $('#create-user-file-title').textContent=pendingUserKind==='folder'?'Nueva carpeta':'Nuevo documento';
+ createDialog.showModal();createName.focus();
+});
+createForm.addEventListener('submit',event=>{
+ event.preventDefault();
+ const name=createName.value.trim();
+ if(!name||name==='.'||name==='..'||/[\/\\\x00-\x1f]/.test(name)){createError.textContent='Escribe un nombre válido, sin barras.';return}
+ const path=currentUserFolder+'/'+name;
+ if(directories.has(path)||Object.hasOwn(files,path)){createError.textContent='Ya existe un elemento con ese nombre.';return}
+ try{
+  if(pendingUserKind==='folder'){persistUserFiles({...userFiles,folders:[...userFiles.folders,path]});directories.add(path)}
+  else {persistUserFiles({...userFiles,documents:{...userFiles.documents,[path]:''}});files[path]=''}
+ }catch{createError.textContent='No se pudo guardar. Comprueba el espacio disponible en el navegador.';return}
+ createDialog.close();showFolder(currentUserFolder);
+ if(pendingUserKind==='document')openDocument(path);
+});
+$('#create-user-file-cancel').addEventListener('click',()=>createDialog.close());
 document.querySelectorAll('button[data-layout-style]').forEach(button=>button.addEventListener('click',()=>{document.body.dataset.layoutStyle=button.dataset.layoutStyle;document.querySelectorAll('button[data-layout-style]').forEach(option=>option.setAttribute('aria-pressed',String(option===button)))}));
 document.querySelectorAll('[data-size]').forEach(button=>button.addEventListener('click',()=>{document.body.classList.remove('small-text','large-text');if(button.dataset.size==='small')document.body.classList.add('small-text');if(button.dataset.size==='large')document.body.classList.add('large-text');document.querySelectorAll('[data-size]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)))}));
 $('#reduce-motion').checked=matchMedia('(prefers-reduced-motion:reduce)').matches;$('#reduce-motion').addEventListener('change',()=>document.body.classList.toggle('reduce-motion',$('#reduce-motion').checked));

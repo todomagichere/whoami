@@ -18,6 +18,7 @@ Desde la raíz del repositorio, abre http://localhost:8081. La primera visita mu
 - `open sobre-mi.md` abre el documento en el editor inspirado en gedit.
 - Editor: documentos, ajuste de líneas, posición del cursor, edición y guardado; las notas se guardan automáticamente en localStorage y los demás documentos duran durante la visita; Ctrl+S guarda. `cat ~/notas.md` permite leer la nota guardada.
 - Menú Aplicaciones con búsqueda; galería de capturas reales; monitor para mostrar o cerrar ventanas.
+- Documentos: crea carpetas y archivos de texto, navega por ellos y edítalos; se guardan automáticamente en el navegador.
 - Mi PC: disco virtual con el tamaño aproximado de las notas, las preferencias, la imagen de fondo y las cookies visibles; también muestra la estimación de almacenamiento del navegador para el sitio.
 - Ajustes: diseños Linux, Windows 11 y Windows 3.1; texto pequeño, cómodo o grande (grande por defecto); fondos de color, tres ilustraciones WebP, selector de color libre e imagen propia del dispositivo; reducción de animaciones. Los fondos seleccionados, incluidas las imágenes propias, se guardan en el navegador sin subirlas a un servidor.
 - Buscaminas: 8×8, diez minas, primer clic seguro, apertura de áreas vacías, banderas, cronómetro, reinicio, victoria y derrota. Clic derecho o F marca; las flechas navegan. En móvil hay un modo banderas. También se abre con `open buscaminas`.
