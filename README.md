@@ -8,7 +8,7 @@ Portfolio de Roberto Pérez Villegas como un ordenador con escritorio inspirado 
 python3 -m http.server 8081 --bind 127.0.0.1 --directory "$PWD/public"
 ```
 
-Desde la raíz del repositorio, abre http://localhost:8081. La primera visita muestra el inicio de sesión de invitado. Al entrar, el navegador recuerda la sesión y abre el escritorio ampliado con la terminal lista para escribir; el botón de encendido cierra la sesión. Sin dependencias ni compilación. La interfaz usa Ubuntu Sans, la terminal y el editor JetBrains Mono, y el fondo Bricolage Grotesque. Google Fonts es opcional; hay fuentes de sistema de respaldo.
+Desde la raíz del repositorio, abre http://localhost:8081. La primera visita muestra el inicio de sesión de invitado. Al entrar, el navegador recuerda la sesión y abre el escritorio ampliado con las ventanas cerradas; el botón de encendido cierra la sesión. Sin dependencias ni compilación. La interfaz usa Ubuntu Sans, la terminal y el editor JetBrains Mono, y el fondo Bricolage Grotesque. Google Fonts es opcional; hay fuentes de sistema de respaldo.
 
 ## Qué probar
 
