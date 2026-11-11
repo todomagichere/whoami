@@ -242,3 +242,16 @@ body[data-layout-style="windows31"] .calendar-grid .calendar-day[aria-pressed=tr
 body[data-layout-style="windows31"] .calendar-grid .calendar-current-day:not([aria-pressed=true]){background:transparent;color:inherit;box-shadow:inset 0 0 0 2px #000080}
 
 .calendar-notification-note{font-size:12px;line-height:1.4;opacity:.8}
+
+/* An explicit wallpaper choice takes precedence over the layout's default color. */
+body[data-theme="ink"] .wallpaper{background-color:#28283b}
+body[data-theme="clay"] .wallpaper{background-color:#654c4c}
+body[data-theme="forest"] .wallpaper{background-color:#314b42}
+
+.wallpaper-options{flex-wrap:wrap}
+.wallpaper-options button[data-theme="ocean"] i{background:#284f68}
+.wallpaper-options button[data-theme="plum"] i{background:#5c3959}
+.wallpaper-options button[data-theme="sand"] i{background:#a67c55}
+body[data-theme="ocean"] .wallpaper{background-color:#284f68}
+body[data-theme="plum"] .wallpaper{background-color:#5c3959}
+body[data-theme="sand"] .wallpaper{background-color:#a67c55}
