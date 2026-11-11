@@ -116,7 +116,7 @@ function run(raw){
  case 'snake':showWindow('snake');line('Snake abierto.','success');break;
  case 'quake':showWindow('quake');line('Quake III Arena abierto.','success');break;
  case 'projects':projectGrid();showWindow('files');line('Abriendo ~/proyectos…','success');break;
- case 'open':{if(Object.hasOwn(files,resolvePath(arg))||arg.endsWith('.md')){const path=resolvePath(arg);if(Object.hasOwn(files,path)){openDocument(path);line('Abriendo el editor de texto…','success')}else line('No existe ese documento. Prueba open ~/sobre-mi.md','error');break}const app={buscaminas:'mines',mines:'mines',ajustes:'settings',imagenes:'gallery',notas:'editor',monitor:'processes',contactos:'contact-app',editor:'editor'}[arg];if(app){showWindow(app);break}const id=(arg||'proyectos').replace(/\/$/,'').split('/').pop();if(['proyectos','.'].includes(id)){projectGrid();showWindow('files');line('Abriendo el explorador…','success')}else if(projectDetail(id)){line(`Abriendo ${id}: captura, descripción y código.`,'success')}else line(`No encuentro «${arg}». Puedes abrir: ${projects.map(p=>p.id).join(', ')}.`,'error');break}
+ case 'open':{if(Object.hasOwn(files,resolvePath(arg))||arg.endsWith('.md')){const path=resolvePath(arg);if(Object.hasOwn(files,path)){openDocument(path);line('Abriendo el editor de texto…','success')}else line('No existe ese documento. Prueba open ~/sobre-mi.md','error');break}const app={buscaminas:'mines',mines:'mines',ajustes:'settings',notas:'editor',monitor:'processes',contactos:'contact-app',editor:'editor'}[arg];if(app){showWindow(app);break}const id=(arg||'proyectos').replace(/\/$/,'').split('/').pop();if(['proyectos','.'].includes(id)){projectGrid();showWindow('files');line('Abriendo el explorador…','success')}else if(projectDetail(id)){line(`Abriendo ${id}: captura, descripción y código.`,'success')}else line(`No encuentro «${arg}». Puedes abrir: ${projects.map(p=>p.id).join(', ')}.`,'error');break}
  case 'contact':{
    line('Perfiles de contacto:');const p=line('');[['GitHub','https://github.com/todomagichere'],['LinkedIn','https://www.linkedin.com/in/robertoperezvillegas/']].forEach(([text,url])=>{const a=document.createElement('a');a.textContent=text+' ↗   ';a.href=url;a.target='_blank';a.rel='noopener noreferrer';p.append(a)});break}
  case 'fibonacci':{const n=Number(arg||'12');if(!Number.isInteger(n)||n<0||n>50){line('Prueba un número entero entre 0 y 50. Ejemplo: fibonacci 12','error');break}const values=[0,1];for(let i=2;i<=n;i++)values.push(values[i-1]+values[i-2]);line(`F(${n}) = ${values[n]}\n\n${values.slice(0,n+1).join(' → ')}`,'success');explain('Cada término suma los dos anteriores. Esta implementación recorre la secuencia una vez: tiempo O(n). Mi paquete PHP explora tres métodos. Abre open fibonacci.');break}
@@ -139,7 +139,7 @@ input.addEventListener('keydown',e=>{
  if(e.ctrlKey&&e.key.toLowerCase()==='c'){e.preventDefault();line(`visitante@roberto:${shortPath()}$ ${input.value}^C`,'muted');input.value='';scrollTerminal()}
  if(e.key==='Tab'&&!e.shiftKey){
    const parts=input.value.split(/\s+/);const fragment=parts.at(-1);let candidates;
-   if(parts.length===1)candidates=commands;else if(parts[0]==='open')candidates=['proyectos','sobre-mi.md','ajustes','imagenes','editor','monitor','contactos','buscaminas',...projects.map(p=>p.id)];else{
+   if(parts.length===1)candidates=commands;else if(parts[0]==='open')candidates=['proyectos','sobre-mi.md','ajustes','editor','monitor','contactos','buscaminas',...projects.map(p=>p.id)];else{
      const slash=fragment.lastIndexOf('/');const prefix=slash>=0?fragment.slice(0,slash+1):'';const base=resolvePath(prefix||'.');
      candidates=[...directories,...Object.keys(files)].filter(p=>p.startsWith(base+'/')&&!p.slice(base.length+1).includes('/')).map(p=>prefix+p.slice(base.length+1)+(directories.has(p)?'/':''));
    }
@@ -376,7 +376,6 @@ const applications = [
  {id:'terminal',name:'Terminal',icon:'>_',image:'assets/dock/terminal.webp',description:'Comandos y navegación'},
  {id:'files',name:'Archivos',icon:'▱',image:'assets/dock/files.webp',description:'Proyectos y documentos'},
  {id:'editor',name:'Editor de texto',icon:'▤',image:'assets/dock/editor.webp',description:'Sobre mí, tecnologías y notas'},
- {id:'gallery',name:'Imágenes',icon:'▧',image:'assets/dock/gallery.webp',description:'Capturas reales de proyectos'},
  {id:'settings',name:'Ajustes',icon:'⚙',image:'assets/dock/settings.webp',description:'Tu escritorio, a tu gusto'},
  {id:'processes',name:'Monitor de aplicaciones',icon:'▥',image:'assets/dock/computer.webp',description:'Gestiona las ventanas abiertas'},
  {id:'contact-app',name:'Contactos',icon:'↗',image:'assets/desktop/about.webp',description:'GitHub y LinkedIn'},
@@ -588,7 +587,6 @@ $('#editor-text').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.ke
 function renderApps(){const query=$('#app-search').value.toLocaleLowerCase('es');const grid=$('#app-grid');grid.replaceChildren();applications.filter(app=>(app.name+' '+app.description).toLocaleLowerCase('es').includes(query)).forEach(app=>{const button=document.createElement('button');button.dataset.open=app.id;const icon=document.createElement(app.image?'img':'span');icon.className=app.image?'launcher-image':'app-icon';if(app.image){icon.src=app.image;icon.alt=''}else icon.textContent=app.icon;const title=document.createElement('strong');title.textContent=app.name;const description=document.createElement('small');description.textContent=app.description;button.append(icon,title,description);grid.append(button)});$('#app-empty').hidden=grid.childElementCount>0}
 function showApplications(){if(!entered)enter(false);$('#app-search').value='';renderApps();$('#launcher').showModal();$('#app-search').focus()}
 $('#applications').addEventListener('click',showApplications);$('#dock-applications').addEventListener('click',showApplications);$('#app-search').addEventListener('input',renderApps);
-function renderGallery(){$('#gallery-count').textContent=projects.filter(p=>p.image).length+' imágenes de proyectos';const grid=$('#gallery-grid');projects.filter(p=>p.image).forEach(p=>{const button=document.createElement('button');button.dataset.screenshot=p.id;const img=document.createElement('img');img.src=p.image;img.alt=(p.imageLabel||'Captura')+' de '+p.title;const title=document.createElement('strong');title.textContent=p.title;button.append(img,title);grid.append(button)})}
 function renderProcesses(){if(typeof applications==='undefined')return;const list=$('#process-list');list.replaceChildren();applications.filter(app=>!document.getElementById(app.id).hidden).forEach(app=>{const row=document.createElement('div');const title=document.createElement('span');title.textContent=app.icon+'  '+app.name;const open=document.createElement('button');open.textContent='Mostrar';open.dataset.open=app.id;const close=document.createElement('button');close.textContent='Cerrar';close.setAttribute('aria-label','Cerrar '+app.name);close.addEventListener('click',()=>{document.getElementById(app.id).hidden=true;syncDock();focusTerminal()});row.append(title,open,close);list.append(row)})}
 let currentUserFolder=documentsRoot;
 let pendingUserKind='';
@@ -605,10 +603,9 @@ function showFolder(folder){
  $('#file-address').textContent='⌂ '+(isHome?home:path);
  const grid=document.createElement('div');grid.className='folder-grid';
  function addEntry(name,target,type){
-  const button=document.createElement('button');const icon=document.createElement('span');icon.className=type==='folder'||type==='gallery'?'folder-icon':'file-icon';icon.textContent=type==='folder'||type==='gallery'?'':'#';
+  const button=document.createElement('button');const icon=document.createElement('span');icon.className=type==='folder'?'folder-icon':'file-icon';icon.textContent=type==='folder'?'':'#';
   const title=document.createElement('span');title.textContent=name;button.append(icon,title);
   if(type==='builtin')button.dataset.document=name;
-  else if(type==='gallery')button.dataset.open='gallery';
   else if(type==='folder')button.dataset.folder=target;
   else button.dataset.userDocument=target;
   if((type==='folder'&&userFiles.folders.includes(target))||type==='document')makeFolderItemDraggable(button,target);
@@ -616,7 +613,7 @@ function showFolder(folder){
   grid.append(button);
  }
  {
-  if(isHome){addEntry('Proyectos','projects','folder');addEntry('Documentos','documents','folder');addEntry('Juegos','games','folder');addEntry('Escritorio',desktopRoot,'folder');addEntry('Imágenes','gallery','gallery')}
+  if(isHome){addEntry('Proyectos','projects','folder');addEntry('Documentos','documents','folder');addEntry('Juegos','games','folder');addEntry('Escritorio',desktopRoot,'folder')}
   const toolbar=document.createElement('div');toolbar.className='user-files-toolbar';
   if(!isHome&&path!==documentsRoot&&path!==desktopRoot&&path!==gamesRoot){const back=document.createElement('button');back.textContent='← Carpeta anterior';back.dataset.folder=path.slice(0,path.lastIndexOf('/'));toolbar.append(back)}
   for(const [label,kind] of [['Nueva carpeta','folder'],['Nuevo documento','document']]){const button=document.createElement('button');button.textContent=label;button.dataset.createUserFile=kind;toolbar.append(button)}
@@ -683,7 +680,7 @@ createForm.addEventListener('submit',event=>{
  const name=createName.value.trim();
  if(!name||name==='.'||name==='..'||/[\/\\\x00-\x1f]/.test(name)){createError.textContent='Escribe un nombre válido, sin barras.';return}
  const path=currentUserFolder+'/'+name;
- if((currentUserFolder===home&&['Proyectos','Documentos','Escritorio','Imágenes','Juegos'].includes(name))||directories.has(path)||Object.hasOwn(files,path)){createError.textContent='Ya existe un elemento con ese nombre.';return}
+ if((currentUserFolder===home&&['Proyectos','Documentos','Escritorio','Juegos'].includes(name))||directories.has(path)||Object.hasOwn(files,path)){createError.textContent='Ya existe un elemento con ese nombre.';return}
  try{
   if(pendingUserKind==='folder'){persistUserFiles({...userFiles,folders:[...userFiles.folders,path]});directories.add(path)}
   else {persistUserFiles({...userFiles,documents:{...userFiles.documents,[path]:''}});files[path]=''}
@@ -695,6 +692,6 @@ $('#create-user-file-cancel').addEventListener('click',()=>createDialog.close())
 document.querySelectorAll('button[data-layout-style]').forEach(button=>button.addEventListener('click',()=>{document.body.dataset.layoutStyle=button.dataset.layoutStyle;document.querySelectorAll('button[data-layout-style]').forEach(option=>option.setAttribute('aria-pressed',String(option===button)))}));
 document.querySelectorAll('[data-size]').forEach(button=>button.addEventListener('click',()=>{document.body.classList.remove('small-text','large-text');if(button.dataset.size==='small')document.body.classList.add('small-text');if(button.dataset.size==='large')document.body.classList.add('large-text');document.querySelectorAll('[data-size]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)))}));
 $('#reduce-motion').checked=matchMedia('(prefers-reduced-motion:reduce)').matches;$('#reduce-motion').addEventListener('change',()=>document.body.classList.toggle('reduce-motion',$('#reduce-motion').checked));
-clock();setInterval(clock,30000);projectGrid();welcome();loadDocument(home+'/sobre-mi.md');renderGallery();renderApps();syncDock();initDesktopIcons();refreshDesktopIcons();projectGrid();
+clock();setInterval(clock,30000);projectGrid();welcome();loadDocument(home+'/sobre-mi.md');renderApps();syncDock();initDesktopIcons();refreshDesktopIcons();projectGrid();
 let sessionActive=false;try{sessionActive=localStorage.getItem(sessionKey)==='active'}catch{}
 if(sessionActive)enter();else $('#enter').focus({preventScroll:true});

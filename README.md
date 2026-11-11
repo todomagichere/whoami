@@ -1,6 +1,6 @@
 # whoami — portfolio-os
 
-Portfolio de Roberto Pérez Villegas como un ordenador con escritorio inspirado en Linux. Escritorio ampliado, ventanas movibles y redimensionables, terminal didáctica y diez aplicaciones: Archivos, Terminal, Editor de texto, Imágenes, Ajustes, Monitor de aplicaciones, Contactos, Ayuda, Buscaminas y Snake.
+Portfolio de Roberto Pérez Villegas como un ordenador con escritorio inspirado en Linux. Escritorio ampliado, ventanas movibles y redimensionables, terminal didáctica y aplicaciones como: Archivos, Terminal, Editor de texto, Ajustes, Monitor de aplicaciones, Contactos, Ayuda, Buscaminas y Snake.
 
 ## Ver en local
 
@@ -17,7 +17,7 @@ Desde la raíz del repositorio, abre http://localhost:8081. La primera visita mu
 - `open etimologia` abre su ficha con captura y enlaces.
 - `open sobre-mi.md` abre el documento en el editor inspirado en gedit.
 - Editor: documentos, ajuste de líneas, posición del cursor, edición y guardado; las notas y los archivos creados se guardan automáticamente en localStorage; las ediciones de los documentos del portfolio duran durante la visita; Ctrl+S guarda. `cat ~/notas.md` permite leer la nota guardada.
-- Menú Aplicaciones con búsqueda; galería de capturas reales; monitor para mostrar o cerrar ventanas.
+- Menú Aplicaciones con búsqueda; capturas en las fichas de proyectos; monitor para mostrar o cerrar ventanas.
 - Calendario: consulta fechas y añade o elimina eventos, guardados en el navegador.
 - Juegos: carpeta del escritorio con accesos fijos a Buscaminas, Snake, Quake III Arena, Neverball y Micropolis.
 - Neverball y Micropolis: versiones web de [Neverball](https://play.neverball.org/) y [micropolisJS](https://github.com/graememcc/micropolisJS), cargadas desde sus sitios al abrir cada juego.
