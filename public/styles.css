@@ -255,3 +255,10 @@ body[data-theme="forest"] .wallpaper{background-color:#314b42}
 body[data-theme="ocean"] .wallpaper{background-color:#284f68}
 body[data-theme="plum"] .wallpaper{background-color:#5c3959}
 body[data-theme="sand"] .wallpaper{background-color:#a67c55}
+
+/* Wider scrollbars across windows, panels, and text areas. */
+*,.terminal-body,.project-content{scrollbar-width:auto;scrollbar-color:auto}
+*::-webkit-scrollbar{width:24px;height:24px}
+*::-webkit-scrollbar-track{background:#e5dfea}
+*::-webkit-scrollbar-thumb{background:#8c7c98;border:5px solid #e5dfea;border-radius:12px}
+*::-webkit-scrollbar-thumb:hover{background:#6c5a7b}
