@@ -271,3 +271,6 @@ body[data-theme="sand"] .wallpaper{background-color:#a67c55}
 #contact-app:not([hidden]) .contact-content>:nth-child(4){animation-delay:.18s}
 #contact-app:not([hidden]) .contact-content>:nth-child(5){animation-delay:.24s}
 #contact-app:not([hidden]) .contact-content>:nth-child(6){animation-delay:.30s}
+
+#update-notice{position:fixed;z-index:10000;right:16px;top:54px;display:flex;align-items:center;gap:12px;max-width:calc(100vw - 32px);padding:12px 14px;border:1px solid #80718e;border-radius:8px;background:#302b39;color:#fff;box-shadow:0 8px 24px #0005;font-size:14px}
+#update-notice button{padding:7px 10px;border-radius:5px;background:#c9b5df;color:#302537;font-size:13px;font-weight:700}
