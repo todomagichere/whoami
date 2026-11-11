@@ -201,14 +201,24 @@ function initDesktopIcons(){
    if(!drag||event.pointerId!==drag.id)return;
    const dx=event.clientX-drag.x,dy=event.clientY-drag.y;
    if(!drag.moved&&Math.hypot(dx,dy)<6)return;
-   drag.moved=true;icon.classList.add('dragging');place(icon,drag.left+dx,drag.top+dy);event.preventDefault();
+   drag.moved=true;icon.classList.add('dragging');place(icon,drag.left+dx,drag.top+dy);if(icon.dataset.folder||icon.dataset.userDocument)highlightDropTarget(icon,event.clientX,event.clientY);event.preventDefault();
   });
   icon.addEventListener('pointerup',event=>{
    if(!drag||event.pointerId!==drag.id)return;
-   if(drag.moved){remember(icon);save();suppressClick=true;setTimeout(()=>{suppressClick=false},0)}
+   if(drag.moved){
+    const source=icon.dataset.folder||icon.dataset.userDocument;
+    const target=source&&findDropTarget(icon,event.clientX,event.clientY);
+    clearDropTarget();
+    if(target){
+     const moved=moveUserItem(source,target.path);
+     if(moved){icon.remove();icons.splice(icons.indexOf(icon),1);delete positions[iconKey(icon)];save();refreshDesktopIcons();if(!$('#files').hidden&&$('#project-content').dataset.userFolder)showFolder(currentUserFolder)}
+     else place(icon,drag.left,drag.top);
+    }else{remember(icon);save()}
+    suppressClick=true;setTimeout(()=>{suppressClick=false},0);
+   }
    drag=null;icon.classList.remove('dragging');
   });
-  icon.addEventListener('pointercancel',()=>{drag=null;icon.classList.remove('dragging');arrange()});
+  icon.addEventListener('pointercancel',()=>{drag=null;icon.classList.remove('dragging');clearDropTarget();arrange()});
   icon.addEventListener('click',event=>{if(suppressClick){event.preventDefault();event.stopImmediatePropagation();suppressClick=false}},true);
   icon.addEventListener('keydown',event=>{
    if(event.altKey||event.ctrlKey||event.metaKey||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key))return;
@@ -218,13 +228,14 @@ function initDesktopIcons(){
  }
  icons.forEach(registerIcon);
  refreshDesktopIcons=(createdPath,desktopPoint)=>{
+  for(let i=icons.length-1;i>=0;i--){const key=iconKey(icons[i]);if(key.startsWith(prefix)&&!userFiles.folders.includes(key)&&!isUserDocument(key)){icons[i].remove();icons.splice(i,1);delete positions[key];save()}}
   const existing=new Set(icons.map(iconKey));
   const add=(path,isFolder)=>{
    if(existing.has(path)||!path.startsWith(prefix)||path.slice(prefix.length).includes('/'))return;
    const icon=makeUserIcon(path,isFolder),index=icons.length;icons.push(icon);
    const height=icon.offsetHeight||80,width=icon.offsetWidth||104;
    const rows=Math.max(1,Math.floor((desktop.clientHeight-$('.panel').offsetHeight-100)/(height+8)));
-   initial.push({left:8+Math.floor(index/rows)*(width+8),top:$('.panel').offsetHeight+10+(index%rows)*(height+8)});
+   initial[index]={left:8+Math.floor(index/rows)*(width+8),top:$('.panel').offsetHeight+10+(index%rows)*(height+8)};
    registerIcon(icon,index);const b=bounds(icon),pos=positions[iconKey(icon)];
    if(path===createdPath&&desktopPoint){place(icon,desktopPoint.x-icon.offsetWidth/2,desktopPoint.y);remember(icon);save()}
    else place(icon,pos.x*b.x,b.top+pos.y*b.y);
@@ -355,6 +366,84 @@ function persistUserFiles(next){localStorage.setItem(userFilesKey,JSON.stringify
 function isUserDocument(path){return Object.hasOwn(userFiles.documents,path)}
 let currentDocument=home+'/sobre-mi.md';
 const drafts=new Map();
+let highlightedDropTarget=null;
+let fileMessageTimer=0;
+function fileMessage(message){
+ const status=$('#file-move-status');status.textContent=message;status.hidden=false;
+ clearTimeout(fileMessageTimer);fileMessageTimer=setTimeout(()=>{status.hidden=true},4000);
+}
+function folderPath(button){
+ const path=button?.dataset.folder;
+ if(path==='documents')return documentsRoot;
+ if(path==='home')return home;
+ return path&&directories.has(path)?path:null;
+}
+function findDropTarget(source,x,y){
+ for(const element of document.elementsFromPoint(x,y)){
+  if(element===source||source.contains(element))continue;
+  const button=element.closest('button[data-folder]');
+  if(button&&button!==source){const path=folderPath(button);if(path)return {element:button,path}}
+  if(element.closest('.window,.dock,.panel'))return null;
+ }
+ return null;
+}
+function clearDropTarget(){if(highlightedDropTarget)highlightedDropTarget.classList.remove('drop-target');highlightedDropTarget=null}
+function highlightDropTarget(source,x,y){
+ const target=findDropTarget(source,x,y);clearDropTarget();
+ if(target){highlightedDropTarget=target.element;highlightedDropTarget.classList.add('drop-target')}
+}
+function moveUserItem(source,destination){
+ const isFolder=userFiles.folders.includes(source);
+ if(!isFolder&&!isUserDocument(source))return false;
+ if(source===destination||destination.startsWith(source+'/')){fileMessage('No puedes mover una carpeta dentro de sí misma.');return false}
+ if(!directories.has(destination)){fileMessage('La carpeta de destino no existe.');return false}
+ const nextPath=destination+'/'+source.slice(source.lastIndexOf('/')+1);
+ if(nextPath===source)return false;
+ if(directories.has(nextPath)||Object.hasOwn(files,nextPath)){fileMessage('Ya existe un archivo o carpeta con ese nombre.');return false}
+ const remap=path=>path===source||path.startsWith(source+'/')?nextPath+path.slice(source.length):path;
+ const next={folders:userFiles.folders.map(remap),documents:{}};
+ Object.entries(userFiles.documents).forEach(([path,content])=>{next.documents[remap(path)]=content});
+ try{persistUserFiles(next)}catch{fileMessage('No se pudo mover: comprueba el almacenamiento del navegador.');return false}
+ // Update all in-memory paths only after the entire change has been saved.
+ for(const path of [...directories])if(path===source||path.startsWith(source+'/')){directories.delete(path);directories.add(remap(path))}
+ for(const path of Object.keys(files))if(path===source||path.startsWith(source+'/')){files[remap(path)]=files[path];delete files[path]}
+ for(const [path,text] of [...drafts])if(path===source||path.startsWith(source+'/')){drafts.delete(path);drafts.set(remap(path),text)}
+ if(currentDocument===source||currentDocument.startsWith(source+'/')){
+  currentDocument=remap(currentDocument);
+  const name=currentDocument.slice(home.length+1);$('#editor-tab-name').textContent=name;$('#editor-title').textContent=name+' — gedit';
+ }
+ for(const option of $('#editor-file').options){const path=home+'/'+option.value;const updated=remap(path);if(updated!==path){option.value=updated.slice(home.length+1);option.textContent=option.value}}
+ if(currentDocument===nextPath||currentDocument.startsWith(nextPath+'/'))$('#editor-file').value=currentDocument.slice(home.length+1);
+ if(cwd===source||cwd.startsWith(source+'/')){cwd=remap(cwd);updatePrompt()}
+ if(currentUserFolder===source||currentUserFolder.startsWith(source+'/'))currentUserFolder=remap(currentUserFolder);
+ fileMessage('Elemento movido a '+destination.slice(destination.lastIndexOf('/')+1)+'.');
+ return true;
+}
+function makeFolderItemDraggable(button,source){
+ button.classList.add('user-file-draggable');
+ let drag=null,suppressClick=false;
+ button.addEventListener('pointerdown',event=>{
+  if(!event.isPrimary||event.button!==0)return;
+  drag={id:event.pointerId,x:event.clientX,y:event.clientY,moved:false};button.setPointerCapture(event.pointerId);
+ });
+ button.addEventListener('pointermove',event=>{
+  if(!drag||drag.id!==event.pointerId)return;
+  if(!drag.moved&&Math.hypot(event.clientX-drag.x,event.clientY-drag.y)<6)return;
+  drag.moved=true;button.classList.add('dragging-file');highlightDropTarget(button,event.clientX,event.clientY);event.preventDefault();
+ });
+ button.addEventListener('pointerup',event=>{
+  if(!drag||drag.id!==event.pointerId)return;
+  if(drag.moved){
+   const target=findDropTarget(button,event.clientX,event.clientY);clearDropTarget();
+   if(target&&moveUserItem(source,target.path)){refreshDesktopIcons();showFolder(currentUserFolder)}
+   suppressClick=true;setTimeout(()=>{suppressClick=false},0);
+  }
+  drag=null;button.classList.remove('dragging-file');
+ });
+ button.addEventListener('pointercancel',()=>{drag=null;button.classList.remove('dragging-file');clearDropTarget()});
+ button.addEventListener('click',event=>{if(suppressClick){event.preventDefault();event.stopImmediatePropagation()}},true);
+}
+
 function rememberDraft(){if(currentDocument&&$('#editor-text').value!==files[currentDocument])drafts.set(currentDocument,$('#editor-text').value);else drafts.delete(currentDocument)}
 function loadDocument(path){
  currentDocument=path;$('#editor-text').value=drafts.get(path)??files[path];
@@ -414,6 +503,7 @@ function showFolder(folder){
   else if(type==='gallery')button.dataset.open='gallery';
   else if(type==='folder')button.dataset.folder=target;
   else button.dataset.userDocument=target;
+  if((type==='folder'&&userFiles.folders.includes(target))||type==='document')makeFolderItemDraggable(button,target);
   grid.append(button);
  }
  {
