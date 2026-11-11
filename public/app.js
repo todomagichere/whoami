@@ -310,6 +310,8 @@ function initDesktopIcons(){
   contextDeletePath=itemPath&&(userFiles.folders.includes(itemPath)||isUserDocument(itemPath))?itemPath:null;
   remove.hidden=!contextDeletePath;
   organize.hidden=!onDesktop;
+  menu.querySelectorAll('[data-context-create]').forEach(button=>{button.hidden=folder===gamesRoot&&!onDesktop});
+  if([...menu.querySelectorAll('button')].every(button=>button.hidden)){closeMenu();return}
   const rect=desktop.getBoundingClientRect();
   const targetRect=event.target.getBoundingClientRect();
   const x=(event.clientX||targetRect.left)-rect.left,y=(event.clientY||targetRect.bottom)-rect.top;
@@ -317,7 +319,7 @@ function initDesktopIcons(){
   menu.hidden=false;
   menu.style.left=`${clamp(x,0,Math.max(0,rect.width-menu.offsetWidth))}px`;
   menu.style.top=`${clamp(y,$('.panel').offsetHeight,Math.max($('.panel').offsetHeight,rect.height-menu.offsetHeight))}px`;
-  menu.querySelector('[data-context-create]').focus({preventScroll:true});
+  menu.querySelector('button:not([hidden])').focus({preventScroll:true});
  });
  organize.addEventListener('click',organizeIcons);
  remove.addEventListener('click',()=>{const path=contextDeletePath;closeMenu();if(path)openDeleteDialog(path)});
@@ -616,7 +618,7 @@ function showFolder(folder){
   if(isHome){addEntry('Proyectos','projects','folder');addEntry('Documentos','documents','folder');addEntry('Juegos','games','folder');addEntry('Escritorio',desktopRoot,'folder')}
   const toolbar=document.createElement('div');toolbar.className='user-files-toolbar';
   if(!isHome&&path!==documentsRoot&&path!==desktopRoot&&path!==gamesRoot){const back=document.createElement('button');back.textContent='← Carpeta anterior';back.dataset.folder=path.slice(0,path.lastIndexOf('/'));toolbar.append(back)}
-  for(const [label,kind] of [['Nueva carpeta','folder'],['Nuevo documento','document']]){const button=document.createElement('button');button.textContent=label;button.dataset.createUserFile=kind;toolbar.append(button)}
+  if(path!==gamesRoot)for(const [label,kind] of [['Nueva carpeta','folder'],['Nuevo documento','document']]){const button=document.createElement('button');button.textContent=label;button.dataset.createUserFile=kind;toolbar.append(button)}
   area.append(toolbar);
   if(path===documentsRoot)for(const name of ['sobre-mi.md','tecnologias.md','notas.md','README.md']){const location=userFiles.shortcuts['document:'+name];if(!location||location===documentsRoot)addEntry(name,null,'builtin')}
   const prefix=path+'/';
@@ -671,12 +673,14 @@ document.addEventListener('click',event=>{
  pendingUserKind=create.dataset.createUserFile;creationFromDesktop=false;openCreateDialog();
 });
 function openCreateDialog(){
+ if(currentUserFolder===gamesRoot)return;
  createName.value='';createError.textContent='';
  $('#create-user-file-title').textContent=pendingUserKind==='folder'?'Nueva carpeta':'Nuevo documento';
  createDialog.showModal();createName.focus();
 }
 createForm.addEventListener('submit',event=>{
  event.preventDefault();
+ if(currentUserFolder===gamesRoot){createError.textContent='No se pueden crear elementos en Juegos.';return}
  const name=createName.value.trim();
  if(!name||name==='.'||name==='..'||/[\/\\\x00-\x1f]/.test(name)){createError.textContent='Escribe un nombre válido, sin barras.';return}
  const path=currentUserFolder+'/'+name;
