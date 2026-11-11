@@ -61,7 +61,10 @@ function projectGrid(){
  delete $('#project-content').dataset.userFolder;
  $('.file-status').textContent=projects.length+' proyectos · código abierto y experimentos';
  $('#file-address').textContent='⌂ /home/roberto/proyectos';
- const area=$('#project-content');area.replaceChildren();area.dataset.userFolder=home+'/proyectos';currentUserFolder=home+'/proyectos';const grid=document.createElement('div');grid.className='project-grid';
+ const area=$('#project-content');area.replaceChildren();area.dataset.userFolder=home+'/proyectos';currentUserFolder=home+'/proyectos';
+ const toolbar=document.createElement('div');toolbar.className='user-files-toolbar';
+ for(const [label,kind] of [['Nueva carpeta','folder'],['Nuevo documento','document']]){const button=document.createElement('button');button.textContent=label;button.dataset.createUserFile=kind;toolbar.append(button)}
+ area.append(toolbar);const grid=document.createElement('div');grid.className='project-grid';
  projects.forEach(p=>{const button=document.createElement('button');button.className='project-tile';button.dataset.project=p.id;button.setAttribute('aria-label',`Abrir ${p.title}`);
  if(p.image){const img=document.createElement('img');img.src=p.thumbnail||p.image;img.alt=p.thumbnail?`Portada de ${p.title}`:`${p.imageLabel||'Captura real'} de ${p.title}`;img.loading='lazy';if(p.id==='ibexa-breadcrumbs-bundle')img.className='contained-image';button.append(img)}else{const art=document.createElement('div');art.className='code-preview';art.textContent=p.symbol;button.append(art)}
  const title=document.createElement('strong');title.textContent=p.title;const tag=document.createElement('small');tag.textContent=p.tag;button.append(title,tag);grid.append(button)});area.append(grid);
@@ -170,7 +173,7 @@ function resetWindowPositions(){windows.forEach(win=>{win.style.left='';win.styl
 let refreshDesktopIcons=(createdPath,desktopPoint)=>{};
 const shortcutTemplates=new Map();
 const defaultDesktopShortcuts=new Set();
-const shortcutId=button=>button.dataset.document?'document:'+button.dataset.document:button.dataset.open?'app:'+button.dataset.open:null;
+const shortcutId=button=>button.dataset.folder==='projects'?'app:files':button.dataset.document?'document:'+button.dataset.document:button.dataset.open?'app:'+button.dataset.open:null;
 function initDesktopIcons(){
  const desktop=$('#desktop'),container=$('.desktop-icons'),storageKey='whoami.desktop-icons.v1';
  function makeUserIcon(path,isFolder){
@@ -193,7 +196,7 @@ function initDesktopIcons(){
   button.dataset.document=name;button.append(image,document.createTextNode(name));shortcutTemplates.set('document:'+name,button);
  }
  const icons=[...container.querySelectorAll('button')];
- const iconKey=icon=>icon.dataset.open||icon.dataset.document||icon.dataset.folder||icon.dataset.userDocument;
+ const iconKey=icon=>icon.dataset.folder==='projects'?'files':icon.dataset.open||icon.dataset.document||icon.dataset.folder||icon.dataset.userDocument;
  const screen=desktop.getBoundingClientRect();
  const initial=icons.map(icon=>{const rect=icon.getBoundingClientRect();return {left:rect.left-screen.left,top:rect.top-screen.top}});
  let saved={};try{saved=JSON.parse(localStorage.getItem(storageKey)||'{}')||{}}catch{}
@@ -223,7 +226,7 @@ function initDesktopIcons(){
   icon.addEventListener('pointerup',event=>{
    if(!drag||event.pointerId!==drag.id)return;
    if(drag.moved){
-    const source=icon.dataset.folder||icon.dataset.userDocument||shortcutId(icon);
+    const source=shortcutId(icon)||icon.dataset.folder||icon.dataset.userDocument;
     const target=source&&findDropTarget(icon,event.clientX,event.clientY);
     clearDropTarget();
     if(target){
@@ -447,7 +450,9 @@ function appendShortcuts(grid,path){
 function moveUserItem(source,destination){
  const isFolder=userFiles.folders.includes(source);
  if(!isFolder&&!isUserDocument(source))return false;
- if(source===destination||destination.startsWith(source+'/')){fileMessage('No puedes mover una carpeta dentro de sí misma.');return false}
+ const projectLocation=userFiles.shortcuts['app:files'];
+ const containsProjects=isFolder&&projectLocation&&(projectLocation===source||projectLocation.startsWith(source+'/'));
+ if(source===destination||destination.startsWith(source+'/')||(containsProjects&&(destination===home+'/proyectos'||destination.startsWith(home+'/proyectos/')))){fileMessage('No puedes mover una carpeta dentro de sí misma.');return false}
  if(!directories.has(destination)){fileMessage('La carpeta de destino no existe.');return false}
  const nextPath=destination+'/'+source.slice(source.lastIndexOf('/')+1);
  if(nextPath===source)return false;
@@ -557,7 +562,7 @@ let currentUserFolder=documentsRoot;
 let pendingUserKind='';
 let contextCreationFolder=desktopRoot,contextFromDesktop=false,creationFromDesktop=false,contextDesktopPoint=null,creationDesktopPoint=null;
 function showFolder(folder){
- if(folder==='projects'){projectGrid();showWindow('files');return}
+ if(folder==='projects'||folder===home+'/proyectos'){projectGrid();showWindow('files');return}
  const area=$('#project-content');area.replaceChildren();delete area.dataset.userFolder;
  const isHome=folder==='home';
  const path=isHome?home:folder==='documents'?documentsRoot:folder;
