@@ -197,3 +197,15 @@ body[data-layout-style="windows31"] .desktop-context-menu button span{color:inhe
 .file-move-status{position:absolute;z-index:210;left:50%;bottom:100px;transform:translateX(-50%);max-width:min(90%,480px);padding:11px 16px;border:1px solid #756482;border-radius:8px;background:#302b38;color:#f5eff6;box-shadow:0 8px 24px #0005;font-size:14px;text-align:center;pointer-events:none}
 .folder-grid button.folder-shortcut{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;overflow-wrap:anywhere}
 .folder-shortcut-image{width:38px;height:38px;object-fit:contain}
+
+/* Quake III demo */
+.quake-window{width:min(900px,86vw);height:min(660px,72vh)}
+.quake-content{height:calc(100% - 48px);overflow:auto;background:#171923;color:#eee9e6}
+.quake-intro{position:relative;min-height:100%;overflow:hidden;padding:clamp(26px,5vw,54px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;background:radial-gradient(ellipse at 80% 50%,#67332f60,transparent 50%),linear-gradient(135deg,#1c1d27,#25212b)}
+.quake-intro-mark{position:absolute;right:8%;top:50%;transform:translateY(-50%);font:900 clamp(110px,21vw,250px)/1 var(--display);letter-spacing:-.12em;color:#e2694920;pointer-events:none;user-select:none}
+.quake-intro .eyebrow{color:#edaa8f;position:relative}.quake-intro h3{position:relative;font:800 clamp(32px,4vw,50px)/1 var(--display);letter-spacing:-.04em;margin:14px 0}.quake-intro>p{position:relative;max-width:430px;line-height:1.5;color:#d1c7c6}.quake-facts{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0 22px;position:relative}.quake-facts span{padding:6px 9px;border:1px solid #a6847c66;border-radius:4px;font:12px var(--mono);color:#dfc8be}
+#quake-start{position:relative;display:flex;align-items:center;gap:20px;padding:13px 18px;border-radius:5px;background:#dd6c4e;color:#211a1d;font-weight:700}#quake-start span{font-size:20px}.quake-intro .quake-note,.quake-intro .quake-credit{font-size:12px;color:#b8a9a7;margin:17px 0 0}.quake-credit a{text-decoration:underline;text-underline-offset:3px}
+.quake-game{height:100%;display:flex;flex-direction:column;background:#000}.quake-game-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;color:#d4c9c4;background:#24202a;font-size:12px}.quake-game-bar button{padding:6px 10px;border:1px solid #74616a;border-radius:4px;font-size:12px}.quake-frame-container{flex:1;min-height:0}.quake-frame-container iframe{display:block;border:0;width:100%;height:100%;background:#000}
+.launcher-image{display:block;width:40px;height:40px;object-fit:contain}
+@media(max-width:700px){.quake-window{width:calc(100% - 16px);height:calc(100% - 235px)}.quake-intro{padding:24px}.quake-intro-mark{opacity:.5}}
+@media(max-width:420px){.dock button,.dock a{width:calc((100vw - 30px)/10)}.dock .dock-image{width:min(29px,calc((100vw - 35px)/10));height:auto}}

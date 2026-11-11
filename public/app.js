@@ -19,7 +19,7 @@ let historyIndex = 0;
 const home = '/home/roberto';
 const input = $('#command-input');
 const output = $('#terminal-output');
-const commands = ['help','whoami','neofetch','ls','pwd','cd','cat','open','projects','contact','fibonacci','snake','clear','history','date','echo','exit'];
+const commands = ['help','whoami','neofetch','ls','pwd','cd','cat','open','projects','contact','fibonacci','snake','quake','clear','history','date','echo','exit'];
 const about = 'Roberto Pérez Villegas\nDesarrollador · @todomagichere\n\nSoy desarrollador de software con 15 años de experiencia. Trabajo principalmente con PHP, Symfony y JavaScript.\n\nEste portfolio reúne proyectos que he desarrollado, entre ellos extensiones para Ibexa y Firefox, juegos y aplicaciones web. Las fichas incluyen descripciones, enlaces al código y capturas cuando están disponibles.';
 const files = {
   [`${home}/sobre-mi.md`]: about,
@@ -102,7 +102,7 @@ function run(raw){
  switch(name){
  case 'help':
    line('COMANDOS DISPONIBLES','success');
-   line('whoami              Quién soy\nneofetch            Mi ficha de desarrollador\nls [carpeta]        Listar archivos\npwd                 Mostrar dónde estás\ncd proyectos        Entrar en una carpeta\ncd ..               Volver a la carpeta anterior\ncat sobre-mi.md     Leer un archivo\nopen etimologia     Abrir un proyecto\nopen sobre-mi.md    Leer en el editor\nopen ajustes        Personalizar escritorio\nopen monitor        Ventanas abiertas\nsnake               Abrir la sala recreativa\nprojects            Abrir el explorador\ncontact             Encontrarme en la red\nfibonacci 12        Calcular y aprender\nclear               Limpiar la terminal\nhistory             Ver tus comandos\nexit                Volver a la pantalla de entrada');
+   line('whoami              Quién soy\nneofetch            Mi ficha de desarrollador\nls [carpeta]        Listar archivos\npwd                 Mostrar dónde estás\ncd proyectos        Entrar en una carpeta\ncd ..               Volver a la carpeta anterior\ncat sobre-mi.md     Leer un archivo\nopen etimologia     Abrir un proyecto\nopen sobre-mi.md    Leer en el editor\nopen ajustes        Personalizar escritorio\nopen monitor        Ventanas abiertas\nsnake               Abrir Snake\nquake               Abrir Quake III Arena\nprojects            Abrir el explorador\ncontact             Encontrarme en la red\nfibonacci 12        Calcular y aprender\nclear               Limpiar la terminal\nhistory             Ver tus comandos\nexit                Volver a la pantalla de entrada');
    explain('Tab autocompleta. ↑ y ↓ recorren el historial. Ctrl+L limpia. Los comandos son una simulación local para explorar el portfolio.');break;
  case 'whoami':line(about,'success');explain('En Linux, whoami devuelve el usuario actual. Aquí te presenta al dueño del escritorio.');break;
  case 'neofetch':line('      .--.       rperez@portfolio\n     |o_o |      ──────────────────────────\n     |:_/ |      Nombre   Roberto Pérez\n    //   \\ \\     GitHub   @todomagichere\n   (|     | )    Código   PHP · Symfony · JavaScript\n     |           Experiencia   15 años\n  /\u0027\\_   _/\u0027\\   Taller   Ibexa · Firefox · Web\n  \\___)=(___/    Proyectos   '+projects.length+' seleccionados','accent');explain('neofetch suele mostrar información del sistema. Esta versión muestra mi perfil y los proyectos seleccionados.');break;
@@ -111,6 +111,7 @@ function run(raw){
  case 'cd':{const path=resolvePath(arg||'~');if(directories.has(path)){cwd=path;updatePrompt();explain(`Ahora estás en ${shortPath()}. Prueba ls.`)}else line(`cd: no existe la carpeta «${arg}». Prueba cd ~/proyectos`,'error');break}
  case 'cat':{if(!arg){line('Uso: cat <archivo>. Por ejemplo: cat ~/sobre-mi.md','muted');break}const path=resolvePath(arg);if(Object.hasOwn(files,path)){line(files[path]);explain('cat muestra el contenido de un archivo de texto.')}else line(`cat: no existe «${arg}». Usa ls para ver los archivos de esta carpeta.`,'error');break}
  case 'snake':showWindow('snake');line('Snake abierto.','success');break;
+ case 'quake':showWindow('quake');line('Quake III Arena abierto.','success');break;
  case 'projects':projectGrid();showWindow('files');line('Abriendo ~/proyectos…','success');break;
  case 'open':{if(Object.hasOwn(files,resolvePath(arg))||arg.endsWith('.md')){const path=resolvePath(arg);if(Object.hasOwn(files,path)){openDocument(path);line('Abriendo el editor de texto…','success')}else line('No existe ese documento. Prueba open ~/sobre-mi.md','error');break}const app={buscaminas:'mines',mines:'mines',ajustes:'settings',imagenes:'gallery',notas:'editor',monitor:'processes',contactos:'contact-app',editor:'editor'}[arg];if(app){showWindow(app);break}const id=(arg||'proyectos').replace(/\/$/,'').split('/').pop();if(['proyectos','.'].includes(id)){projectGrid();showWindow('files');line('Abriendo el explorador…','success')}else if(projectDetail(id)){line(`Abriendo ${id}: captura, descripción y código.`,'success')}else line(`No encuentro «${arg}». Puedes abrir: ${projects.map(p=>p.id).join(', ')}.`,'error');break}
  case 'contact':{
@@ -368,6 +369,7 @@ const applications = [
  {id:'contact-app',name:'Contactos',icon:'↗',description:'GitHub y LinkedIn'},
  {id:'mines',name:'Buscaminas',icon:'✹',description:'8 × 8 · diez minas, una pausa'},
  {id:'snake',name:'Snake',icon:'▦',description:'Arcade · flechas, WASD y píxeles'},
+ {id:'quake',name:'Quake III Arena',icon:'◉',image:'assets/dock/quake.webp',description:'Demo clásica · un jugador'},
  {id:'guide',name:'Ayuda',icon:'?',description:'Aprende a usar la terminal'}
 ];
 files[home+'/sobre-mi.md']='# Roberto Pérez Villegas\n\nDesarrollador · @todomagichere\n\n## Perfil\n\n'+about.split('\n\n').slice(1).join('\n\n')+'\n';
@@ -553,7 +555,7 @@ $('#editor-wrap').addEventListener('change',()=>{const wrap=$('#editor-wrap').ch
 $('#editor-undo').addEventListener('click',()=>{drafts.delete(currentDocument);loadDocument(currentDocument);$('#editor-text').focus()});
 $('#editor-file').addEventListener('change',()=>openDocument(home+'/'+$('#editor-file').value));
 $('#editor-text').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();saveDocument()}});
-function renderApps(){const query=$('#app-search').value.toLocaleLowerCase('es');const grid=$('#app-grid');grid.replaceChildren();applications.filter(app=>(app.name+' '+app.description).toLocaleLowerCase('es').includes(query)).forEach(app=>{const button=document.createElement('button');button.dataset.open=app.id;const icon=document.createElement('span');icon.className='app-icon';icon.textContent=app.icon;const title=document.createElement('strong');title.textContent=app.name;const description=document.createElement('small');description.textContent=app.description;button.append(icon,title,description);grid.append(button)});$('#app-empty').hidden=grid.childElementCount>0}
+function renderApps(){const query=$('#app-search').value.toLocaleLowerCase('es');const grid=$('#app-grid');grid.replaceChildren();applications.filter(app=>(app.name+' '+app.description).toLocaleLowerCase('es').includes(query)).forEach(app=>{const button=document.createElement('button');button.dataset.open=app.id;const icon=document.createElement(app.image?'img':'span');icon.className=app.image?'launcher-image':'app-icon';if(app.image){icon.src=app.image;icon.alt=''}else icon.textContent=app.icon;const title=document.createElement('strong');title.textContent=app.name;const description=document.createElement('small');description.textContent=app.description;button.append(icon,title,description);grid.append(button)});$('#app-empty').hidden=grid.childElementCount>0}
 function showApplications(){if(!entered)enter(false);$('#app-search').value='';renderApps();$('#launcher').showModal();$('#app-search').focus()}
 $('#applications').addEventListener('click',showApplications);$('#dock-applications').addEventListener('click',showApplications);$('#app-search').addEventListener('input',renderApps);
 function renderGallery(){$('#gallery-count').textContent=projects.filter(p=>p.image).length+' imágenes de proyectos';const grid=$('#gallery-grid');projects.filter(p=>p.image).forEach(p=>{const button=document.createElement('button');button.dataset.screenshot=p.id;const img=document.createElement('img');img.src=p.image;img.alt=(p.imageLabel||'Captura')+' de '+p.title;const title=document.createElement('strong');title.textContent=p.title;button.append(img,title);grid.append(button)})}

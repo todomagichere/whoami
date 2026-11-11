@@ -18,6 +18,7 @@ Desde la raíz del repositorio, abre http://localhost:8081. La primera visita mu
 - `open sobre-mi.md` abre el documento en el editor inspirado en gedit.
 - Editor: documentos, ajuste de líneas, posición del cursor, edición y guardado; las notas y los archivos creados se guardan automáticamente en localStorage; las ediciones de los documentos del portfolio duran durante la visita; Ctrl+S guarda. `cat ~/notas.md` permite leer la nota guardada.
 - Menú Aplicaciones con búsqueda; galería de capturas reales; monitor para mostrar o cerrar ventanas.
+- Quake III Arena: demo de [QuakeJS](https://github.com/mcftira/quakejs), cargada desde un servicio externo solo al iniciarla. Requiere conexión, aceptar la licencia de la demo y almacenamiento del navegador para los datos del juego.
 - Documentos: crea carpetas y archivos de texto, navega por ellos, edítalos y arrástralos a otras carpetas; se guardan automáticamente en el navegador.
 - Mi PC: disco virtual con el tamaño aproximado de las notas, las preferencias, la imagen de fondo y las cookies visibles; también muestra la estimación de almacenamiento del navegador para el sitio.
 - Ajustes: diseños Linux, Windows 11 y Windows 3.1; texto pequeño, cómodo o grande (grande por defecto); fondos de color, tres ilustraciones WebP, selector de color libre e imagen propia del dispositivo; reducción de animaciones. Los fondos seleccionados, incluidas las imágenes propias, se guardan en el navegador sin subirlas a un servidor.
@@ -38,6 +39,7 @@ La terminal simula un sistema de archivos local. Nunca ejecuta comandos del sist
 - `public/app.js`: comandos, archivos virtuales, proyectos, almacenamiento de notas, fondos y gestión de ventanas.
 - `public/wallpaper.js`: selección y almacenamiento local de fondos.
 - `public/computer.js`: estimaciones de almacenamiento del escritorio y del navegador.
+- `public/quake.js`: carga y cierre de la demo externa de QuakeJS.
 - `public/filesystem-storage.js`: registros independientes de archivos, carpetas y relaciones, y migración del formato anterior.
 - `public/mines.mjs`: lógica del Buscaminas.
 - `public/mines-ui.js`: interfaz, controles y cronómetro del Buscaminas.
