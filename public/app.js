@@ -58,6 +58,8 @@ const sessionKey='whoami.guest-session.v1';
 function enter(focus=true){entered=true;try{localStorage.setItem(sessionKey,'active')}catch{}windows.forEach(win=>{win.hidden=true});$('#login').hidden=true;$('#desktop').inert=false;syncDock();if(focus)$('#applications').focus({preventScroll:true});}
 function lock(){entered=false;try{localStorage.removeItem(sessionKey)}catch{}$('#login').hidden=false;$('#desktop').inert=true;$('#enter').focus();}
 function projectGrid(){
+ $('#files-title').textContent='Proyectos';
+ document.querySelectorAll('.file-sidebar button').forEach(button=>button.classList.toggle('active',button.id==='show-all'));
  delete $('#project-content').dataset.userFolder;
  $('.file-status').textContent=projects.length+' proyectos · código abierto y experimentos';
  $('#file-address').textContent='⌂ /home/roberto/proyectos';
@@ -77,6 +79,7 @@ function projectGrid(){
 function projectDetail(id){
  delete $('#project-content').dataset.userFolder;
  const p=projects.find(p=>p.id===id);if(!p)return false;
+ $('#files-title').textContent=p.title;$('#file-address').textContent='⌂ '+home+'/proyectos/'+p.id;$('.file-status').textContent='Ficha de proyecto';
  const area=$('#project-content');area.replaceChildren();const back=document.createElement('button');back.className='back-button';back.textContent='← Todos los proyectos';back.addEventListener('click',projectGrid);area.append(back);
  const detail=document.createElement('article');detail.className='project-detail';
  if(p.image){const b=document.createElement('button');b.className='screenshot-button';b.dataset.screenshot=p.id;const img=document.createElement('img');img.src=p.image;img.alt=`${p.imageLabel||'Captura real'} de ${p.title}`;const caption=document.createElement('span');caption.textContent=p.imageLabel?'↗ Ampliar imagen del proyecto':'↗ Ampliar captura real';b.append(img,caption);detail.append(b)}
@@ -588,6 +591,8 @@ function showFolder(folder){
  const path=isHome?home:folder==='documents'?documentsRoot:folder==='games'?gamesRoot:folder;
  if(!isHome&&!directories.has(path))return;
  currentUserFolder=path;area.dataset.userFolder=path;
+ $('#files-title').textContent=isHome?'Carpeta personal':path.slice(path.lastIndexOf('/')+1);
+ document.querySelectorAll('.file-sidebar button').forEach(button=>button.classList.toggle('active',(isHome&&button.dataset.folder==='home')||(path===documentsRoot&&button.dataset.folder==='documents')||(path===gamesRoot&&button.dataset.folder==='games')));
  $('#file-address').textContent='⌂ '+(isHome?home:path);
  const grid=document.createElement('div');grid.className='folder-grid';
  function addEntry(name,target,type){
@@ -612,7 +617,7 @@ function showFolder(folder){
   userFiles.folders.filter(item=>item.startsWith(prefix)&&!item.slice(prefix.length).includes('/')).sort((a,b)=>a.localeCompare(b,'es')).forEach(item=>addEntry(item.slice(prefix.length),item,'folder'));
   Object.keys(userFiles.documents).filter(item=>item.startsWith(prefix)&&!item.slice(prefix.length).includes('/')).sort((a,b)=>a.localeCompare(b,'es')).forEach(item=>addEntry(item.slice(prefix.length),item,'document'));
  }
- appendShortcuts(grid,path);area.append(grid);showWindow('files');
+ appendShortcuts(grid,path);area.append(grid);const count=grid.childElementCount;$('.file-status').textContent=count+(count===1?' elemento':' elementos');showWindow('files');
 }
 let pendingDeletePath=null;
 const deleteDialog=$('#delete-user-item-dialog');
