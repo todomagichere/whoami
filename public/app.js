@@ -192,10 +192,9 @@ function initDesktopIcons(){
  });
  userFiles.folders.filter(path=>path.startsWith(prefix)&&!path.slice(prefix.length).includes('/')).forEach(path=>makeUserIcon(path,true));
  Object.keys(userFiles.documents).filter(path=>path.startsWith(prefix)&&!path.slice(prefix.length).includes('/')).forEach(path=>makeUserIcon(path,false));
- for(const [id,label] of [['mines','Buscaminas'],['snake','Snake'],['quake','Quake III Arena']]){
-  const source=document.querySelector('.dock [data-open="'+id+'"]');
-  const button=document.createElement('button'),image=source.querySelector('img').cloneNode(true);
-  image.className='desktop-image';image.alt='';button.dataset.open=id;button.append(image,document.createTextNode(label));shortcutTemplates.set('app:'+id,button);
+ for(const [id,label] of [['mines','Buscaminas'],['snake','Snake'],['quake','Quake III Arena'],['neverball','Neverball'],['micropolis','Micropolis']]){
+  const button=document.createElement('button'),image=document.createElement('img');
+  image.src='assets/dock/'+id+'.webp';image.className='desktop-image';image.alt='';button.dataset.open=id;button.append(image,document.createTextNode(label));shortcutTemplates.set('app:'+id,button);
  }
  for(const name of ['tecnologias.md','README.md']){
   const button=document.createElement('button'),image=document.createElement('img');image.className='desktop-image';image.src='assets/dock/editor.webp';image.alt='';
@@ -381,6 +380,8 @@ const applications = [
  {id:'mines',name:'Buscaminas',icon:'✹',description:'8 × 8 · diez minas, una pausa'},
  {id:'snake',name:'Snake',icon:'▦',description:'Arcade · flechas, WASD y píxeles'},
  {id:'quake',name:'Quake III Arena',icon:'◉',image:'assets/dock/quake.webp',description:'Demo clásica · un jugador'},
+ {id:'neverball',name:'Neverball',icon:'◉',image:'assets/dock/neverball.webp',description:'Habilidad · inclina el escenario'},
+ {id:'micropolis',name:'Micropolis',icon:'▦',image:'assets/dock/micropolis.webp',description:'Construcción y gestión de ciudades'},
  {id:'guide',name:'Ayuda',icon:'?',description:'Aprende a usar la terminal'}
 ];
 files[home+'/sobre-mi.md']='# Roberto Pérez Villegas\n\nDesarrollador · @todomagichere\n\n## Perfil\n\n'+about.split('\n\n').slice(1).join('\n\n')+'\n';
@@ -442,7 +443,7 @@ function highlightDropTarget(source,x,y){
  const target=findDropTarget(source,x,y);clearDropTarget();
  if(target&&!target.desktop){highlightedDropTarget=target.element;highlightedDropTarget.classList.add('drop-target')}
 }
-function shortcutDefaultLocation(id){return ['app:mines','app:snake','app:quake'].includes(id)?gamesRoot:defaultDesktopShortcuts.has(id)?desktopRoot:null}
+function shortcutDefaultLocation(id){return ['app:mines','app:snake','app:quake','app:neverball','app:micropolis'].includes(id)?gamesRoot:defaultDesktopShortcuts.has(id)?desktopRoot:null}
 function shortcutNameTaken(destination,name,except){
  return [...shortcutTemplates].some(([id,template])=>id!==except&&(userFiles.shortcuts[id]||shortcutDefaultLocation(id))===destination&&template.textContent.trim()===name);
 }
