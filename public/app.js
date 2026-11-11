@@ -204,10 +204,12 @@ function initDesktopIcons(){
   button.dataset.document=name;button.append(image,document.createTextNode(name));shortcutTemplates.set('document:'+name,button);
  }
  const icons=[...container.querySelectorAll('button')];
+ const bottomOrder=icon=>icon.dataset.open==='terminal'?1:icon.dataset.folder==='games'?2:0;
+ icons.sort((a,b)=>bottomOrder(a)-bottomOrder(b));
+ container.append(...icons);
  const iconKey=icon=>icon.dataset.folder==='projects'?'files':icon.dataset.open||icon.dataset.document||icon.dataset.folder||icon.dataset.userDocument;
- const screen=desktop.getBoundingClientRect();
- const initial=icons.map(icon=>{const rect=icon.getBoundingClientRect();return {left:rect.left-screen.left,top:rect.top-screen.top}});
- let saved={};try{saved=JSON.parse(localStorage.getItem(storageKey)||'{}')||{}}catch{}
+ const initial=[];
+ let saved={},moveBottomIcons=false,updateLayout=false;try{saved=JSON.parse(localStorage.getItem(storageKey)||'{}')||{};moveBottomIcons=!localStorage.getItem('whoami.desktop-bottom.v1');if(moveBottomIcons){delete saved.terminal;delete saved.games}updateLayout=!localStorage.getItem('whoami.desktop-layout.v2');if(updateLayout)for(const key of ['computer','settings','files','sobre-mi.md','notas.md',desktopRoot+'/Nueva carpeta'])delete saved[key]}catch{}
  const positions={};
  function bounds(icon){const top=$('.panel').offsetHeight;return {top,x:Math.max(0,desktop.clientWidth-icon.offsetWidth),y:Math.max(0,desktop.clientHeight-top-icon.offsetHeight)}}
  function clamp(value,min,max){return Math.min(max,Math.max(min,value))}
@@ -216,9 +218,31 @@ function initDesktopIcons(){
  function save(){try{localStorage.setItem(storageKey,JSON.stringify(positions))}catch{}}
  function arrange(){icons.forEach(icon=>{const b=bounds(icon),pos=positions[iconKey(icon)];place(icon,pos.x*b.x,b.top+pos.y*b.y)})}
  container.classList.add('free-icons');
+ function gridPosition(index){
+  const top=$('.panel').offsetHeight+10;
+  const width=icons[0]?.offsetWidth||104,height=Math.max(...icons.map(icon=>icon.offsetHeight),80);
+  const stepX=width+8,stepY=height+8;
+  const icon=icons[index],key=icon&&iconKey(icon);
+  const leftRows={'computer':0,'settings':1,'files':2,'sobre-mi.md':3};
+  if(Object.hasOwn(leftRows,key))return {left:8,top:top+leftRows[key]*stepY};
+  if(key===desktopRoot+'/Nueva carpeta')return {left:8+2*stepX,top};
+  const bottomIndex=icon?.dataset.open==='terminal'?0:icon?.dataset.folder==='games'?1:-1;
+  if(bottomIndex>=0){
+   const desktopRect=desktop.getBoundingClientRect(),dockRect=$('.dock').getBoundingClientRect();
+   const left=8+bottomIndex*stepX;
+   const overlapsDock=left+width>dockRect.left-desktopRect.left && left<dockRect.right-desktopRect.left;
+   const dockTop=dockRect.top-desktopRect.top;
+   return {left,top:overlapsDock?dockTop-height-8:dockTop+(dockRect.height-height)/2};
+  }
+  const regularCount=icons.filter(item=>!bottomOrder(item)).length;
+  const rows=Math.max(1,Math.floor(Math.max(height,desktop.clientHeight-top-170)/stepY));
+  const maxColumns=Math.max(1,Math.floor((desktop.clientWidth-16)/stepX));
+  const columns=matchMedia('(max-width:700px)').matches?maxColumns:Math.min(maxColumns,Math.max(1,Math.ceil(regularCount/rows)));
+  return {left:8+(index%columns)*stepX,top:top+Math.floor(index/columns)*stepY};
+ }
+ icons.forEach((icon,index)=>{initial[index]=gridPosition(index)});
  function registerIcon(icon,index){
   const key=iconKey(icon),b=bounds(icon),pos=saved[key];
-  if(key==='games'&&!pos&&!matchMedia('(max-width:700px)').matches)initial[index]={left:(icons[0]?.offsetWidth||104)+16,top:b.top+10};
   positions[key]=pos&&Number.isFinite(pos.x)&&Number.isFinite(pos.y)?{x:clamp(pos.x,0,1),y:clamp(pos.y,0,1)}:{x:b.x?clamp(initial[index].left/b.x,0,1):0,y:b.y?clamp((initial[index].top-b.top)/b.y,0,1):0};
   icon.setAttribute('aria-describedby','desktop-icon-help');
   let drag=null,suppressClick=false;
@@ -263,7 +287,7 @@ function initDesktopIcons(){
   shortcutTemplates.forEach((template,id)=>{
    const key=iconKey(template);if(existing.has(key)||shortcutLocation(id)!==desktopRoot)return;
    const icon=template.cloneNode(true),index=icons.length;container.append(icon);icons.push(icon);
-   initial[index]={left:8+index*12,top:$('.panel').offsetHeight+10+index*12};registerIcon(icon,index);
+   initial[index]=gridPosition(index);registerIcon(icon,index);
    const b=bounds(icon),pos=positions[iconKey(icon)];
    if(id===createdPath&&desktopPoint){place(icon,desktopPoint.x-icon.offsetWidth/2,desktopPoint.y);remember(icon);save()}
    else place(icon,pos.x*b.x,b.top+pos.y*b.y);
@@ -271,9 +295,7 @@ function initDesktopIcons(){
   const add=(path,isFolder)=>{
    if(existing.has(path)||!path.startsWith(prefix)||path.slice(prefix.length).includes('/'))return;
    const icon=makeUserIcon(path,isFolder),index=icons.length;icons.push(icon);
-   const height=icon.offsetHeight||80,width=icon.offsetWidth||104;
-   const rows=Math.max(1,Math.floor((desktop.clientHeight-$('.panel').offsetHeight-100)/(height+8)));
-   initial[index]={left:8+Math.floor(index/rows)*(width+8),top:$('.panel').offsetHeight+10+(index%rows)*(height+8)};
+   initial[index]=gridPosition(index);
    registerIcon(icon,index);const b=bounds(icon),pos=positions[iconKey(icon)];
    if(path===createdPath&&desktopPoint){place(icon,desktopPoint.x-icon.offsetWidth/2,desktopPoint.y);remember(icon);save()}
    else place(icon,pos.x*b.x,b.top+pos.y*b.y);
@@ -283,18 +305,7 @@ function initDesktopIcons(){
  const menu=$('#desktop-context-menu'),organize=$('#desktop-organize-icons'),remove=$('#desktop-delete-item');
  function closeMenu(restoreFocus=false){if(menu.hidden)return;menu.hidden=true;if(restoreFocus)desktop.focus({preventScroll:true})}
  function organizeIcons(){
-  const top=$('.panel').offsetHeight+10;
-  const iconWidth=icons[0]?.offsetWidth||104,iconHeight=Math.max(...icons.map(icon=>icon.offsetHeight),1);
-  const stepX=iconWidth+8,stepY=iconHeight+8;
-  const usableHeight=Math.max(iconHeight,desktop.clientHeight-top-90);
-  const rows=Math.max(1,Math.floor(usableHeight/stepY));
-  const columns=Math.max(1,Math.floor((desktop.clientWidth-16)/stepX));
-  const horizontal=matchMedia('(max-width:700px)').matches;
-  icons.forEach((icon,index)=>{
-   const column=horizontal?index%columns:Math.floor(index/rows);
-   const row=horizontal?Math.floor(index/columns):index%rows;
-   place(icon,8+column*stepX,top+row*stepY);remember(icon);
-  });
+  icons.forEach((icon,index)=>{const position=gridPosition(index);place(icon,position.left,position.top);remember(icon)});
   save();closeMenu();
  }
  desktop.addEventListener('contextmenu',event=>{
@@ -332,6 +343,7 @@ function initDesktopIcons(){
  window.addEventListener('resize',()=>{closeMenu();arrange()});
  new MutationObserver(()=>{if(!$('#login').hidden)closeMenu()}).observe($('#login'),{attributes:true,attributeFilter:['hidden']});
  arrange();
+ if(moveBottomIcons||updateLayout)try{localStorage.setItem(storageKey,JSON.stringify(positions));if(moveBottomIcons)localStorage.setItem('whoami.desktop-bottom.v1','ready');if(updateLayout)localStorage.setItem('whoami.desktop-layout.v2','ready')}catch{}
 }
 windows.forEach(win=>{
  win.addEventListener('pointerdown',()=>raise(win));
@@ -415,6 +427,17 @@ if(Object.keys(userFiles.shortcuts).some(id=>fixedGameShortcuts.has(id))){
  const next={...userFiles,shortcuts};
  try{fileStorage.write(next);userFiles=next}catch{ /* The fixed locations still apply if storage is unavailable. */ }
 }
+// Create the starter folder only once, so deleting or moving it is respected.
+try {
+ const starterMarker='whoami.starter-folder.v1',starterPath=desktopRoot+'/Nueva carpeta';
+ if(!localStorage.getItem(starterMarker)){
+  if(!userFiles.folders.includes(starterPath)&&!Object.hasOwn(userFiles.documents,starterPath)){
+   const next={...userFiles,folders:[...userFiles.folders,starterPath]};
+   fileStorage.write(next);userFiles=next;
+  }
+  localStorage.setItem(starterMarker,'ready');
+ }
+} catch { /* Existing files remain available if storage cannot be updated. */ }
 directories.add(documentsRoot);
 directories.add(desktopRoot);
 directories.add(gamesRoot);
