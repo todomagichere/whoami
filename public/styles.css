@@ -274,3 +274,15 @@ body[data-theme="sand"] .wallpaper{background-color:#a67c55}
 
 #update-notice{position:fixed;z-index:10000;right:16px;top:54px;display:flex;align-items:center;gap:12px;max-width:calc(100vw - 32px);padding:12px 14px;border:1px solid #80718e;border-radius:8px;background:#302b39;color:#fff;box-shadow:0 8px 24px #0005;font-size:14px}
 #update-notice button{padding:7px 10px;border-radius:5px;background:#c9b5df;color:#302537;font-size:13px;font-weight:700}
+
+/* Slightly roomier default windows on desktop-sized screens. */
+@media (min-width:701px){
+ .terminal-window{left:8%;width:min(840px,75%);height:580px}
+ .files-window{left:42%;width:55%;height:660px}
+ .guide-window{width:min(600px,80%);height:660px}
+ .app-window{left:15%;width:min(880px,80%);height:690px}
+ .editor-window{left:13%;width:min(960px,82%)}
+ .mines-window{left:30%;width:min(520px,65%);height:750px}
+ .snake-window{left:25%;width:min(700px,70%);height:750px}
+ .quake-window,.external-game-window{left:10%;width:min(1000px,80%);height:min(740px,78vh)}
+}
