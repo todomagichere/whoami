@@ -15,6 +15,7 @@
   const status = document.querySelector('#calendar-event-status');
   const addButton = document.querySelector('#calendar-add-event');
   const prefix = 'whoami.calendar.event.';
+  const notifiedPrefix = 'whoami.calendar.notified.';
   const fullDate = new Intl.DateTimeFormat('es-ES', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
   const monthDate = new Intl.DateTimeFormat('es-ES', {month: 'long', year: 'numeric'});
   let selected = new Date();
@@ -47,6 +48,23 @@
       return false;
     }
   }
+  function checkNotifications() {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const now = Date.now();
+    events.forEach(event => {
+      if (!event.time) return;
+      const [year, month, day] = event.date.split('-').map(Number);
+      const [hour, minute] = event.time.split(':').map(Number);
+      const due = new Date(year, month - 1, day, hour, minute).getTime();
+      if (now < due || now - due >= 60000) return;
+      const marker = notifiedPrefix + event.key.slice(prefix.length);
+      try {
+        if (localStorage.getItem(marker)) return;
+        localStorage.setItem(marker, '1');
+        new Notification('Evento del calendario', {body: event.title, icon: 'icon.webp', tag: event.key});
+      } catch { /* Notifications or storage may be unavailable in this browser. */ }
+    });
+  }
   function renderEvents() {
     selectedLabel.textContent = fullDate.format(selected);
     const selectedKey = dateKey(selected);
@@ -63,7 +81,7 @@
       const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Eliminar';
       remove.setAttribute('aria-label', `Eliminar ${event.title}`);
       remove.addEventListener('click', () => {
-        try { localStorage.removeItem(event.key); status.textContent = 'Evento eliminado.'; loadEvents(); render(); }
+        try { localStorage.removeItem(event.key); localStorage.removeItem(notifiedPrefix + event.key.slice(prefix.length)); status.textContent = 'Evento eliminado.'; loadEvents(); render(); }
         catch { status.textContent = 'No se pudo eliminar el evento.'; }
       });
       row.append(content, remove); list.append(row);
@@ -140,17 +158,33 @@
     event.preventDefault();
     const text = title.value.trim();
     if (!text) { status.textContent = 'Escribe un nombre para el evento.'; title.focus(); return; }
+    let notificationRequest = null;
+    try {
+      if (time.value && 'Notification' in window && Notification.permission === 'default') notificationRequest = Notification.requestPermission();
+    } catch { /* Saving the event should still work if permission cannot be requested. */ }
     const id = globalThis.crypto?.randomUUID?.() || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
     try {
       localStorage.setItem(prefix + id, JSON.stringify({title: text, date: dateKey(selected), time: time.value}));
+      const hasTime = Boolean(time.value);
       form.hidden = true; form.reset(); status.textContent = 'Evento guardado en este navegador.'; loadEvents(); render(); addButton.focus();
+      if (hasTime && !('Notification' in window)) status.textContent = 'Evento guardado. Este navegador no admite notificaciones.';
+      else if (hasTime && Notification.permission === 'denied') status.textContent = 'Evento guardado. Las notificaciones están bloqueadas en el navegador.';
+      if (notificationRequest) notificationRequest.then(permission => {
+        if (permission !== 'granted') status.textContent = 'Evento guardado. Activa las notificaciones del navegador para recibir avisos.';
+        else checkNotifications();
+      }).catch(() => { status.textContent = 'Evento guardado. No se pudo activar el aviso.'; });
+      checkNotifications();
     } catch { status.textContent = 'No se pudo guardar el evento. Comprueba el almacenamiento del navegador.'; }
   });
   document.addEventListener('pointerdown', event => { if (!panel.hidden && !panel.contains(event.target) && !clock.contains(event.target)) close(); });
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && !panel.hidden) { event.preventDefault(); event.stopPropagation(); close(true); }
   }, true);
-  window.addEventListener('storage', event => { if (!panel.hidden && (!event.key || event.key.startsWith(prefix))) { loadEvents(); render(); } });
+  window.addEventListener('storage', event => { if (!event.key || event.key.startsWith(prefix)) { loadEvents(); if (!panel.hidden) render(); checkNotifications(); } });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { loadEvents(); checkNotifications(); } });
+  loadEvents();
+  checkNotifications();
+  setInterval(checkNotifications, 10000);
   new MutationObserver(() => { if (!document.querySelector('#login').hidden) close(); }).observe(document.querySelector('#login'), {attributes: true, attributeFilter: ['hidden']});
   setInterval(() => { if (!panel.hidden && new Date().toDateString() !== lastDate) render(); }, 30000);
 })();

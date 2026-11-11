@@ -240,3 +240,5 @@ body[data-layout-style="windows11"] .calendar-grid .calendar-day[aria-pressed=tr
 body[data-layout-style="windows11"] .calendar-grid .calendar-current-day:not([aria-pressed=true]){background:transparent;color:inherit;box-shadow:inset 0 0 0 2px #3277ba}
 body[data-layout-style="windows31"] .calendar-grid .calendar-day[aria-pressed=true]{background:#000080;color:white;box-shadow:none}
 body[data-layout-style="windows31"] .calendar-grid .calendar-current-day:not([aria-pressed=true]){background:transparent;color:inherit;box-shadow:inset 0 0 0 2px #000080}
+
+.calendar-notification-note{font-size:12px;line-height:1.4;opacity:.8}
