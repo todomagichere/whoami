@@ -174,7 +174,7 @@ function resetWindowPositions(){windows.forEach(win=>{win.style.left='';win.styl
 let refreshDesktopIcons=(createdPath,desktopPoint)=>{};
 const shortcutTemplates=new Map();
 const defaultDesktopShortcuts=new Set();
-const shortcutId=button=>button.dataset.folder==='projects'?'app:files':button.dataset.document?'document:'+button.dataset.document:button.dataset.open?'app:'+button.dataset.open:null;
+const shortcutId=button=>button.dataset.folder==='projects'?'app:files':button.dataset.folder==='games'?'folder:games':button.dataset.document?'document:'+button.dataset.document:button.dataset.open?'app:'+button.dataset.open:null;
 function initDesktopIcons(){
  const desktop=$('#desktop'),container=$('.desktop-icons'),storageKey='whoami.desktop-icons.v1';
  function makeUserIcon(path,isFolder){
@@ -192,6 +192,11 @@ function initDesktopIcons(){
  });
  userFiles.folders.filter(path=>path.startsWith(prefix)&&!path.slice(prefix.length).includes('/')).forEach(path=>makeUserIcon(path,true));
  Object.keys(userFiles.documents).filter(path=>path.startsWith(prefix)&&!path.slice(prefix.length).includes('/')).forEach(path=>makeUserIcon(path,false));
+ for(const [id,label] of [['mines','Buscaminas'],['snake','Snake'],['quake','Quake III Arena']]){
+  const source=document.querySelector('.dock [data-open="'+id+'"]');
+  const button=document.createElement('button'),image=source.querySelector('img').cloneNode(true);
+  image.className='desktop-image';image.alt='';button.dataset.open=id;button.append(image,document.createTextNode(label));shortcutTemplates.set('app:'+id,button);
+ }
  for(const name of ['tecnologias.md','README.md']){
   const button=document.createElement('button'),image=document.createElement('img');image.className='desktop-image';image.src='assets/dock/editor.webp';image.alt='';
   button.dataset.document=name;button.append(image,document.createTextNode(name));shortcutTemplates.set('document:'+name,button);
@@ -211,6 +216,7 @@ function initDesktopIcons(){
  container.classList.add('free-icons');
  function registerIcon(icon,index){
   const key=iconKey(icon),b=bounds(icon),pos=saved[key];
+  if(key==='games'&&!pos&&!matchMedia('(max-width:700px)').matches)initial[index]={left:(icons[0]?.offsetWidth||104)+16,top:b.top+10};
   positions[key]=pos&&Number.isFinite(pos.x)&&Number.isFinite(pos.y)?{x:clamp(pos.x,0,1),y:clamp(pos.y,0,1)}:{x:b.x?clamp(initial[index].left/b.x,0,1):0,y:b.y?clamp((initial[index].top-b.top)/b.y,0,1):0};
   icon.setAttribute('aria-describedby','desktop-icon-help');
   let drag=null,suppressClick=false;
@@ -388,11 +394,13 @@ try{
 }catch{notesStorageAvailable=false}
 const documentsRoot=home+'/Documentos';
 const desktopRoot=home+'/Escritorio';
+const gamesRoot=home+'/Juegos';
 let fileStorage;
 try{fileStorage=new PortfolioFileSystemStorage(window.localStorage)}catch{fileStorage=new PortfolioFileSystemStorage(null)}
 let userFiles=fileStorage.load();
 directories.add(documentsRoot);
 directories.add(desktopRoot);
+directories.add(gamesRoot);
 userFiles.folders.forEach(path=>directories.add(path));
 Object.entries(userFiles.documents).forEach(([path,content])=>{files[path]=content});
 function persistUserFiles(next,options){fileStorage.write(next,options);userFiles=next}
@@ -409,6 +417,7 @@ function folderPath(button){
  if(button?.dataset.open==='files')return home+'/proyectos';
  const path=button?.dataset.folder;
  if(path==='projects')return home+'/proyectos';
+ if(path==='games')return gamesRoot;
  if(path==='documents')return documentsRoot;
  if(path==='home')return home;
  return path&&directories.has(path)?path:null;
@@ -428,14 +437,15 @@ function highlightDropTarget(source,x,y){
  const target=findDropTarget(source,x,y);clearDropTarget();
  if(target&&!target.desktop){highlightedDropTarget=target.element;highlightedDropTarget.classList.add('drop-target')}
 }
+function shortcutDefaultLocation(id){return ['app:mines','app:snake','app:quake'].includes(id)?gamesRoot:defaultDesktopShortcuts.has(id)?desktopRoot:null}
 function shortcutNameTaken(destination,name,except){
- return [...shortcutTemplates].some(([id,template])=>id!==except&&(userFiles.shortcuts[id]||(defaultDesktopShortcuts.has(id)?desktopRoot:null))===destination&&template.textContent.trim()===name);
+ return [...shortcutTemplates].some(([id,template])=>id!==except&&(userFiles.shortcuts[id]||shortcutDefaultLocation(id))===destination&&template.textContent.trim()===name);
 }
 function moveShortcut(id,destination){
  if(!shortcutTemplates.has(id)||!directories.has(destination))return false;
- if(id==='app:files'&&(destination===home+'/proyectos'||destination.startsWith(home+'/proyectos/'))){fileMessage('No puedes mover una carpeta dentro de sí misma.');return false}
+ if((id==='app:files'&&(destination===home+'/proyectos'||destination.startsWith(home+'/proyectos/')))||(id==='folder:games'&&(destination===gamesRoot||destination.startsWith(gamesRoot+'/')))){fileMessage('No puedes mover una carpeta dentro de sí misma.');return false}
  const template=shortcutTemplates.get(id),name=template.textContent.trim();
- if((userFiles.shortcuts[id]||desktopRoot)===destination)return false;
+ if((userFiles.shortcuts[id]||shortcutDefaultLocation(id))===destination)return false;
  const conflict=shortcutNameTaken(destination,name,id);
  if(conflict||directories.has(destination+'/'+name)||Object.hasOwn(files,destination+'/'+name)){fileMessage('Ya existe un archivo o carpeta con ese nombre.');return false}
  try{persistUserFiles({...userFiles,shortcuts:{...userFiles.shortcuts,[id]:destination}})}catch{fileMessage('No se pudo mover: comprueba el almacenamiento del navegador.');return false}
@@ -443,7 +453,7 @@ function moveShortcut(id,destination){
 }
 function appendShortcuts(grid,path){
  shortcutTemplates.forEach((template,id)=>{
-  if(userFiles.shortcuts[id]!==path||(path===documentsRoot&&id.startsWith('document:')&&['sobre-mi.md','notas.md','tecnologias.md','README.md'].includes(id.slice(9))))return;
+  if((userFiles.shortcuts[id]||shortcutDefaultLocation(id))!==path||(path===documentsRoot&&id.startsWith('document:')&&['sobre-mi.md','notas.md','tecnologias.md','README.md'].includes(id.slice(9))))return;
   const button=template.cloneNode(true);button.className='folder-shortcut';
   const image=button.querySelector('img');if(image)image.className='folder-shortcut-image';
   makeFolderItemDraggable(button,id);grid.append(button);
@@ -453,8 +463,10 @@ function moveUserItem(source,destination){
  const isFolder=userFiles.folders.includes(source);
  if(!isFolder&&!isUserDocument(source))return false;
  const projectLocation=userFiles.shortcuts['app:files'];
+ const gamesLocation=userFiles.shortcuts['folder:games'];
  const containsProjects=isFolder&&projectLocation&&(projectLocation===source||projectLocation.startsWith(source+'/'));
- if(source===destination||destination.startsWith(source+'/')||(containsProjects&&(destination===home+'/proyectos'||destination.startsWith(home+'/proyectos/')))){fileMessage('No puedes mover una carpeta dentro de sí misma.');return false}
+ const containsGames=isFolder&&gamesLocation&&(gamesLocation===source||gamesLocation.startsWith(source+'/'));
+ if(source===destination||destination.startsWith(source+'/')||(containsProjects&&(destination===home+'/proyectos'||destination.startsWith(home+'/proyectos/')))||(containsGames&&(destination===gamesRoot||destination.startsWith(gamesRoot+'/')))){fileMessage('No puedes mover una carpeta dentro de sí misma.');return false}
  if(!directories.has(destination)){fileMessage('La carpeta de destino no existe.');return false}
  const nextPath=destination+'/'+source.slice(source.lastIndexOf('/')+1);
  if(nextPath===source)return false;
@@ -567,7 +579,7 @@ function showFolder(folder){
  if(folder==='projects'||folder===home+'/proyectos'){projectGrid();showWindow('files');return}
  const area=$('#project-content');area.replaceChildren();delete area.dataset.userFolder;
  const isHome=folder==='home';
- const path=isHome?home:folder==='documents'?documentsRoot:folder;
+ const path=isHome?home:folder==='documents'?documentsRoot:folder==='games'?gamesRoot:folder;
  if(!isHome&&!directories.has(path))return;
  currentUserFolder=path;area.dataset.userFolder=path;
  $('#file-address').textContent='⌂ '+(isHome?home:path);
@@ -584,9 +596,9 @@ function showFolder(folder){
   grid.append(button);
  }
  {
-  if(isHome){addEntry('Proyectos','projects','folder');addEntry('Documentos','documents','folder');addEntry('Escritorio',desktopRoot,'folder');addEntry('Imágenes','gallery','gallery')}
+  if(isHome){addEntry('Proyectos','projects','folder');addEntry('Documentos','documents','folder');addEntry('Juegos','games','folder');addEntry('Escritorio',desktopRoot,'folder');addEntry('Imágenes','gallery','gallery')}
   const toolbar=document.createElement('div');toolbar.className='user-files-toolbar';
-  if(!isHome&&path!==documentsRoot&&path!==desktopRoot){const back=document.createElement('button');back.textContent='← Carpeta anterior';back.dataset.folder=path.slice(0,path.lastIndexOf('/'));toolbar.append(back)}
+  if(!isHome&&path!==documentsRoot&&path!==desktopRoot&&path!==gamesRoot){const back=document.createElement('button');back.textContent='← Carpeta anterior';back.dataset.folder=path.slice(0,path.lastIndexOf('/'));toolbar.append(back)}
   for(const [label,kind] of [['Nueva carpeta','folder'],['Nuevo documento','document']]){const button=document.createElement('button');button.textContent=label;button.dataset.createUserFile=kind;toolbar.append(button)}
   area.append(toolbar);
   if(path===documentsRoot)for(const name of ['sobre-mi.md','tecnologias.md','notas.md','README.md']){const location=userFiles.shortcuts['document:'+name];if(!location||location===documentsRoot)addEntry(name,null,'builtin')}
@@ -612,7 +624,7 @@ createForm.addEventListener('submit',event=>{
  const name=createName.value.trim();
  if(!name||name==='.'||name==='..'||/[\/\\\x00-\x1f]/.test(name)){createError.textContent='Escribe un nombre válido, sin barras.';return}
  const path=currentUserFolder+'/'+name;
- if((currentUserFolder===home&&['Proyectos','Documentos','Escritorio','Imágenes'].includes(name))||directories.has(path)||Object.hasOwn(files,path)){createError.textContent='Ya existe un elemento con ese nombre.';return}
+ if((currentUserFolder===home&&['Proyectos','Documentos','Escritorio','Imágenes','Juegos'].includes(name))||directories.has(path)||Object.hasOwn(files,path)){createError.textContent='Ya existe un elemento con ese nombre.';return}
  try{
   if(pendingUserKind==='folder'){persistUserFiles({...userFiles,folders:[...userFiles.folders,path]});directories.add(path)}
   else {persistUserFiles({...userFiles,documents:{...userFiles.documents,[path]:''}});files[path]=''}
@@ -624,6 +636,6 @@ $('#create-user-file-cancel').addEventListener('click',()=>createDialog.close())
 document.querySelectorAll('button[data-layout-style]').forEach(button=>button.addEventListener('click',()=>{document.body.dataset.layoutStyle=button.dataset.layoutStyle;document.querySelectorAll('button[data-layout-style]').forEach(option=>option.setAttribute('aria-pressed',String(option===button)))}));
 document.querySelectorAll('[data-size]').forEach(button=>button.addEventListener('click',()=>{document.body.classList.remove('small-text','large-text');if(button.dataset.size==='small')document.body.classList.add('small-text');if(button.dataset.size==='large')document.body.classList.add('large-text');document.querySelectorAll('[data-size]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)))}));
 $('#reduce-motion').checked=matchMedia('(prefers-reduced-motion:reduce)').matches;$('#reduce-motion').addEventListener('change',()=>document.body.classList.toggle('reduce-motion',$('#reduce-motion').checked));
-clock();setInterval(clock,30000);projectGrid();welcome();loadDocument(home+'/sobre-mi.md');renderGallery();renderApps();syncDock();initDesktopIcons();projectGrid();
+clock();setInterval(clock,30000);projectGrid();welcome();loadDocument(home+'/sobre-mi.md');renderGallery();renderApps();syncDock();initDesktopIcons();refreshDesktopIcons();projectGrid();
 let sessionActive=false;try{sessionActive=localStorage.getItem(sessionKey)==='active'}catch{}
 if(sessionActive)enter();else $('#enter').focus({preventScroll:true});

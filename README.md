@@ -18,6 +18,7 @@ Desde la raíz del repositorio, abre http://localhost:8081. La primera visita mu
 - `open sobre-mi.md` abre el documento en el editor inspirado en gedit.
 - Editor: documentos, ajuste de líneas, posición del cursor, edición y guardado; las notas y los archivos creados se guardan automáticamente en localStorage; las ediciones de los documentos del portfolio duran durante la visita; Ctrl+S guarda. `cat ~/notas.md` permite leer la nota guardada.
 - Menú Aplicaciones con búsqueda; galería de capturas reales; monitor para mostrar o cerrar ventanas.
+- Juegos: carpeta del escritorio con accesos a Buscaminas, Snake y Quake III Arena.
 - Quake III Arena: demo de [QuakeJS](https://github.com/mcftira/quakejs), cargada desde un servicio externo al abrir su ventana. Requiere conexión, aceptar la licencia de la demo y almacenamiento del navegador para los datos del juego.
 - Documentos: crea carpetas y archivos de texto, navega por ellos, edítalos y arrástralos a otras carpetas; se guardan automáticamente en el navegador.
 - Mi PC: disco virtual con el tamaño aproximado de las notas, las preferencias, la imagen de fondo y las cookies visibles; también muestra la estimación de almacenamiento del navegador para el sitio.
