@@ -96,7 +96,7 @@
           button.setAttribute('aria-label', fullDate.format(date) + (number ? `, ${number} ${number === 1 ? 'evento' : 'eventos'}` : ''));
           if (number) button.classList.add('has-events');
           if (key === todayKey) { button.classList.add('calendar-current-day'); button.setAttribute('aria-current', 'date'); }
-          button.addEventListener('click', () => selectDate(date));
+          button.addEventListener('click', () => { selectDate(date); openEventForm(); });
           cell.append(button);
         }
         row.append(cell);
@@ -133,7 +133,8 @@
     if (!(event.key in offsets)) return;
     event.preventDefault(); selectDate(new Date(selected.getFullYear(), selected.getMonth(), selected.getDate() + offsets[event.key]), true);
   });
-  addButton.addEventListener('click', () => { form.hidden = false; status.textContent = ''; title.focus(); });
+  function openEventForm() { form.hidden = false; status.textContent = ''; title.focus(); }
+  addButton.addEventListener('click', openEventForm);
   document.querySelector('#calendar-event-cancel').addEventListener('click', () => { form.hidden = true; form.reset(); status.textContent = ''; addButton.focus(); });
   form.addEventListener('submit', event => {
     event.preventDefault();
