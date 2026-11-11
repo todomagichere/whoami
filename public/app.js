@@ -370,26 +370,27 @@ const applications = [
 files[home+'/sobre-mi.md']='# Roberto Pérez Villegas\n\nDesarrollador · @todomagichere\n\n## Perfil\n\n'+about.split('\n\n').slice(1).join('\n\n')+'\n';
 files[home+'/tecnologias.md']='# Tecnologías entre mis proyectos\n\n## Tecnologías principales\n\nPHP, Symfony y JavaScript. 15 años de experiencia en desarrollo de software.\n\n## PHP e Ibexa\n\nExtensiones para el back office y experimentos con algoritmos.\nProyectos: ibexa-contenttype-info-tab, ibexa-breadcrumbs-bundle y fibonacci.\n\n## JavaScript y navegador\n\nJuegos diarios, herramientas e interfaces interactivas.\nProyecto: etimologia.\n\n## Firefox\n\nTraducción de texto seleccionado mediante Perplexity.\nProyecto: firefox-perplexity-translator.\n\n## React y TypeScript\n\nGestión de partidas y jugadores.\nProyecto: risk-master.\n\n## HTML, CSS y Docker\n\nPortales estáticos y entornos de desarrollo reproducibles.\nProyectos: prepara-tu-mochila y la-gran-aventura-pirata.\n';
 files[home+'/notas.md']='# Cuaderno del visitante\n\nEste documento es tuyo mientras exploras el escritorio.\nEscribe aquí y léelo con cat ~/notas.md.\n\nTus notas se guardan automáticamente en este navegador.\n\n## Comandos para probar\n\nls proyectos\ncd proyectos/etimologia\ncat README.md\nopen etimologia\n\n## Tus ideas\n\n';
-const notesKey='whoami.notes.v1';
+const notesKey='whoami.fs.v2.notes';
+const legacyNotesKey='whoami.notes.v1';
 let notesStorageAvailable=true;
-try{const saved=localStorage.getItem(notesKey);if(saved!==null)files[home+'/notas.md']=saved}catch{notesStorageAvailable=false}
-const userFilesKey='whoami.user-files.v1';
+try{
+ const saved=localStorage.getItem(notesKey),legacy=localStorage.getItem(legacyNotesKey);
+ if(saved!==null){const note=JSON.parse(saved);if(typeof note.content!=='string')throw new Error('Invalid note');files[home+'/notas.md']=note.content}
+ else if(legacy!==null){
+  files[home+'/notas.md']=legacy;
+  try{localStorage.setItem(notesKey,JSON.stringify({type:'file',title:'notas.md',content:legacy,parent:'system:'+home+'/Documentos'}));localStorage.removeItem(legacyNotesKey)}catch{notesStorageAvailable=false}
+ }
+}catch{notesStorageAvailable=false}
 const documentsRoot=home+'/Documentos';
 const desktopRoot=home+'/Escritorio';
-let userFiles={folders:[],documents:{},shortcuts:{}};
-try {
- const saved=JSON.parse(localStorage.getItem(userFilesKey)||'null');
- if(saved&&Array.isArray(saved.folders)&&saved.documents&&typeof saved.documents==='object'){
-  if(saved.shortcuts&&typeof saved.shortcuts==='object')Object.entries(saved.shortcuts).forEach(([key,path])=>{if(typeof path==='string'&&path.startsWith(home+'/'))userFiles.shortcuts[key]=path});
-  userFiles.folders=saved.folders.filter(path=>typeof path==='string'&&path.startsWith(home+'/'));
-  Object.entries(saved.documents).forEach(([path,content])=>{if(path.startsWith(home+'/')&&typeof content==='string')userFiles.documents[path]=content});
- }
-}catch{}
+let fileStorage;
+try{fileStorage=new PortfolioFileSystemStorage(window.localStorage)}catch{fileStorage=new PortfolioFileSystemStorage(null)}
+let userFiles=fileStorage.load();
 directories.add(documentsRoot);
 directories.add(desktopRoot);
 userFiles.folders.forEach(path=>directories.add(path));
 Object.entries(userFiles.documents).forEach(([path,content])=>{files[path]=content});
-function persistUserFiles(next){localStorage.setItem(userFilesKey,JSON.stringify(next));userFiles=next}
+function persistUserFiles(next,options){fileStorage.write(next,options);userFiles=next}
 function isUserDocument(path){return Object.hasOwn(userFiles.documents,path)}
 let currentDocument=home+'/sobre-mi.md';
 const drafts=new Map();
@@ -455,7 +456,7 @@ function moveUserItem(source,destination){
  const next={folders:userFiles.folders.map(remap),documents:{},shortcuts:{}};
  Object.entries(userFiles.shortcuts).forEach(([key,path])=>{next.shortcuts[key]=remap(path)});
  Object.entries(userFiles.documents).forEach(([path,content])=>{next.documents[remap(path)]=content});
- try{persistUserFiles(next)}catch{fileMessage('No se pudo mover: comprueba el almacenamiento del navegador.');return false}
+ try{persistUserFiles(next,{remap})}catch{fileMessage('No se pudo mover: comprueba el almacenamiento del navegador.');return false}
  // Update all in-memory paths only after the entire change has been saved.
  for(const path of [...directories])if(path===source||path.startsWith(source+'/')){directories.delete(path);directories.add(remap(path))}
  for(const path of Object.keys(files))if(path===source||path.startsWith(source+'/')){files[remap(path)]=files[path];delete files[path]}
@@ -537,7 +538,7 @@ function saveDocument(){
  }
  files[currentDocument]=value;drafts.delete(currentDocument);
  if(currentDocument===home+'/notas.md'){
-  try{localStorage.setItem(notesKey,files[currentDocument]);notesStorageAvailable=true;status='Guardado en este navegador'}
+  try{localStorage.setItem(notesKey,JSON.stringify({type:'file',title:'notas.md',content:files[currentDocument],parent:'system:'+home+'/Documentos'}));localStorage.removeItem(legacyNotesKey);notesStorageAvailable=true;status='Guardado en este navegador'}
   catch{notesStorageAvailable=false;status='No se pudo guardar; copia tus notas antes de salir'}
  }
  $('#editor-save-status').textContent=status;updateEditor();

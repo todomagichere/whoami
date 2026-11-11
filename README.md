@@ -16,7 +16,7 @@ Desde la raíz del repositorio, abre http://localhost:8081. La primera visita mu
 - `ls`, `cd proyectos`, `cd etimologia`, `cat README.md`, `cd ~`.
 - `open etimologia` abre su ficha con captura y enlaces.
 - `open sobre-mi.md` abre el documento en el editor inspirado en gedit.
-- Editor: documentos, ajuste de líneas, posición del cursor, edición y guardado; las notas se guardan automáticamente en localStorage y los demás documentos duran durante la visita; Ctrl+S guarda. `cat ~/notas.md` permite leer la nota guardada.
+- Editor: documentos, ajuste de líneas, posición del cursor, edición y guardado; las notas y los archivos creados se guardan automáticamente en localStorage; las ediciones de los documentos del portfolio duran durante la visita; Ctrl+S guarda. `cat ~/notas.md` permite leer la nota guardada.
 - Menú Aplicaciones con búsqueda; galería de capturas reales; monitor para mostrar o cerrar ventanas.
 - Documentos: crea carpetas y archivos de texto, navega por ellos, edítalos y arrástralos a otras carpetas; se guardan automáticamente en el navegador.
 - Mi PC: disco virtual con el tamaño aproximado de las notas, las preferencias, la imagen de fondo y las cookies visibles; también muestra la estimación de almacenamiento del navegador para el sitio.
@@ -29,7 +29,7 @@ Desde la raíz del repositorio, abre http://localhost:8081. La primera visita mu
 - Mover, minimizar, cerrar y maximizar ventanas; reabrirlas desde el dock. La apertura y el cierre usan transiciones adaptadas a cada diseño.
 - Ampliar el monitor; Escape o el botón ↙ del panel para restaurarlo.
 
-La terminal simula un sistema de archivos local. Nunca ejecuta comandos del sistema ni usa `eval`. Las entradas se muestran como texto. No se utilizan cookies ni analítica. `notas.md` se guarda automáticamente en `localStorage` bajo `whoami.notes.v1`, se restaura al cargar y permanece en ese navegador. Si el almacenamiento falla, el editor conserva el texto y muestra que no se ha podido guardar. Los demás documentos y ajustes duran hasta recargar la página; el fondo elegido y las posiciones de los iconos se guardan en el navegador.
+La terminal simula un sistema de archivos local. Nunca ejecuta comandos del sistema ni usa `eval`. Las entradas se muestran como texto. No se utilizan cookies ni analítica. `notas.md` y los archivos creados se guardan por separado en `localStorage`, con identificadores estables y una relación con su carpeta. Los datos del formato anterior se migran automáticamente. Si el almacenamiento falla, el editor conserva el texto y muestra que no se ha podido guardar. Las ediciones de los documentos del portfolio y algunos ajustes duran hasta recargar la página; el fondo elegido y las posiciones de los iconos se guardan en el navegador.
 
 ## Archivos
 
@@ -38,6 +38,7 @@ La terminal simula un sistema de archivos local. Nunca ejecuta comandos del sist
 - `public/app.js`: comandos, archivos virtuales, proyectos, almacenamiento de notas, fondos y gestión de ventanas.
 - `public/wallpaper.js`: selección y almacenamiento local de fondos.
 - `public/computer.js`: estimaciones de almacenamiento del escritorio y del navegador.
+- `public/filesystem-storage.js`: registros independientes de archivos, carpetas y relaciones, y migración del formato anterior.
 - `public/mines.mjs`: lógica del Buscaminas.
 - `public/mines-ui.js`: interfaz, controles y cronómetro del Buscaminas.
 - `public/snake.js`: partida y controles de Snake.
