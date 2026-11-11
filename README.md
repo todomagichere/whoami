@@ -19,6 +19,7 @@ Desde la raíz del repositorio, abre http://localhost:8081. La primera visita mu
 - Editor: documentos, ajuste de líneas, posición del cursor, edición y guardado; las notas y los archivos creados se guardan automáticamente en localStorage; las ediciones de los documentos del portfolio duran durante la visita; Ctrl+S guarda. `cat ~/notas.md` permite leer la nota guardada.
 - Menú Aplicaciones con búsqueda; capturas en las fichas de proyectos; monitor para mostrar o cerrar ventanas.
 - Calendario: consulta fechas y añade o elimina eventos, guardados en el navegador.
+- Caja de ritmos: secuenciador de 16 pasos con muestras TR-808, tempo y patrón guardado en el navegador.
 - Juegos: carpeta del escritorio con accesos fijos a Buscaminas, Snake, Quake III Arena, Neverball y Micropolis.
 - Neverball y Micropolis: versiones web de [Neverball](https://play.neverball.org/) y [micropolisJS](https://github.com/graememcc/micropolisJS), cargadas desde sus sitios al abrir cada juego.
 - Quake III Arena: demo de [QuakeJS](https://github.com/mcftira/quakejs), cargada desde un servicio externo al abrir su ventana. Requiere conexión, aceptar la licencia de la demo y almacenamiento del navegador para los datos del juego.

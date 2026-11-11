@@ -45,3 +45,7 @@ Etimología fue desarrollado por Roberto de forma individual. La idea surgió al
 - `pirata.webp`: recurso visual original, no captura de pantalla, https://raw.githubusercontent.com/todomagichere/la-gran-aventura-pirata/main/src/assets/mapa-del-tesoro.7c2f.webp
 
 La descripción de Risk Master se contrastó con su interfaz React: el README menciona Next.js, pero el código consultado utiliza React, TypeScript y Vite. No se ha atribuido Next.js al proyecto.
+
+## Sonidos de la caja de ritmos
+
+Las muestras de TR-808 fueron grabadas por Michael Fischer para el *Roland TR-808 Rhythm Composer Sound Sample Set 1.0.0* (1994). Proceden del repositorio [tidalcycles/sounds-tr808-fischer](https://github.com/tidalcycles/sounds-tr808-fischer), distribuido bajo CC0 1.0; se incluye la licencia junto a los archivos de audio.

@@ -390,6 +390,7 @@ const applications = [
  {id:'terminal',name:'Terminal',icon:'>_',image:'assets/dock/terminal.webp',description:'Comandos y navegación'},
  {id:'files',name:'Archivos',icon:'▱',image:'assets/dock/files.webp',description:'Proyectos y documentos'},
  {id:'editor',name:'Editor de texto',icon:'▤',image:'assets/dock/editor.webp',description:'Sobre mí, tecnologías y notas'},
+ {id:'drums',name:'Caja de ritmos',icon:'▦',image:'assets/dock/drums.webp',description:'Secuenciador de 16 pasos · sonidos 808'},
  {id:'settings',name:'Ajustes',icon:'⚙',image:'assets/dock/settings.webp',description:'Tu escritorio, a tu gusto'},
  {id:'processes',name:'Monitor de aplicaciones',icon:'▥',image:'assets/dock/computer.webp',description:'Gestiona las ventanas abiertas'},
  {id:'contact-app',name:'Contactos',icon:'↗',image:'assets/desktop/about.webp',description:'GitHub y LinkedIn'},
