@@ -21,6 +21,7 @@
   let audio, master, buffersPromise, playing = false, starting = false, generation = 0;
   let timer = null, frame = null, nextTime = 0, nextStep = 0, queued = [];
   const cells = [];
+  let paint = null, ignoreMouseClick = false;
 
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey));
@@ -52,12 +53,41 @@
       grid.append(sound); cells[row] = [];
       for (let step = 0; step < 16; step++) {
         const button = document.createElement('button'); button.type = 'button'; button.className = 'drum-step'; button.dataset.group = String(Math.floor(step / 4));
+        button.dataset.row = String(row); button.dataset.step = String(step);
         button.setAttribute('aria-label', `${name}, paso ${step + 1}`); button.setAttribute('aria-pressed', String(pattern[row][step]));
-        button.addEventListener('click', () => { pattern[row][step] = !pattern[row][step]; button.setAttribute('aria-pressed', String(pattern[row][step])); save(); });
+        button.addEventListener('click', event => { if (ignoreMouseClick && event.detail !== 0) return; setStep(button, !pattern[row][step]); save(); });
         cells[row].push(button); grid.append(button);
       }
     });
   }
+  function setStep(button, value) {
+    const row = Number(button.dataset.row), step = Number(button.dataset.step);
+    pattern[row][step] = value;
+    button.setAttribute('aria-pressed', String(value));
+  }
+  grid.addEventListener('pointerdown', event => {
+    const button = event.target.closest('.drum-step');
+    if (!button || event.pointerType !== 'mouse' || event.button !== 0) return;
+    event.preventDefault();
+    button.focus({preventScroll: true});
+    ignoreMouseClick = true;
+    paint = {id: event.pointerId, value: button.getAttribute('aria-pressed') !== 'true'};
+    setStep(button, paint.value);
+    grid.setPointerCapture(event.pointerId);
+  });
+  grid.addEventListener('pointermove', event => {
+    if (!paint || event.pointerId !== paint.id || !(event.buttons & 1)) return;
+    const button = document.elementFromPoint(event.clientX, event.clientY)?.closest('.drum-step');
+    if (button && grid.contains(button)) setStep(button, paint.value);
+  });
+  function finishPainting(event) {
+    if (!paint || event.pointerId !== paint.id) return;
+    paint = null; save();
+    setTimeout(() => { ignoreMouseClick = false; }, 0);
+  }
+  grid.addEventListener('pointerup', finishPainting);
+  grid.addEventListener('pointercancel', finishPainting);
+  grid.addEventListener('lostpointercapture', finishPainting);
   async function prepareAudio() {
     if (!audio) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
