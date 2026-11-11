@@ -278,7 +278,7 @@ function initDesktopIcons(){
   };
   userFiles.folders.forEach(path=>add(path,true));Object.keys(userFiles.documents).forEach(path=>add(path,false));
  };
- const menu=$('#desktop-context-menu'),organize=$('#desktop-organize-icons');
+ const menu=$('#desktop-context-menu'),organize=$('#desktop-organize-icons'),remove=$('#desktop-delete-item');
  function closeMenu(restoreFocus=false){if(menu.hidden)return;menu.hidden=true;if(restoreFocus)desktop.focus({preventScroll:true})}
  function organizeIcons(){
   const top=$('.panel').offsetHeight+10;
@@ -303,6 +303,10 @@ function initDesktopIcons(){
   event.preventDefault();
   contextCreationFolder=onDesktop?desktopRoot:folder;
   contextFromDesktop=Boolean(onDesktop);
+  const item=event.target.closest('.desktop-icons button[data-folder],.desktop-icons button[data-user-document],#project-content button[data-folder],#project-content button[data-user-document]');
+  const itemPath=item?.dataset.userDocument||item?.dataset.folder;
+  contextDeletePath=itemPath&&(userFiles.folders.includes(itemPath)||isUserDocument(itemPath))?itemPath:null;
+  remove.hidden=!contextDeletePath;
   organize.hidden=!onDesktop;
   const rect=desktop.getBoundingClientRect();
   const targetRect=event.target.getBoundingClientRect();
@@ -314,6 +318,7 @@ function initDesktopIcons(){
   menu.querySelector('[data-context-create]').focus({preventScroll:true});
  });
  organize.addEventListener('click',organizeIcons);
+ remove.addEventListener('click',()=>{const path=contextDeletePath;closeMenu();if(path)openDeleteDialog(path)});
  menu.querySelectorAll('[data-context-create]').forEach(button=>button.addEventListener('click',()=>{
   currentUserFolder=contextCreationFolder;pendingUserKind=button.dataset.contextCreate;creationFromDesktop=contextFromDesktop;creationDesktopPoint=contextDesktopPoint;
   closeMenu();openCreateDialog();
@@ -574,7 +579,7 @@ function renderGallery(){$('#gallery-count').textContent=projects.filter(p=>p.im
 function renderProcesses(){if(typeof applications==='undefined')return;const list=$('#process-list');list.replaceChildren();applications.filter(app=>!document.getElementById(app.id).hidden).forEach(app=>{const row=document.createElement('div');const title=document.createElement('span');title.textContent=app.icon+'  '+app.name;const open=document.createElement('button');open.textContent='Mostrar';open.dataset.open=app.id;const close=document.createElement('button');close.textContent='Cerrar';close.setAttribute('aria-label','Cerrar '+app.name);close.addEventListener('click',()=>{document.getElementById(app.id).hidden=true;syncDock();focusTerminal()});row.append(title,open,close);list.append(row)})}
 let currentUserFolder=documentsRoot;
 let pendingUserKind='';
-let contextCreationFolder=desktopRoot,contextFromDesktop=false,creationFromDesktop=false,contextDesktopPoint=null,creationDesktopPoint=null;
+let contextCreationFolder=desktopRoot,contextFromDesktop=false,creationFromDesktop=false,contextDesktopPoint=null,creationDesktopPoint=null,contextDeletePath=null;
 function showFolder(folder){
  if(folder==='projects'||folder===home+'/proyectos'){projectGrid();showWindow('files');return}
  const area=$('#project-content');area.replaceChildren();delete area.dataset.userFolder;
@@ -608,6 +613,45 @@ function showFolder(folder){
  }
  appendShortcuts(grid,path);area.append(grid);showWindow('files');
 }
+let pendingDeletePath=null;
+const deleteDialog=$('#delete-user-item-dialog');
+function openDeleteDialog(path){
+ const folder=userFiles.folders.includes(path),document=isUserDocument(path);
+ if(!folder&&!document)return;
+ pendingDeletePath=path;
+ $('#delete-user-item-title').textContent=folder?'Eliminar carpeta':'Eliminar archivo';
+ const name=path.slice(path.lastIndexOf('/')+1);
+ const hasShortcuts=folder&&Object.values(userFiles.shortcuts).some(location=>location===path||location.startsWith(path+'/'));
+ $('#delete-user-item-description').textContent=folder
+  ? `¿Eliminar «${name}» y todo su contenido?${hasShortcuts?' Los accesos del sistema que contiene volverán al escritorio.':''}`
+  : `¿Eliminar «${name}»?`;
+ $('#delete-user-item-error').textContent='';deleteDialog.showModal();$('#delete-user-item-cancel').focus();
+}
+$('#delete-user-item-cancel').addEventListener('click',()=>deleteDialog.close());
+$('#delete-user-item-form').addEventListener('submit',event=>{
+ event.preventDefault();
+ const path=pendingDeletePath,folder=userFiles.folders.includes(path),document=isUserDocument(path);
+ if(!folder&&!document){deleteDialog.close();return}
+ const matches=value=>value===path||(folder&&value.startsWith(path+'/'));
+ const next={folders:userFiles.folders.filter(item=>!matches(item)),documents:{},shortcuts:{}};
+ for(const [item,content] of Object.entries(userFiles.documents))if(!matches(item))next.documents[item]=content;
+ for(const [id,location] of Object.entries(userFiles.shortcuts))next.shortcuts[id]=matches(location)?desktopRoot:location;
+ try{persistUserFiles(next)}catch{$('#delete-user-item-error').textContent='No se pudo eliminar. Comprueba el almacenamiento del navegador.';return}
+ for(const item of [...directories])if(matches(item))directories.delete(item);
+ for(const item of Object.keys(files))if(matches(item))delete files[item];
+ for(const item of [...drafts.keys()])if(matches(item))drafts.delete(item);
+ for(const option of [...$('#editor-file').options])if(matches(home+'/'+option.value))option.remove();
+ if(matches(currentDocument)){
+  currentDocument=home+'/sobre-mi.md';loadDocument(currentDocument);
+  if(!$('#editor').hidden){$('#editor').hidden=true;syncDock()}
+ }
+ if(matches(cwd)){cwd=home;updatePrompt()}
+ const visibleFolder=$('#project-content').dataset.userFolder;
+ if(matches(currentUserFolder))currentUserFolder=desktopRoot;
+ deleteDialog.close();pendingDeletePath=null;refreshDesktopIcons();
+ if(visibleFolder&&!$('#files').hidden){if(currentUserFolder===home+'/proyectos')projectGrid();else showFolder(currentUserFolder)}
+ fileMessage(folder?'Carpeta eliminada.':'Archivo eliminado.');
+});
 const createDialog=$('#create-user-file-dialog'),createForm=$('#create-user-file-form'),createName=$('#create-user-file-name'),createError=$('#create-user-file-error');
 document.addEventListener('click',event=>{
  const open=event.target.closest('[data-user-document]');if(open)openDocument(open.dataset.userDocument);

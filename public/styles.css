@@ -208,3 +208,5 @@ body[data-layout-style="windows31"] .desktop-context-menu button span{color:inhe
 
 /* Match Quake's icon tile to the folder icon while preserving the logo. */
 img[src="assets/dock/quake.webp"]{border-radius:23%;background:#eee5d4}
+#desktop-delete-item{color:#ffd6d6}body[data-layout-style="windows11"] #desktop-delete-item{color:#9d3540}body[data-layout-style="windows31"] #desktop-delete-item{color:inherit}
+#delete-user-item-dialog{width:min(440px,92vw);padding:26px}#delete-user-item-form{text-align:left;display:grid;gap:12px}#delete-user-item-form h2{margin:0;font:700 24px var(--display)}#delete-user-item-description{margin:0;line-height:1.5}#delete-user-item-error{margin:0;color:#a23943;font-size:13px}.delete-user-item-actions{display:flex;justify-content:flex-end;gap:8px}.delete-user-item-actions button{padding:8px 14px}.delete-user-item-actions button[type=submit]{background:#a83f48;color:white}

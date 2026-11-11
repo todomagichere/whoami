@@ -107,8 +107,9 @@
     write(next, {remap = path => path, migration = false} = {}) {
       if (this.blocked) throw new Error('File storage is unavailable');
       const paths = new Map();
-      for (const [path, id] of this.pathIds) paths.set(remap(path), id);
-      for (const path of [...next.folders, ...Object.keys(next.documents)]) if (!paths.has(path)) paths.set(path, newId());
+      const wantedPaths = new Set([...next.folders, ...Object.keys(next.documents)]);
+      for (const [path, id] of this.pathIds) { const mapped = remap(path); if (wantedPaths.has(mapped)) paths.set(mapped, id); }
+      for (const path of wantedPaths) if (!paths.has(path)) paths.set(path, newId());
       const parentId = path => paths.get(path) || systemParent(path);
       const wanted = new Map();
       for (const path of next.folders) wanted.set(itemPrefix + paths.get(path), JSON.stringify({type: 'folder', title: titleOf(path), parent: parentId(parentPath(path))}));
