@@ -18,6 +18,7 @@ Desde la raíz del repositorio, abre http://localhost:8081. La primera visita mu
 - `open sobre-mi.md` abre el documento en el editor inspirado en gedit.
 - Editor: documentos, ajuste de líneas, posición del cursor, edición y guardado; las notas y los archivos creados se guardan automáticamente en localStorage; las ediciones de los documentos del portfolio duran durante la visita; Ctrl+S guarda. `cat ~/notas.md` permite leer la nota guardada.
 - Menú Aplicaciones con búsqueda; galería de capturas reales; monitor para mostrar o cerrar ventanas.
+- Calendario: consulta fechas y añade o elimina eventos, guardados en el navegador.
 - Juegos: carpeta del escritorio con accesos fijos a Buscaminas, Snake, Quake III Arena, Neverball y Micropolis.
 - Neverball y Micropolis: versiones web de [Neverball](https://play.neverball.org/) y [micropolisJS](https://github.com/graememcc/micropolisJS), cargadas desde sus sitios al abrir cada juego.
 - Quake III Arena: demo de [QuakeJS](https://github.com/mcftira/quakejs), cargada desde un servicio externo al abrir su ventana. Requiere conexión, aceptar la licencia de la demo y almacenamiento del navegador para los datos del juego.
@@ -41,6 +42,7 @@ La terminal simula un sistema de archivos local. Nunca ejecuta comandos del sist
 - `public/app.js`: comandos, archivos virtuales, proyectos, almacenamiento de notas, fondos y gestión de ventanas.
 - `public/wallpaper.js`: selección y almacenamiento local de fondos.
 - `public/computer.js`: estimaciones de almacenamiento del escritorio y del navegador.
+- `public/calendar.js`: calendario y eventos guardados localmente.
 - `public/external-games.js`: carga y cierre de QuakeJS, Neverball y micropolisJS desde sus sitios externos.
 - `public/filesystem-storage.js`: registros independientes de archivos, carpetas y relaciones, y migración del formato anterior.
 - `public/mines.mjs`: lógica del Buscaminas.
