@@ -211,4 +211,4 @@ body[data-layout-style="windows31"] .desktop-context-menu button span{color:inhe
 @media(max-width:420px){.dock button,.dock a{width:calc((100vw - 30px)/10)}.dock .dock-image{width:min(29px,calc((100vw - 35px)/10));height:auto}}
 
 /* Match Quake's icon tile to the folder icon while preserving the logo. */
-img[src="assets/dock/quake.webp"]{padding:3px;border-radius:23%;background:#eee5d4}
+img[src="assets/dock/quake.webp"]{border-radius:23%;background:#eee5d4}
