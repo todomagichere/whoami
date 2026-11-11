@@ -261,7 +261,7 @@ function initDesktopIcons(){
   for(let i=icons.length-1;i>=0;i--){const id=shortcutId(icons[i]);if(id&&userFiles.shortcuts[id]&&userFiles.shortcuts[id]!==desktopRoot){const key=iconKey(icons[i]);icons[i].remove();icons.splice(i,1);delete positions[key];save()}}
   const existing=new Set(icons.map(iconKey));
   shortcutTemplates.forEach((template,id)=>{
-   const key=iconKey(template);if(existing.has(key)||(userFiles.shortcuts[id]&&userFiles.shortcuts[id]!==desktopRoot)||(!defaultDesktopShortcuts.has(id)&&userFiles.shortcuts[id]!==desktopRoot))return;
+   const key=iconKey(template);if(existing.has(key)||shortcutLocation(id)!==desktopRoot)return;
    const icon=template.cloneNode(true),index=icons.length;container.append(icon);icons.push(icon);
    initial[index]={left:8+index*12,top:$('.panel').offsetHeight+10+index*12};registerIcon(icon,index);
    const b=bounds(icon),pos=positions[iconKey(icon)];
@@ -404,9 +404,16 @@ try{
 const documentsRoot=home+'/Documentos';
 const desktopRoot=home+'/Escritorio';
 const gamesRoot=home+'/Juegos';
+const fixedGameShortcuts=new Set(['app:mines','app:snake','app:quake','app:neverball','app:micropolis']);
 let fileStorage;
 try{fileStorage=new PortfolioFileSystemStorage(window.localStorage)}catch{fileStorage=new PortfolioFileSystemStorage(null)}
 let userFiles=fileStorage.load();
+// Bring back game shortcuts that were moved before the Games folder became fixed.
+if(Object.keys(userFiles.shortcuts).some(id=>fixedGameShortcuts.has(id))){
+ const shortcuts=Object.fromEntries(Object.entries(userFiles.shortcuts).filter(([id])=>!fixedGameShortcuts.has(id)));
+ const next={...userFiles,shortcuts};
+ try{fileStorage.write(next);userFiles=next}catch{ /* The fixed locations still apply if storage is unavailable. */ }
+}
 directories.add(documentsRoot);
 directories.add(desktopRoot);
 directories.add(gamesRoot);
@@ -446,15 +453,17 @@ function highlightDropTarget(source,x,y){
  const target=findDropTarget(source,x,y);clearDropTarget();
  if(target&&!target.desktop){highlightedDropTarget=target.element;highlightedDropTarget.classList.add('drop-target')}
 }
-function shortcutDefaultLocation(id){return ['app:mines','app:snake','app:quake','app:neverball','app:micropolis'].includes(id)?gamesRoot:defaultDesktopShortcuts.has(id)?desktopRoot:null}
+function shortcutDefaultLocation(id){return fixedGameShortcuts.has(id)?gamesRoot:defaultDesktopShortcuts.has(id)?desktopRoot:null}
+function shortcutLocation(id){return fixedGameShortcuts.has(id)?gamesRoot:userFiles.shortcuts[id]||shortcutDefaultLocation(id)}
 function shortcutNameTaken(destination,name,except){
- return [...shortcutTemplates].some(([id,template])=>id!==except&&(userFiles.shortcuts[id]||shortcutDefaultLocation(id))===destination&&template.textContent.trim()===name);
+ return [...shortcutTemplates].some(([id,template])=>id!==except&&shortcutLocation(id)===destination&&template.textContent.trim()===name);
 }
 function moveShortcut(id,destination){
  if(!shortcutTemplates.has(id)||!directories.has(destination))return false;
+ if(fixedGameShortcuts.has(id)){fileMessage('Los juegos permanecen en la carpeta Juegos.');return false}
  if((id==='app:files'&&(destination===home+'/proyectos'||destination.startsWith(home+'/proyectos/')))||(id==='folder:games'&&(destination===gamesRoot||destination.startsWith(gamesRoot+'/')))){fileMessage('No puedes mover una carpeta dentro de sí misma.');return false}
  const template=shortcutTemplates.get(id),name=template.textContent.trim();
- if((userFiles.shortcuts[id]||shortcutDefaultLocation(id))===destination)return false;
+ if(shortcutLocation(id)===destination)return false;
  const conflict=shortcutNameTaken(destination,name,id);
  if(conflict||directories.has(destination+'/'+name)||Object.hasOwn(files,destination+'/'+name)){fileMessage('Ya existe un archivo o carpeta con ese nombre.');return false}
  try{persistUserFiles({...userFiles,shortcuts:{...userFiles.shortcuts,[id]:destination}})}catch{fileMessage('No se pudo mover: comprueba el almacenamiento del navegador.');return false}
@@ -462,10 +471,10 @@ function moveShortcut(id,destination){
 }
 function appendShortcuts(grid,path){
  shortcutTemplates.forEach((template,id)=>{
-  if((userFiles.shortcuts[id]||shortcutDefaultLocation(id))!==path||(path===documentsRoot&&id.startsWith('document:')&&['sobre-mi.md','notas.md','tecnologias.md','README.md'].includes(id.slice(9))))return;
+  if(shortcutLocation(id)!==path||(path===documentsRoot&&id.startsWith('document:')&&['sobre-mi.md','notas.md','tecnologias.md','README.md'].includes(id.slice(9))))return;
   const button=template.cloneNode(true);button.className='folder-shortcut';
   const image=button.querySelector('img');if(image)image.className='folder-shortcut-image';
-  makeFolderItemDraggable(button,id);grid.append(button);
+  if(!fixedGameShortcuts.has(id))makeFolderItemDraggable(button,id);grid.append(button);
  });
 }
 function moveUserItem(source,destination){
