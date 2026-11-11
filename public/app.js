@@ -372,20 +372,20 @@ window.addEventListener('resize',resetWindowPositions);
 function clock(){const now=new Date();$('#clock').textContent=now.toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' · '+now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});$('#login-time').textContent=now.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})+' · '+now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}
 
 const applications = [
- {id:'computer',name:'Mi PC',icon:'▣',description:'Almacenamiento del escritorio'},
- {id:'terminal',name:'Terminal',icon:'>_',description:'Comandos y navegación'},
- {id:'files',name:'Archivos',icon:'▱',description:'Proyectos y documentos'},
- {id:'editor',name:'Editor de texto',icon:'▤',description:'Sobre mí, tecnologías y notas'},
- {id:'gallery',name:'Imágenes',icon:'▧',description:'Capturas reales de proyectos'},
- {id:'settings',name:'Ajustes',icon:'⚙',description:'Tu escritorio, a tu gusto'},
- {id:'processes',name:'Monitor de aplicaciones',icon:'▥',description:'Gestiona las ventanas abiertas'},
- {id:'contact-app',name:'Contactos',icon:'↗',description:'GitHub y LinkedIn'},
- {id:'mines',name:'Buscaminas',icon:'✹',description:'8 × 8 · diez minas, una pausa'},
- {id:'snake',name:'Snake',icon:'▦',description:'Arcade · flechas, WASD y píxeles'},
+ {id:'computer',name:'Mi PC',icon:'▣',image:'assets/dock/computer.webp',description:'Almacenamiento del escritorio'},
+ {id:'terminal',name:'Terminal',icon:'>_',image:'assets/dock/terminal.webp',description:'Comandos y navegación'},
+ {id:'files',name:'Archivos',icon:'▱',image:'assets/dock/files.webp',description:'Proyectos y documentos'},
+ {id:'editor',name:'Editor de texto',icon:'▤',image:'assets/dock/editor.webp',description:'Sobre mí, tecnologías y notas'},
+ {id:'gallery',name:'Imágenes',icon:'▧',image:'assets/dock/gallery.webp',description:'Capturas reales de proyectos'},
+ {id:'settings',name:'Ajustes',icon:'⚙',image:'assets/dock/settings.webp',description:'Tu escritorio, a tu gusto'},
+ {id:'processes',name:'Monitor de aplicaciones',icon:'▥',image:'assets/dock/computer.webp',description:'Gestiona las ventanas abiertas'},
+ {id:'contact-app',name:'Contactos',icon:'↗',image:'assets/desktop/about.webp',description:'GitHub y LinkedIn'},
+ {id:'mines',name:'Buscaminas',icon:'✹',image:'assets/dock/mines.webp',description:'8 × 8 · diez minas, una pausa'},
+ {id:'snake',name:'Snake',icon:'▦',image:'assets/dock/snake.webp',description:'Arcade · flechas, WASD y píxeles'},
  {id:'quake',name:'Quake III Arena',icon:'◉',image:'assets/dock/quake.webp',description:'Demo clásica · un jugador'},
  {id:'neverball',name:'Neverball',icon:'◉',image:'assets/dock/neverball.webp',description:'Habilidad · inclina el escenario'},
  {id:'micropolis',name:'Micropolis',icon:'▦',image:'assets/dock/micropolis.webp',description:'Construcción y gestión de ciudades'},
- {id:'guide',name:'Ayuda',icon:'?',description:'Aprende a usar la terminal'}
+ {id:'guide',name:'Ayuda',icon:'?',image:'assets/dock/help.webp',description:'Aprende a usar la terminal'}
 ];
 files[home+'/sobre-mi.md']='# Roberto Pérez Villegas\n\nDesarrollador · @todomagichere\n\n## Perfil\n\n'+about.split('\n\n').slice(1).join('\n\n')+'\n';
 files[home+'/tecnologias.md']='# Tecnologías entre mis proyectos\n\n## Tecnologías principales\n\nPHP, Symfony y JavaScript. 15 años de experiencia en desarrollo de software.\n\n## PHP e Ibexa\n\nExtensiones para el back office y experimentos con algoritmos.\nProyectos: ibexa-contenttype-info-tab, ibexa-breadcrumbs-bundle y fibonacci.\n\n## JavaScript y navegador\n\nJuegos diarios, herramientas e interfaces interactivas.\nProyecto: etimologia.\n\n## Firefox\n\nTraducción de texto seleccionado mediante Perplexity.\nProyecto: firefox-perplexity-translator.\n\n## React y TypeScript\n\nGestión de partidas y jugadores.\nProyecto: risk-master.\n\n## HTML, CSS y Docker\n\nPortales estáticos y entornos de desarrollo reproducibles.\nProyectos: prepara-tu-mochila y la-gran-aventura-pirata.\n';
